@@ -284,9 +284,9 @@ func (ctx *Context) Files() map[string]*multipart.FileHeader {
 func (ctx *Context) File(key string) multipart.File {
 	if file, _, err := ctx.Request.FormFile(key); err == nil {
 		return file
-	} else {
-		return nil
 	}
+
+	return nil
 }
 
 // Stream get the body stream.
