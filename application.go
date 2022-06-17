@@ -30,12 +30,20 @@ func New() *Application {
 		templateFuncs: template.FuncMap{},
 		notfound:      NotFound(),
 	}
-	app.RouterGroup = &RouterGroup{
-		app: app,
-	}
+	app.RouterGroup = newRouterGroup(app, "")
 	app.groups = []*RouterGroup{app.RouterGroup}
 
 	return app
+}
+
+// NotFound defines the 404 handler, replaced of built in not found handler.
+func (app *Application) NotFound(h HandlerFunc) {
+	app.notfound = h
+}
+
+// Fallback is the default handler for all requests.
+func (app *Application) Fallback(h HandlerFunc) {
+	app.NotFound(h)
 }
 
 // Run defines the method to start the server
@@ -60,16 +68,6 @@ func (app *Application) SetTemplates(dir string, fns ...template.FuncMap) {
 	}
 
 	app.templates = template.Must(template.New("").Funcs(app.templateFuncs).ParseGlob(dir + "/*"))
-}
-
-// NotFound defines the 404 handler, replaced of built in not found handler.
-func (app *Application) NotFound(h HandlerFunc) {
-	app.notfound = h
-}
-
-// Fallback is the default handler for all requests.
-func (app *Application) Fallback(h HandlerFunc) {
-	app.NotFound(h)
 }
 
 func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {

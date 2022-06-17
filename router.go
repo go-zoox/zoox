@@ -7,13 +7,13 @@ import (
 
 type router struct {
 	roots    map[string]*node
-	handlers map[string]HandlerFunc
+	handlers map[string][]HandlerFunc
 }
 
 func newRouter() *router {
 	return &router{
 		roots:    make(map[string]*node),
-		handlers: make(map[string]HandlerFunc),
+		handlers: make(map[string][]HandlerFunc),
 	}
 }
 
@@ -34,7 +34,7 @@ func parsePath(path string) []string {
 	return parts
 }
 
-func (r *router) addRoute(method string, path string, handler HandlerFunc) {
+func (r *router) addRoute(method string, path string, handler ...HandlerFunc) {
 	// logger.Info("Route add: %4s %s", method, path)
 
 	parts := parsePath(path)
@@ -81,7 +81,7 @@ func (r *router) handle(ctx *Context) {
 
 		key := fmt.Sprintf("%s %s", ctx.Method, n.path)
 		if handler, ok := r.handlers[key]; ok {
-			ctx.handlers = append(ctx.handlers, handler)
+			ctx.handlers = append(ctx.handlers, handler...)
 		} else {
 			ctx.handlers = append(ctx.handlers, ctx.app.notfound)
 		}
