@@ -11,11 +11,6 @@ func main() {
 
 	app.Static("/assets", fs.CurrentDir())
 
-	app.Get("/panic", func(ctx *zoox.Context) {
-		var a []int
-		a[0] = 1
-	})
-
 	v1 := app.Group("/v1")
 	{
 		v1.Get("/", func(ctx *zoox.Context) {
