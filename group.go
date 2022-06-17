@@ -6,6 +6,12 @@ import (
 	"time"
 )
 
+var anyMethods = []string{
+	http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete,
+	http.MethodHead, http.MethodOptions, http.MethodConnect,
+	http.MethodTrace,
+}
+
 // RouterGroup is a group of routes.
 type RouterGroup struct {
 	prefix      string
@@ -33,32 +39,44 @@ func (g *RouterGroup) addRoute(method string, path string, handler HandlerFunc) 
 
 // Get defines the method to add GET request
 func (g *RouterGroup) Get(path string, handler HandlerFunc) {
-	g.addRoute("GET", path, handler)
+	g.addRoute(http.MethodGet, path, handler)
 }
 
 // Post defines the method to add POST request
 func (g *RouterGroup) Post(path string, handler HandlerFunc) {
-	g.addRoute("POST", path, handler)
+	g.addRoute(http.MethodPost, path, handler)
 }
 
 // Put defines the method to add PUT request
 func (g *RouterGroup) Put(path string, handler HandlerFunc) {
-	g.addRoute("PUT", path, handler)
+	g.addRoute(http.MethodPut, path, handler)
 }
 
 // Patch defines the method to add PATCH request
 func (g *RouterGroup) Patch(path string, handler HandlerFunc) {
-	g.addRoute("PATCH", path, handler)
+	g.addRoute(http.MethodPatch, path, handler)
 }
 
 // Delete defines the method to add DELETE request
 func (g *RouterGroup) Delete(path string, handler HandlerFunc) {
-	g.addRoute("DELETE", path, handler)
+	g.addRoute(http.MethodDelete, path, handler)
 }
 
 // Head defines the method to add HEAD request
 func (g *RouterGroup) Head(path string, handler HandlerFunc) {
-	g.addRoute("HEAD", path, handler)
+	g.addRoute(http.MethodHead, path, handler)
+}
+
+// Options defines the method to add OPTIONS request
+func (g *RouterGroup) Options(path string, handler HandlerFunc) {
+	g.addRoute(http.MethodOptions, path, handler)
+}
+
+// Any defines all request methods (anyMethods)
+func (g *RouterGroup) Any(path string, handler HandlerFunc) {
+	for _, method := range anyMethods {
+		g.addRoute(method, path, handler)
+	}
 }
 
 // Use adds a middleware to the group
