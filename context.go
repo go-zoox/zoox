@@ -8,6 +8,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/go-yaml/yaml"
@@ -177,6 +178,30 @@ func (ctx *Context) Redirect(url string, status ...int) {
 
 	ctx.Status(code)
 	ctx.SetHeader("location", url)
+}
+
+// Host gets the host from HTTP Header.
+// format: `host:port`
+func (ctx *Context) Host() string {
+	return ctx.Request.Host
+}
+
+// URL is http.Request.RequestURI.
+func (ctx *Context) URL() string {
+	return ctx.Request.RequestURI
+}
+
+// IP gets the ip from X-Forwarded-For or X-Real-IP or RemoteAddr.
+func (ctx *Context) IP() string {
+	if xForwardedFor := ctx.Header("X-Forwarded-For"); xForwardedFor != "" {
+		return strings.Split(xForwardedFor, ",")[0]
+	}
+
+	if xRealIP := ctx.Header("X-Real-IP"); xRealIP != "" {
+		return xRealIP
+	}
+
+	return ctx.Request.RemoteAddr
 }
 
 // Header gets the header value by key.
