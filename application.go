@@ -74,7 +74,7 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	ctx := app.createContext(w, req)
 	ctx.app = app
 
-	var middlewares []HandlerFunc
+	var middlewares []HandlerFunc = defaultGlobalMiddleware
 
 	for _, group := range app.groups {
 		if strings.HasPrefix(ctx.Path, group.prefix) {
