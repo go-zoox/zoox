@@ -75,22 +75,37 @@ func (ctx *Context) Next() {
 }
 
 // Query returns the query string parameter with the given name.
-func (ctx *Context) Query(key string) string {
-	return ctx.Request.URL.Query().Get(key)
+func (ctx *Context) Query(key string, defaultValue ...string) string {
+	value := ctx.Request.URL.Query().Get(key)
+	if value == "" && len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+
+	return value
 }
 
 // Param returns the named URL parameter value if it exists.
-func (ctx *Context) Param(key string) string {
-	if value, ok := ctx.params[key]; ok {
+func (ctx *Context) Param(key string, defaultValue ...string) string {
+	value, ok := ctx.params[key]
+	if ok {
 		return value
 	}
 
-	return ""
+	if value == "" && len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+
+	return value
 }
 
 // Form returns the form data from POST or PUT request body.
-func (ctx *Context) Form(key string) string {
-	return ctx.Request.FormValue(key)
+func (ctx *Context) Form(key string, defaultValue ...string) string {
+	value := ctx.Request.FormValue(key)
+	if value == "" && len(defaultValue) > 0 {
+		value = defaultValue[0]
+	}
+
+	return value
 }
 
 // Status sets the HTTP response status code.
