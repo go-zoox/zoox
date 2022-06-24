@@ -171,13 +171,14 @@ func (ctx *Context) Fail(code int, message string) {
 
 // Redirect redirects the request to the given URL.
 func (ctx *Context) Redirect(url string, status ...int) {
+	ctx.SetHeader("location", url)
+
 	code := http.StatusFound
 	if len(status) == 1 && status[0] != 0 {
 		code = status[0]
 	}
 
 	ctx.Status(code)
-	ctx.SetHeader("location", url)
 }
 
 // Host gets the host from HTTP Header.
