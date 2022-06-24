@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/go-yaml/yaml"
 )
@@ -26,6 +25,7 @@ type Context struct {
 	params map[string]string
 	// response
 	StatusCode int
+	Cookie     *Cookie
 	// middleware
 	handlers []HandlerFunc
 	index    int
@@ -41,7 +41,7 @@ func newContext(w http.ResponseWriter, req *http.Request) *Context {
 	// 	path += "/"
 	// }
 
-	return &Context{
+	ctx := &Context{
 		Writer:     w,
 		Request:    req,
 		Method:     req.Method,
@@ -49,6 +49,12 @@ func newContext(w http.ResponseWriter, req *http.Request) *Context {
 		StatusCode: 200,
 		index:      -1,
 	}
+
+	ctx.Cookie = &Cookie{
+		ctx: ctx,
+	}
+
+	return ctx
 }
 
 // Next runs the next handler in the middleware stack
@@ -80,8 +86,8 @@ func (ctx *Context) Param(key string) string {
 	return ""
 }
 
-// PostForm returns the form data from POST or PUT request body.
-func (ctx *Context) PostForm(key string) string {
+// Form returns the form data from POST or PUT request body.
+func (ctx *Context) Form(key string) string {
 	return ctx.Request.FormValue(key)
 }
 
@@ -91,19 +97,14 @@ func (ctx *Context) Status(status int) {
 	ctx.Writer.WriteHeader(status)
 }
 
+// Set alias for ctx.SetHeader.
+func (ctx *Context) Set(key string, value string) {
+	ctx.SetHeader(key, value)
+}
+
 // SetHeader sets a header in the response.
 func (ctx *Context) SetHeader(key string, value string) {
 	ctx.Writer.Header().Set(key, value)
-}
-
-// SetCookie sets a cookie with the given name and value.
-func (ctx *Context) SetCookie(name string, value string, maxAge time.Duration) {
-	expires := time.Now().Add(maxAge)
-
-	ctx.SetHeader(
-		"Set-Cookie",
-		fmt.Sprintf("%s=%s; path=/; expires=%s; httponly", name, value, expires),
-	)
 }
 
 // BasicAuth returns the user/password pair for Basic Authentication.
@@ -274,16 +275,6 @@ func (ctx *Context) Cookies() map[string]string {
 	}
 
 	return cookies
-}
-
-// Cookie gets the cookie value by key.
-func (ctx *Context) Cookie(key string) string {
-	cookie, err := ctx.Request.Cookie(key)
-	if err != nil {
-		return ""
-	}
-
-	return cookie.Value
 }
 
 // Files gets all files.
