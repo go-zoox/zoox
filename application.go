@@ -49,7 +49,7 @@ func (app *Application) Fallback(h HandlerFunc) {
 // Run defines the method to start the server
 func (app *Application) Run(addr ...string) {
 	addrX := ":8080"
-	if len(addr) > 1 && addr[0] != "" {
+	if len(addr) > 0 && addr[0] != "" {
 		addrX = addr[0]
 	}
 

@@ -31,6 +31,8 @@ type Context struct {
 	index    int
 	//
 	app *Application
+	//
+	State map[string]interface{}
 }
 
 func newContext(w http.ResponseWriter, req *http.Request) *Context {
@@ -105,6 +107,11 @@ func (ctx *Context) Set(key string, value string) {
 // SetHeader sets a header in the response.
 func (ctx *Context) SetHeader(key string, value string) {
 	ctx.Writer.Header().Set(key, value)
+}
+
+// AddHeader adds a header to the response.
+func (ctx *Context) AddHeader(key string, value string) {
+	ctx.Writer.Header().Add(key, value)
 }
 
 // BasicAuth returns the user/password pair for Basic Authentication.

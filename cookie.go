@@ -14,7 +14,7 @@ type Cookie struct {
 func (c *Cookie) Set(name string, value string, maxAge time.Duration) {
 	expires := time.Now().Add(maxAge)
 
-	c.ctx.SetHeader(
+	c.ctx.AddHeader(
 		"Set-Cookie",
 		fmt.Sprintf("%s=%s; path=/; expires=%s; httponly", name, value, expires),
 	)
