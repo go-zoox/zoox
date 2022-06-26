@@ -13,6 +13,6 @@ func Logger() HandlerFunc {
 
 		ctx.Next()
 
-		logger.Info("[%s] %s %s %d %dms", ctx.Request.RemoteAddr, ctx.Method, ctx.Path, ctx.StatusCode, time.Since(t)/time.Millisecond)
+		logger.Info("[%s] %s %s %d +%dms", ctx.Request.RemoteAddr, ctx.Method, ctx.Path, ctx.StatusCode, time.Since(t)/time.Millisecond)
 	}
 }
