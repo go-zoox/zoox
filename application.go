@@ -54,7 +54,9 @@ func (app *Application) Run(addr ...string) {
 	}
 
 	logger.Info("Server started at %s", addrX)
-	http.ListenAndServe(addrX, app)
+	if err := http.ListenAndServe(addrX, app); err != nil {
+		panic(err)
+	}
 }
 
 func (app *Application) createContext(w http.ResponseWriter, req *http.Request) *Context {
