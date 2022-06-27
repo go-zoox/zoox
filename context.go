@@ -16,7 +16,7 @@ import (
 // Context is the request context
 type Context struct {
 	// origin objects
-	Writer  http.ResponseWriter
+	Writer  ResponseWriter
 	Request *http.Request
 	// request
 	Method string
@@ -44,7 +44,7 @@ func newContext(w http.ResponseWriter, req *http.Request) *Context {
 	// }
 
 	ctx := &Context{
-		Writer:     w,
+		Writer:     newResponseWriter(w),
 		Request:    req,
 		Method:     req.Method,
 		Path:       path,
@@ -55,6 +55,8 @@ func newContext(w http.ResponseWriter, req *http.Request) *Context {
 	ctx.Cookie = &Cookie{
 		ctx: ctx,
 	}
+
+	ctx.Writer.setContext(ctx)
 
 	return ctx
 }
