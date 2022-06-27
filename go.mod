@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/go-yaml/yaml v2.1.0+incompatible
-	github.com/go-zoox/logger v1.1.3
+	github.com/go-zoox/logger v1.1.4
 )
 
 require (

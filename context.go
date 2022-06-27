@@ -48,7 +48,7 @@ func newContext(w http.ResponseWriter, req *http.Request) *Context {
 		Request:    req,
 		Method:     req.Method,
 		Path:       path,
-		StatusCode: 200,
+		StatusCode: 404,
 		index:      -1,
 	}
 
