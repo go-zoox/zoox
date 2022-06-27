@@ -2,6 +2,7 @@ package zoox
 
 import (
 	"bufio"
+	"io"
 	"net"
 	"net/http"
 )
@@ -16,6 +17,9 @@ type ResponseWriter interface {
 	Status() int
 
 	Size() int
+
+	// WriteString writes the string into the response body.
+	WriteString(string) (int, error)
 
 	Written() bool
 
@@ -66,6 +70,13 @@ func (w *responseWriter) writeHeaderNow() {
 func (w *responseWriter) Write(b []byte) (n int, err error) {
 	w.writeHeaderNow()
 	n, err = w.ResponseWriter.Write(b)
+	w.size += n
+	return
+}
+
+func (w *responseWriter) WriteString(s string) (n int, err error) {
+	w.writeHeaderNow()
+	n, err = io.WriteString(w.ResponseWriter, s)
 	w.size += n
 	return
 }

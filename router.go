@@ -90,4 +90,8 @@ func (r *router) handle(ctx *Context) {
 	}
 
 	ctx.Next()
+
+	if !ctx.Writer.Written() {
+		ctx.Writer.Flush()
+	}
 }
