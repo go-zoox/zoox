@@ -25,17 +25,20 @@ type Context struct {
 	params map[string]string
 	// response
 	StatusCode int
-	Cookie     *Cookie
+	//
+	Cookie *Cookie
+	//
+	Session *Session
 	// middleware
 	handlers []HandlerFunc
 	index    int
 	//
-	app *Application
+	App *Application
 	//
 	State map[string]interface{}
 }
 
-func newContext(w http.ResponseWriter, req *http.Request) *Context {
+func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Context {
 	// path := strings.TrimSuffix(req.URL.Path, "/")
 	path := req.URL.Path
 	// path := req.URL.Path
@@ -44,6 +47,7 @@ func newContext(w http.ResponseWriter, req *http.Request) *Context {
 	// }
 
 	ctx := &Context{
+		App:        app,
 		Writer:     newResponseWriter(w),
 		Request:    req,
 		Method:     req.Method,
@@ -52,9 +56,9 @@ func newContext(w http.ResponseWriter, req *http.Request) *Context {
 		index:      -1,
 	}
 
-	ctx.Cookie = &Cookie{
-		ctx: ctx,
-	}
+	ctx.Cookie = newCookie(ctx)
+
+	ctx.Session = newSession(ctx)
 
 	ctx.Writer.setContext(ctx)
 
@@ -161,7 +165,7 @@ func (ctx *Context) JSON(status int, obj interface{}) {
 func (ctx *Context) HTML(code int, name string, data interface{}) {
 	ctx.Status(code)
 	ctx.SetHeader("content-type", "text/html")
-	if err := ctx.app.templates.ExecuteTemplate(ctx.Writer, name, data); err != nil {
+	if err := ctx.App.templates.ExecuteTemplate(ctx.Writer, name, data); err != nil {
 		ctx.Fail(http.StatusInternalServerError, err.Error())
 	}
 }

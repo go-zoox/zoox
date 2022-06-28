@@ -21,6 +21,8 @@ type Application struct {
 	templateFuncs template.FuncMap
 	//
 	notfound HandlerFunc
+	//
+	SecretKey string
 }
 
 // New is the constructor of zoox.Application.
@@ -60,7 +62,7 @@ func (app *Application) Run(addr ...string) {
 }
 
 func (app *Application) createContext(w http.ResponseWriter, req *http.Request) *Context {
-	return newContext(w, req)
+	return newContext(app, w, req)
 }
 
 // SetTemplates set the template
@@ -74,7 +76,6 @@ func (app *Application) SetTemplates(dir string, fns ...template.FuncMap) {
 
 func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	ctx := app.createContext(w, req)
-	ctx.app = app
 
 	var middlewares []HandlerFunc = defaultGlobalMiddleware
 

@@ -83,10 +83,10 @@ func (r *router) handle(ctx *Context) {
 		if handler, ok := r.handlers[key]; ok {
 			ctx.handlers = append(ctx.handlers, handler...)
 		} else {
-			ctx.handlers = append(ctx.handlers, ctx.app.notfound)
+			ctx.handlers = append(ctx.handlers, ctx.App.notfound)
 		}
 	} else {
-		ctx.handlers = append(ctx.handlers, ctx.app.notfound)
+		ctx.handlers = append(ctx.handlers, ctx.App.notfound)
 	}
 
 	ctx.Next()

@@ -1,7 +1,7 @@
 package zoox
 
 import (
-	"fmt"
+	"net/http"
 	"time"
 )
 
@@ -10,14 +10,22 @@ type Cookie struct {
 	ctx *Context
 }
 
+func newCookie(ctx *Context) *Cookie {
+	return &Cookie{
+		ctx: ctx,
+	}
+}
+
 // Set sets response cookie with the given name and value.
 func (c *Cookie) Set(name string, value string, maxAge time.Duration) {
-	expires := time.Now().Add(maxAge)
-
-	c.ctx.AddHeader(
-		"Set-Cookie",
-		fmt.Sprintf("%s=%s; path=/; expires=%s; httponly", name, value, expires),
-	)
+	cookie := &http.Cookie{
+		Name:     name,
+		Value:    value,
+		Path:     "/",
+		Expires:  time.Now().Add(maxAge),
+		HttpOnly: true,
+	}
+	http.SetCookie(c.ctx.Writer, cookie)
 }
 
 // Get gets request cookie with the given name.
