@@ -129,3 +129,13 @@ func (g *RouterGroup) Static(relativePath string, root string, options ...Static
 	//
 	g.Get(pathX, handler)
 }
+
+// Static defines the method to serve static files
+func (g *RouterGroup) StaticFS(relativePath string, fs http.FileSystem) {
+	handler := g.createStaticHandler(relativePath, fs)
+	pathX := path.Join(relativePath, "/*filepath")
+
+	//
+	g.Get(pathX, handler)
+	g.Head(pathX, handler)
+}
