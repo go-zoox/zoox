@@ -1,4 +1,4 @@
-package zoox
+package middleware
 
 import (
 	"fmt"
@@ -7,11 +7,12 @@ import (
 	"strings"
 
 	"github.com/go-zoox/logger"
+	"github.com/go-zoox/zoox"
 )
 
 // Recovery is the recovery middleware
-func Recovery() HandlerFunc {
-	return func(ctx *Context) {
+func Recovery() zoox.HandlerFunc {
+	return func(ctx *zoox.Context) {
 		defer func() {
 			if err := recover(); err != nil {
 				switch v := err.(type) {

@@ -32,8 +32,22 @@ func New() *Application {
 		templateFuncs: template.FuncMap{},
 		notfound:      NotFound(),
 	}
+
 	app.RouterGroup = newRouterGroup(app, "")
 	app.groups = []*RouterGroup{app.RouterGroup}
+
+	// global middlewares
+	for _, mf := range DefaultMiddlewares {
+		// fmt.Println("zoox: default middleware:", name)
+		mf(app)
+	}
+
+	// global groups
+	for gprefix, gfn := range DefaultGroupsFns {
+		// fmt.Println("zoox: default group:", gprefix)
+		g := app.Group(gprefix)
+		gfn(g)
+	}
 
 	return app
 }
@@ -77,7 +91,7 @@ func (app *Application) SetTemplates(dir string, fns ...template.FuncMap) {
 func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	ctx := app.createContext(w, req)
 
-	var middlewares []HandlerFunc = defaultGlobalMiddleware
+	var middlewares []HandlerFunc
 
 	for _, group := range app.groups {
 		if strings.HasPrefix(ctx.Path, group.prefix) {

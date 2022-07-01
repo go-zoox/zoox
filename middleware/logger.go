@@ -1,14 +1,15 @@
-package zoox
+package middleware
 
 import (
 	"time"
 
 	"github.com/go-zoox/logger"
+	"github.com/go-zoox/zoox"
 )
 
 // Logger is a middleware that logs the request as it goes through the handler.
-func Logger() HandlerFunc {
-	return func(ctx *Context) {
+func Logger() zoox.HandlerFunc {
+	return func(ctx *zoox.Context) {
 		t := time.Now()
 
 		ctx.Next()
