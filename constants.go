@@ -7,11 +7,12 @@ var DefaultMiddlewares = map[string]func(app *Application){
 	// Logger,
 }
 
-// DefaultMiddleware
+// DefaultMiddleware ...
 func DefaultMiddleware(name string, fn func(app *Application)) {
 	DefaultMiddlewares[name] = fn
 }
 
+// DefaultGroupsFns ...
 var DefaultGroupsFns = map[string]func(r *RouterGroup){}
 
 // DefaultGroup ...

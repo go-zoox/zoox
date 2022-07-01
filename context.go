@@ -36,6 +36,8 @@ type Context struct {
 	App *Application
 	//
 	State map[string]interface{}
+	//
+	Env *Env
 }
 
 func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Context {
@@ -59,6 +61,8 @@ func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Con
 	ctx.Cookie = newCookie(ctx)
 
 	ctx.Session = newSession(ctx)
+
+	ctx.Env = newEnv()
 
 	ctx.Writer.setContext(ctx)
 
