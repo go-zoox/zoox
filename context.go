@@ -409,3 +409,8 @@ func (ctx *Context) SaveFile(key, path string) error {
 
 	return nil
 }
+
+// AcceptJSON returns true if the request accepts json.
+func (ctx *Context) AcceptJSON() bool {
+	return strings.Contains(ctx.Header("Accept"), "application/json")
+}
