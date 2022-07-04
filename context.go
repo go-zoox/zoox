@@ -124,6 +124,11 @@ func (ctx *Context) Status(status int) {
 	ctx.Writer.WriteHeader(status)
 }
 
+// Get alias for ctx.Header.
+func (ctx *Context) Get(key string) string {
+	return ctx.Header(key)
+}
+
 // Set alias for ctx.SetHeader.
 func (ctx *Context) Set(key string, value string) {
 	ctx.SetHeader(key, value)
@@ -413,4 +418,9 @@ func (ctx *Context) SaveFile(key, path string) error {
 // AcceptJSON returns true if the request accepts json.
 func (ctx *Context) AcceptJSON() bool {
 	return strings.Contains(ctx.Header("Accept"), "application/json")
+}
+
+// Origin returns the origin of the request.
+func (ctx *Context) Origin() string {
+	return ctx.Get("Origin")
 }

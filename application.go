@@ -11,6 +11,9 @@ import (
 // HandlerFunc defines the request handler used by gee
 type HandlerFunc func(ctx *Context)
 
+// Middleware defines the signature of the middleware function.
+type Middleware = HandlerFunc
+
 // Application is the handler for all requests.
 type Application struct {
 	*RouterGroup

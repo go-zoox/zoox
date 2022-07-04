@@ -6,7 +6,7 @@ import (
 	"github.com/go-zoox/zoox"
 )
 
-func BasicAuth(realm string, credentials map[string]string) zoox.HandlerFunc {
+func BasicAuth(realm string, credentials map[string]string) zoox.Middleware {
 	return func(ctx *zoox.Context) {
 		user, pass, ok := ctx.Request.BasicAuth()
 		if !ok {

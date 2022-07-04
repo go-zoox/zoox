@@ -12,7 +12,7 @@ var trueClientIP = http.CanonicalHeaderKey("True-Client-IP")
 var xForwardedFor = http.CanonicalHeaderKey("X-Forwarded-For")
 var xRealIP = http.CanonicalHeaderKey("X-Real-IP")
 
-func RealIP() zoox.HandlerFunc {
+func RealIP() zoox.Middleware {
 	return func(ctx *zoox.Context) {
 		if rip := realIP(ctx.Request); rip != "" {
 			ctx.Request.RemoteAddr = rip

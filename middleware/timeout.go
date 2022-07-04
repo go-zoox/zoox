@@ -8,7 +8,7 @@ import (
 	"github.com/go-zoox/zoox"
 )
 
-func Timeout(timeout time.Duration) zoox.HandlerFunc {
+func Timeout(timeout time.Duration) zoox.Middleware {
 	return func(ctx *zoox.Context) {
 		c, cancel := context.WithTimeout(ctx.Request.Context(), timeout)
 		defer func() {

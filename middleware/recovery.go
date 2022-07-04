@@ -11,7 +11,7 @@ import (
 )
 
 // Recovery is the recovery middleware
-func Recovery() zoox.HandlerFunc {
+func Recovery() zoox.Middleware {
 	return func(ctx *zoox.Context) {
 		defer func() {
 			if err := recover(); err != nil {

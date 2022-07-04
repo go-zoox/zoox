@@ -8,7 +8,7 @@ import (
 )
 
 // Logger is a middleware that logs the request as it goes through the handler.
-func Logger() zoox.HandlerFunc {
+func Logger() zoox.Middleware {
 	return func(ctx *zoox.Context) {
 		t := time.Now()
 

@@ -19,6 +19,10 @@ func Default() *zoox.Application {
 		app.Use(middleware.HealthCheck())
 	})
 
+	zoox.DefaultMiddleware("cors", func(app *zoox.Application) {
+		app.Use(middleware.CORS())
+	})
+
 	app := zoox.New()
 
 	return app
