@@ -28,11 +28,13 @@ func newSession(ctx *Context) *Session {
 	}
 
 	secretKey := []byte("go-zoox")
-	if ctx.App.SecretKey != "" && len(ctx.App.SecretKey) < 32 {
-		rest := 32 - len(secretKey)
-		secretKey = []byte(ctx.App.SecretKey + strings.Repeat("0", rest))
-	} else {
-		secretKey = []byte(ctx.App.SecretKey[:32])
+	if ctx.App.SecretKey != "" {
+		if len(ctx.App.SecretKey) < 32 {
+			rest := 32 - len(secretKey)
+			secretKey = []byte(ctx.App.SecretKey + strings.Repeat("0", rest))
+		} else {
+			secretKey = []byte(ctx.App.SecretKey[:32])
+		}
 	}
 
 	return &Session{
