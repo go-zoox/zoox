@@ -8,10 +8,13 @@ import (
 	"github.com/go-zoox/crypto/aes"
 	"github.com/go-zoox/crypto/hmac"
 	"github.com/go-zoox/random"
+	"github.com/pkg/errors"
 )
 
 var sessionKey = "gsession"
 var sessionSignature = "gsession.sig"
+
+var defaultSessionSecretKey = []byte("go-zoox_" + random.String(24))
 
 // Session is the http session based on cookie.
 type Session struct {
@@ -28,7 +31,7 @@ func newSession(ctx *Context) *Session {
 		panic(err)
 	}
 
-	secretKey := []byte("go-zoox_" + random.String(24))
+	secretKey := defaultSessionSecretKey
 	if ctx.App.SecretKey != "" {
 		if len(ctx.App.SecretKey) < 32 {
 			rest := 32 - len(secretKey)
@@ -70,7 +73,7 @@ func (s *Session) parse() {
 
 	session, err := s.crypto.Decrypt([]byte(sessionEncrypted), s.secretKey)
 	if err != nil {
-		return
+		panic(errors.Wrap(err, "session decrypt failed"))
 	}
 
 	if session == nil {
@@ -79,7 +82,7 @@ func (s *Session) parse() {
 
 	var data map[string]string
 	if err := json.Unmarshal(session, &data); err != nil {
-		return
+		panic(errors.Wrap(err, "session json.Unmarshal failed"))
 	}
 
 	for key, value := range data {
@@ -94,12 +97,12 @@ func (s *Session) flush() {
 
 	d, err := json.Marshal(s.data)
 	if err != nil {
-		return
+		panic(errors.Wrap(err, "session json.Marshal failed"))
 	}
 
 	dEncrypted, err := s.crypto.Encrypt(d, s.secretKey)
 	if err != nil {
-		return
+		panic(errors.Wrap(err, "session encrypt failed"))
 	}
 
 	// dRaw := base64.RawStdEncoding.EncodeToString(dEncrypted)
