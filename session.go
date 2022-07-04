@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-zoox/crypto/aes"
 	"github.com/go-zoox/crypto/hmac"
+	"github.com/go-zoox/random"
 )
 
 var sessionKey = "gsession"
@@ -27,7 +28,7 @@ func newSession(ctx *Context) *Session {
 		panic(err)
 	}
 
-	secretKey := []byte("go-zoox")
+	secretKey := []byte("go-zoox_" + random.String(24))
 	if ctx.App.SecretKey != "" {
 		if len(ctx.App.SecretKey) < 32 {
 			rest := 32 - len(secretKey)
