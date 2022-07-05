@@ -27,11 +27,13 @@ type Application struct {
 	notfound HandlerFunc
 	//
 	SecretKey string
+	LogLevel  string
 	//
 	CacheConfig *typing.Config
 	Cache       *Cache
 	//
-	Env *Env
+	Env    *Env
+	Logger *logger.Logger
 }
 
 // New is the constructor of zoox.Application.
@@ -48,6 +50,10 @@ func New() *Application {
 	app.Env = newEnv()
 
 	app.Cache = newCache(app)
+
+	app.Logger = logger.New(&logger.Options{
+		Level: app.LogLevel,
+	})
 
 	// global middlewares
 	for _, mf := range DefaultMiddlewares {

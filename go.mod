@@ -8,7 +8,7 @@ require (
 	github.com/go-zoox/crypto v1.0.3
 	github.com/go-zoox/jwt v1.0.0
 	github.com/go-zoox/kv v1.4.2
-	github.com/go-zoox/logger v1.1.4
+	github.com/go-zoox/logger v1.2.0
 	github.com/go-zoox/proxy v1.0.2
 	github.com/go-zoox/random v1.0.0
 	github.com/go-zoox/tag v1.0.6

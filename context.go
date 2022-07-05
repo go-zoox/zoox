@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-yaml/yaml"
 	"github.com/go-zoox/core-utils/safe"
+	"github.com/go-zoox/logger"
 	"github.com/go-zoox/tag"
 )
 
@@ -42,6 +43,8 @@ type Context struct {
 	State map[string]interface{}
 	//
 	Env *Env
+	//
+	Logger *logger.Logger
 }
 
 func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Context {
@@ -69,6 +72,10 @@ func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Con
 	ctx.Env = app.Env
 
 	ctx.Cache = app.Cache
+
+	ctx.Logger = logger.New(&logger.Options{
+		Level: app.LogLevel,
+	})
 
 	ctx.Writer.setContext(ctx)
 
