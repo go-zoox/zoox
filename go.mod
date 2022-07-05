@@ -12,6 +12,7 @@ require (
 	github.com/go-zoox/proxy v1.0.2
 	github.com/go-zoox/random v1.0.0
 	github.com/go-zoox/tag v1.0.6
+	github.com/gorilla/websocket v1.5.0
 	github.com/pkg/errors v0.9.1
 )
 
@@ -25,7 +26,6 @@ require (
 	github.com/go-zoox/fs v1.2.4 // indirect
 	github.com/go-zoox/uuid v0.0.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.14 // indirect
 	golang.org/x/crypto v0.0.0-20220313003712-b769efc7c000 // indirect
 	golang.org/x/sys v0.0.0-20220330033206-e17cdc41300f // indirect
