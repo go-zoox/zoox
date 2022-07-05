@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/go-yaml/yaml v2.1.0+incompatible
 	github.com/go-zoox/crypto v1.0.3
+	github.com/go-zoox/jwt v1.0.0
 	github.com/go-zoox/kv v1.4.2
 	github.com/go-zoox/logger v1.1.4
 	github.com/go-zoox/proxy v1.0.2

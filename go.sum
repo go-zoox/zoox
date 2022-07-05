@@ -18,6 +18,8 @@ github.com/go-zoox/encoding v1.0.7 h1:vYo+rXx2QNexxSyomKHouwaKiXob7BTD4u12xTv4Mk
 github.com/go-zoox/encoding v1.0.7/go.mod h1:h6ZgI27IaUSBq1ntaZjnSruPdRFuBLNUmfp57TaPxs4=
 github.com/go-zoox/fs v1.2.4 h1:4XxqAF5VuF/AQphAFC7JG6W/3uUYUDurn8gTdS/zv8o=
 github.com/go-zoox/fs v1.2.4/go.mod h1:aywpClMqf6YO8+QnuwC3p3EvFWe88h0tWH65rpxtY00=
+github.com/go-zoox/jwt v1.0.0 h1:atywT77nPkkg2q/iOoGnV4/0XazR5IUif+CAbCUefmM=
+github.com/go-zoox/jwt v1.0.0/go.mod h1:a6ANQHmSs+b9GJv5aad2cQLl8opFmP3hMOxZtgXRmis=
 github.com/go-zoox/kv v1.4.2 h1:DwrTL8Y3XapWh/0Gve3Sqy2JWJW/pxaLaQQXxCthtLo=
 github.com/go-zoox/kv v1.4.2/go.mod h1:dc3whoIvGrYmQA2wi6g6ZE0oOtRg+loxaJEj6bLKlJA=
 github.com/go-zoox/logger v1.1.4 h1:s+aNuGOCLP8DVahP7HVYYrhb5YUGL8pZc1PDpIH1u08=
