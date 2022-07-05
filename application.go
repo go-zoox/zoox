@@ -15,6 +15,9 @@ type HandlerFunc func(ctx *Context)
 // Middleware defines the signature of the middleware function.
 type Middleware = HandlerFunc
 
+// WsHandlerFunc defines the websocket handler used by gee
+type WsHandlerFunc func(ctx *Context, client *WebSocketClient)
+
 // Application is the handler for all requests.
 type Application struct {
 	*RouterGroup

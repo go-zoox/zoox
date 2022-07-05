@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"path"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 var anyMethods = []string{
@@ -87,6 +89,61 @@ func (g *RouterGroup) Any(path string, handler ...HandlerFunc) *RouterGroup {
 	for _, method := range anyMethods {
 		g.addRoute(method, path, handler...)
 	}
+	return g
+}
+
+// WebSocket defines the method to add websocket route
+func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup {
+	upgrader := &websocket.Upgrader{}
+
+	g.addRoute(http.MethodGet, path, func(ctx *Context) {
+		conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+		if err != nil {
+			ctx.Logger.Error("ws error: %s", err)
+			return
+		}
+		defer conn.Close()
+
+		client := newWebSocket(ctx, conn)
+		handler(ctx, client)
+
+		// ctx.Logger.Info("ws connected")
+		if client.OnConnect != nil {
+			client.OnConnect()
+		}
+
+		for {
+			mt, message, err := conn.ReadMessage()
+			if mt == -1 {
+				if client.OnDisconnect != nil {
+					client.OnDisconnect()
+				}
+			} else if err != nil {
+				// ctx.Logger.Info("read err: %s %d", err, mt)
+
+				if client.OnError != nil {
+					client.OnError(err)
+				}
+				return
+			}
+
+			switch mt {
+			case websocket.TextMessage:
+				if client.OnTextMessage != nil {
+					client.OnTextMessage(message)
+				}
+			case websocket.BinaryMessage:
+				if client.OnBinaryMessage != nil {
+					client.OnBinaryMessage(message)
+				}
+			}
+
+			if client.OnMessage != nil {
+				client.OnMessage(mt, message)
+			}
+		}
+	})
+
 	return g
 }
 
