@@ -11,6 +11,8 @@ import (
 	"strings"
 
 	"github.com/go-yaml/yaml"
+	"github.com/go-zoox/core-utils/safe"
+	"github.com/go-zoox/tag"
 )
 
 // Context is the request context
@@ -253,45 +255,50 @@ func (ctx *Context) Header(key string) string {
 }
 
 // Headers gets all headers.
-func (ctx *Context) Headers() map[string]string {
-	headers := map[string]string{}
+func (ctx *Context) Headers() *safe.Map {
+	headers := safe.NewMap()
 
 	for key, values := range ctx.Request.Header {
-		headers[key] = values[0]
+		headers.Set(key, values[0])
 	}
 
 	return headers
 }
 
 // Queries gets all queries.
-func (ctx *Context) Queries() map[string]string {
-	queries := map[string]string{}
+func (ctx *Context) Queries() *safe.Map {
+	queries := safe.NewMap()
 
 	for key, values := range ctx.Request.URL.Query() {
-		queries[key] = values[0]
+		queries.Set(key, values[0])
 	}
 
 	return queries
 }
 
 // Forms gets all forms.
-func (ctx *Context) Forms() map[string]string {
-	forms := map[string]string{}
+func (ctx *Context) Forms() *safe.Map {
+	forms := safe.NewMap()
 
 	if err := ctx.Request.ParseForm(); err != nil {
 		return forms
 	}
 
 	for key, values := range ctx.Request.Form {
-		forms[key] = values[0]
+		forms.Set(key, values[0])
 	}
 
 	return forms
 }
 
 // Params gets all params.
-func (ctx *Context) Params() map[string]string {
-	return ctx.params
+func (ctx *Context) Params() *safe.Map {
+	m := safe.NewMap()
+	for k, v := range ctx.params {
+		m.Set(k, v)
+	}
+
+	return m
 }
 
 // Bodies gets all bodies.
@@ -372,31 +379,28 @@ func (ctx *Context) BindYAML(obj interface{}) error {
 
 // BindForm binds the query into the given struct.
 func (ctx *Context) BindForm(obj interface{}) error {
-	forms := ctx.Forms()
-	jf, _ := json.Marshal(forms)
-	return json.Unmarshal(jf, obj)
+	return tag.New("form", ctx.Forms()).Decode(obj)
 }
 
 // BindParams binds the params into the given struct.
 func (ctx *Context) BindParams(obj interface{}) error {
-	params := ctx.Params()
-	jf, _ := json.Marshal(params)
-	return json.Unmarshal(jf, obj)
+	return tag.New("param", ctx.Params()).Decode(obj)
 }
 
 // BindHeader binds the header into the given struct.
 func (ctx *Context) BindHeader(obj interface{}) error {
-	headers := ctx.Headers()
-	jf, _ := json.Marshal(headers)
-	return json.Unmarshal(jf, obj)
+	return tag.New("header", ctx.Headers()).Decode(obj)
 }
 
 // BindQuery binds the query into the given struct.
 func (ctx *Context) BindQuery(obj interface{}) error {
-	queries := ctx.Queries()
-	jf, _ := json.Marshal(queries)
-	return json.Unmarshal(jf, obj)
+	return tag.New("query", ctx.Queries()).Decode(obj)
 }
+
+// // BindBody binds the body into the given struct.
+// func (ctx *Context) BindBody(obj interface{}) error {
+// 	return tag.New("body", ctx.Bodies()).Decode(obj)
+// }
 
 // SaveFile saves the file to the given path.
 func (ctx *Context) SaveFile(key, path string) error {
