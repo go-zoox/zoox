@@ -29,6 +29,8 @@ type Context struct {
 	Cookie *Cookie
 	//
 	Session *Session
+	//
+	Cache *Cache
 	// middleware
 	handlers []HandlerFunc
 	index    int
@@ -62,7 +64,9 @@ func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Con
 
 	ctx.Session = newSession(ctx)
 
-	ctx.Env = newEnv()
+	ctx.Env = app.Env
+
+	ctx.Cache = app.Cache
 
 	ctx.Writer.setContext(ctx)
 

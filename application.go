@@ -5,6 +5,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/go-zoox/kv/typing"
 	"github.com/go-zoox/logger"
 )
 
@@ -26,6 +27,11 @@ type Application struct {
 	notfound HandlerFunc
 	//
 	SecretKey string
+	//
+	CacheConfig *typing.Config
+	Cache       *Cache
+	//
+	Env *Env
 }
 
 // New is the constructor of zoox.Application.
@@ -38,6 +44,10 @@ func New() *Application {
 
 	app.RouterGroup = newRouterGroup(app, "")
 	app.groups = []*RouterGroup{app.RouterGroup}
+
+	app.Env = newEnv()
+
+	app.Cache = newCache(app)
 
 	// global middlewares
 	for _, mf := range DefaultMiddlewares {
