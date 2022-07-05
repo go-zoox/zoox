@@ -2,9 +2,9 @@ package zoox
 
 import (
 	"encoding/json"
-	"strings"
 	"time"
 
+	"github.com/go-zoox/core-utils/stringx"
 	"github.com/go-zoox/crypto/aes"
 	"github.com/go-zoox/crypto/hmac"
 	"github.com/go-zoox/random"
@@ -33,12 +33,13 @@ func newSession(ctx *Context) *Session {
 
 	secretKey := defaultSessionSecretKey
 	if ctx.App.SecretKey != "" {
-		if len(ctx.App.SecretKey) < 32 {
-			rest := 32 - len(secretKey)
-			secretKey = []byte(ctx.App.SecretKey + strings.Repeat("0", rest))
-		} else {
-			secretKey = []byte(ctx.App.SecretKey[:32])
-		}
+		secretKey = []byte(ctx.App.SecretKey)
+	}
+
+	if len(secretKey) < 32 {
+		secretKey = []byte(stringx.PadZero(string(secretKey), 32))
+	} else if len(secretKey) > 32 {
+		secretKey = []byte(secretKey[:32])
 	}
 
 	return &Session{
