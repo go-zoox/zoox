@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// WebSocketClient ...
 type WebSocketClient struct {
 	ctx  *Context
 	conn *websocket.Conn
@@ -25,26 +26,32 @@ func newWebSocket(ctx *Context, conn *websocket.Conn) *WebSocketClient {
 	}
 }
 
+// Disconnect ...
 func (c *WebSocketClient) Disconnect() {
 	c.conn.Close()
 }
 
+// Write ...
 func (c *WebSocketClient) Write(typ int, msg []byte) error {
 	return c.conn.WriteMessage(typ, msg)
 }
 
+// WriteText ...
 func (c *WebSocketClient) WriteText(msg string) error {
 	return c.Write(websocket.TextMessage, []byte(msg))
 }
 
+// WriteBinary ...
 func (c *WebSocketClient) WriteBinary(msg []byte) error {
 	return c.Write(websocket.BinaryMessage, msg)
 }
 
+// WriteJSON ...
 func (c *WebSocketClient) WriteJSON(msg interface{}) error {
-	if bytes, err := json.Marshal(msg); err != nil {
+	bytes, err := json.Marshal(msg)
+	if err != nil {
 		return err
-	} else {
-		return c.Write(websocket.TextMessage, bytes)
 	}
+
+	return c.Write(websocket.TextMessage, bytes)
 }
