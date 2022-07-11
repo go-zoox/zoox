@@ -37,6 +37,7 @@ func newResponseWriter(origin http.ResponseWriter) ResponseWriter {
 	return &responseWriter{
 		ResponseWriter: origin,
 		size:           -1,
+		status:         404, // default status 404
 	}
 }
 
