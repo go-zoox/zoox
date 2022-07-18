@@ -11,7 +11,7 @@ require (
 	github.com/go-zoox/logger v1.2.0
 	github.com/go-zoox/proxy v1.0.2
 	github.com/go-zoox/random v1.0.0
-	github.com/go-zoox/tag v1.0.7
+	github.com/go-zoox/tag v1.0.9
 	github.com/gorilla/websocket v1.5.0
 	github.com/pkg/errors v0.9.1
 )
