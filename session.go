@@ -59,8 +59,8 @@ func (s *Session) parse() {
 
 	s.isParsed = true
 
-	sessionEncrypted := s.ctx.Cookie.Get(sessionKey)
-	sessionSignature := s.ctx.Cookie.Get(sessionSignature)
+	sessionEncrypted := s.ctx.Cookie().Get(sessionKey)
+	sessionSignature := s.ctx.Cookie().Get(sessionSignature)
 
 	if signatureX := hmac.Sha256(string(s.secretKey), sessionEncrypted); signatureX != sessionSignature {
 		return
@@ -109,8 +109,8 @@ func (s *Session) flush() {
 	// dRaw := base64.RawStdEncoding.EncodeToString(dEncrypted)
 	data := string(dEncrypted)
 	signature := hmac.Sha256(string(s.secretKey), data)
-	s.ctx.Cookie.Set(sessionKey, data, 7*24*time.Hour)
-	s.ctx.Cookie.Set(sessionSignature, signature, 7*24*time.Hour)
+	s.ctx.Cookie().Set(sessionKey, data, 7*24*time.Hour)
+	s.ctx.Cookie().Set(sessionSignature, signature, 7*24*time.Hour)
 }
 
 // Get gets the value by key.

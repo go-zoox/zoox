@@ -157,7 +157,7 @@ func (g *RouterGroup) createStaticHandler(relativePath string, fs http.FileSyste
 	fileServer := http.StripPrefix(absolutePath, http.FileServer(fs))
 
 	return func(ctx *Context) {
-		file := ctx.Param("filepath")
+		file := ctx.Param().Get("filepath")
 		// Check if file exists and/or is not a directory
 		f, err := fs.Open(file)
 		if err != nil {

@@ -77,7 +77,7 @@ func (r *router) getRoute(method string, path string) (*node, map[string]string)
 func (r *router) handle(ctx *Context) {
 	n, params := r.getRoute(ctx.Method, ctx.Path)
 	if n != nil {
-		ctx.params = params
+		ctx.param = newParams(ctx, params)
 
 		key := fmt.Sprintf("%s %s", ctx.Method, n.path)
 		if handler, ok := r.handlers[key]; ok {

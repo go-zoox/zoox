@@ -130,5 +130,9 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	app.router.handle(ctx)
 }
 
+func (app *Application) IsProd() bool {
+	return app.Env.Get("MODE") == "production"
+}
+
 // H is a shortcut for map[string]interface{}
 type H map[string]interface{}

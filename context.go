@@ -25,26 +25,29 @@ type Context struct {
 	Method string
 	Path   string
 	//
-	params map[string]string
+	param *Param
+	query *Query
+	form  *Form
+
 	// response
 	StatusCode int
 	//
-	Cookie *Cookie
+	cookie  *Cookie
+	session *Session
 	//
-	Session *Session
-	//
-	Cache *Cache
+	cache *Cache
+	env   *Env
 	// middleware
 	handlers []HandlerFunc
 	index    int
 	//
 	App *Application
 	//
-	State map[string]interface{}
-	//
-	Env *Env
-	//
 	Logger *logger.Logger
+	//
+	//
+	state *State
+	user  *User
 }
 
 func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Context {
@@ -64,14 +67,6 @@ func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Con
 		StatusCode: 404,
 		index:      -1,
 	}
-
-	ctx.Cookie = newCookie(ctx)
-
-	ctx.Session = newSession(ctx)
-
-	ctx.Env = app.Env
-
-	ctx.Cache = app.Cache
 
 	ctx.Logger = logger.New(&logger.Options{
 		Level: app.LogLevel,
@@ -98,37 +93,26 @@ func (ctx *Context) Next() {
 }
 
 // Query returns the query string parameter with the given name.
-func (ctx *Context) Query(key string, defaultValue ...string) string {
-	value := ctx.Request.URL.Query().Get(key)
-	if value == "" && len(defaultValue) > 0 {
-		value = defaultValue[0]
+func (ctx *Context) Query() *Query {
+	if ctx.query == nil {
+		ctx.query = newQuery(ctx)
 	}
 
-	return value
+	return ctx.query
 }
 
 // Param returns the named URL parameter value if it exists.
-func (ctx *Context) Param(key string, defaultValue ...string) string {
-	value, ok := ctx.params[key]
-	if ok {
-		return value
-	}
-
-	if value == "" && len(defaultValue) > 0 {
-		value = defaultValue[0]
-	}
-
-	return value
+func (ctx *Context) Param() *Param {
+	return ctx.param
 }
 
 // Form returns the form data from POST or PUT request body.
-func (ctx *Context) Form(key string, defaultValue ...string) string {
-	value := ctx.Request.FormValue(key)
-	if value == "" && len(defaultValue) > 0 {
-		value = defaultValue[0]
+func (ctx *Context) Form() *Form {
+	if ctx.form == nil {
+		ctx.form = newForm(ctx)
 	}
 
-	return value
+	return ctx.form
 }
 
 // Status sets the HTTP response status code.
@@ -188,7 +172,7 @@ func (ctx *Context) HTML(code int, name string, data interface{}) {
 	ctx.Status(code)
 	ctx.SetHeader("content-type", "text/html")
 	if err := ctx.App.templates.ExecuteTemplate(ctx.Writer, name, data); err != nil {
-		ctx.Fail(http.StatusInternalServerError, err.Error())
+		ctx.Fail(err, http.StatusInternalServerError, err.Error())
 	}
 }
 
@@ -213,11 +197,23 @@ func (ctx *Context) Success(result interface{}) {
 }
 
 // Fail writes the given error with code-message-result specification to the response.
-func (ctx *Context) Fail(code int, message string) {
-	ctx.JSON(http.StatusBadRequest, map[string]any{
+func (ctx *Context) Fail(err error, code int, message string, status ...int) {
+	statusX := http.StatusBadRequest
+	if len(status) > 0 {
+		statusX = status[0]
+	}
+
+	fmt.Println("service error:", err)
+
+	ctx.JSON(statusX, map[string]any{
 		"code":    code,
 		"message": message,
 	})
+}
+
+// FailWithError writes the given error with code-message-result specification to the response.
+func (ctx *Context) FailWithError(err HTTPError) {
+	ctx.Fail(err.Raw(), err.Code(), err.Message(), err.Status())
 }
 
 // Redirect redirects the request to the given URL.
@@ -301,7 +297,7 @@ func (ctx *Context) Forms() *safe.Map {
 // Params gets all params.
 func (ctx *Context) Params() *safe.Map {
 	m := safe.NewMap()
-	for k, v := range ctx.params {
+	for k, v := range ctx.param.Iterator() {
 		m.Set(k, v)
 	}
 
@@ -438,4 +434,58 @@ func (ctx *Context) AcceptJSON() bool {
 // Origin returns the origin of the request.
 func (ctx *Context) Origin() string {
 	return ctx.Get("Origin")
+}
+
+// Cache returns the cache of the
+func (ctx *Context) Cache() *Cache {
+	if ctx.cache == nil {
+		ctx.cache = ctx.App.Cache
+	}
+
+	return ctx.cache
+}
+
+// Env returns the env of the
+func (ctx *Context) Env() *Env {
+	if ctx.env == nil {
+		ctx.env = ctx.App.Env
+	}
+
+	return ctx.env
+}
+
+// State returns the state of the
+func (ctx *Context) State() *State {
+	if ctx.state == nil {
+		ctx.state = newState()
+	}
+
+	return ctx.state
+}
+
+// User returns the user of the
+func (ctx *Context) User() *User {
+	if ctx.user == nil {
+		ctx.user = newUser()
+	}
+
+	return ctx.user
+}
+
+// Cookie returns the cookie of the request.
+func (ctx *Context) Cookie() *Cookie {
+	if ctx.cookie == nil {
+		ctx.cookie = newCookie(ctx)
+	}
+
+	return ctx.cookie
+}
+
+// Session returns the session of the request.
+func (ctx *Context) Session() *Session {
+	if ctx.session == nil {
+		ctx.session = newSession(ctx)
+	}
+
+	return ctx.session
 }

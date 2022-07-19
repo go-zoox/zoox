@@ -26,7 +26,7 @@ func Jwt(secret string, algorithm ...string) zoox.Middleware {
 	return func(ctx *zoox.Context) {
 		authHeader := ctx.Get("Authorization")
 		if authHeader == "" {
-			authHeader = ctx.Query("access_token")
+			authHeader = ctx.Query().Get("access_token")
 		}
 
 		if authHeader == "" {
