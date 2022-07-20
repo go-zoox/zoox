@@ -61,22 +61,28 @@ func (w *responseWriter) WriteHeader(code int) {
 	}
 }
 
-func (w *responseWriter) writeHeaderNow() {
+func (w *responseWriter) writeHeaderNow(isEmpty bool) {
 	if !w.Written() {
+		// @TODO io.Copy response write will not trigger writeHeader
+		if !isEmpty && w.status == 404 {
+			w.status = 200
+			w.ctx.StatusCode = 200
+		}
+
 		w.size = 0
 		w.ResponseWriter.WriteHeader(w.status)
 	}
 }
 
 func (w *responseWriter) Write(b []byte) (n int, err error) {
-	w.writeHeaderNow()
+	w.writeHeaderNow(len(b) == 0)
 	n, err = w.ResponseWriter.Write(b)
 	w.size += n
 	return
 }
 
 func (w *responseWriter) WriteString(s string) (n int, err error) {
-	w.writeHeaderNow()
+	w.writeHeaderNow(len(s) == 0)
 	n, err = io.WriteString(w.ResponseWriter, s)
 	w.size += n
 	return
@@ -101,6 +107,7 @@ func (w *responseWriter) CloseNotify() <-chan bool {
 
 // Flush implements the http.Flusher interface.
 func (w *responseWriter) Flush() {
-	w.writeHeaderNow()
+	w.writeHeaderNow(true)
+
 	w.ResponseWriter.(http.Flusher).Flush()
 }
