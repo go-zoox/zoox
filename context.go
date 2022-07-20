@@ -203,7 +203,7 @@ func (ctx *Context) Fail(err error, code int, message string, status ...int) {
 		statusX = status[0]
 	}
 
-	fmt.Println("service error:", err)
+	fmt.Println("[context][fail]", err)
 
 	ctx.JSON(statusX, map[string]any{
 		"code":    code,
@@ -349,12 +349,12 @@ func (ctx *Context) Files() map[string]*multipart.FileHeader {
 }
 
 // File gets the file by key.
-func (ctx *Context) File(key string) multipart.File {
-	if file, _, err := ctx.Request.FormFile(key); err == nil {
-		return file
+func (ctx *Context) File(key string) (multipart.File, *multipart.FileHeader) {
+	if file, header, err := ctx.Request.FormFile(key); err == nil {
+		return file, header
 	}
 
-	return nil
+	return nil, nil
 }
 
 // Stream get the body stream.
