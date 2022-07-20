@@ -17,15 +17,15 @@ func Recovery() zoox.Middleware {
 			if err := recover(); err != nil {
 				switch v := err.(type) {
 				case error:
-					logger.Error("%s", trace(fmt.Sprintf("%s", v)))
+					logger.Error("[recovery] %s", trace(fmt.Sprintf("%s", v)))
 
-					ctx.Error(http.StatusInternalServerError, v.Error())
+					ctx.Error(http.StatusInternalServerError, "Internal Server Error")
 				case string:
-					logger.Error("%s", v)
-					ctx.Error(http.StatusInternalServerError, v)
+					logger.Error("[recovery] %s", v)
+					ctx.Error(http.StatusInternalServerError, "Internal Server Error")
 				default:
-					logger.Error("unknown error: %v", v)
-					ctx.Error(http.StatusInternalServerError, "unknown error")
+					logger.Error("[recovery] unknown error: %v", v)
+					ctx.Error(http.StatusInternalServerError, "Internal Server Error")
 				}
 			}
 		}()
