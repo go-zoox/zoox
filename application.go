@@ -1,12 +1,14 @@
 package zoox
 
 import (
+	"io"
 	"net/http"
 	"strings"
 	"text/template"
 
 	"github.com/go-zoox/kv/typing"
 	"github.com/go-zoox/logger"
+	"github.com/go-zoox/zoox/rpc/jsonrpc"
 )
 
 // HandlerFunc defines the request handler used by gee
@@ -130,8 +132,34 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	app.router.handle(ctx)
 }
 
+// IsProd returns true if the app is in production mode.
 func (app *Application) IsProd() bool {
 	return app.Env.Get("MODE") == "production"
+}
+
+// CreateJSONRPC creates a new CreateJSONRPC handler.
+func (app *Application) CreateJSONRPC(path string) jsonrpc.Server[*Context] {
+	rpc := jsonrpc.NewServer[*Context](path)
+
+	app.Post(path, func(ctx *Context) {
+		request, err := io.ReadAll(ctx.Request.Body)
+		if err != nil {
+			ctx.Error(http.StatusInternalServerError, err.Error())
+			return
+		}
+		defer ctx.Request.Body.Close()
+
+		response, err := rpc.Invoke(ctx, request)
+		if err != nil {
+			ctx.Error(http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		ctx.Status(http.StatusOK)
+		ctx.Write(response)
+	})
+
+	return rpc
 }
 
 // H is a shortcut for map[string]interface{}
