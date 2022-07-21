@@ -11,6 +11,10 @@ func Default() *zoox.Application {
 		app.Use(middleware.Recovery())
 	})
 
+	zoox.DefaultMiddleware("request_id", func(app *zoox.Application) {
+		app.Use(middleware.RequestID())
+	})
+
 	zoox.DefaultMiddleware("logger", func(app *zoox.Application) {
 		app.Use(middleware.Logger())
 	})

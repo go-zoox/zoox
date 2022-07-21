@@ -14,6 +14,7 @@ import (
 	"github.com/go-zoox/core-utils/safe"
 	"github.com/go-zoox/logger"
 	"github.com/go-zoox/tag"
+	"github.com/go-zoox/uuid"
 )
 
 // Context is the request context
@@ -48,6 +49,8 @@ type Context struct {
 	//
 	state *State
 	user  *User
+	// request id
+	requestID string
 }
 
 func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Context {
@@ -66,6 +69,7 @@ func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Con
 		Path:       path,
 		StatusCode: 404,
 		index:      -1,
+		requestID:  uuid.V4(),
 	}
 
 	ctx.Logger = logger.New(&logger.Options{
@@ -488,4 +492,9 @@ func (ctx *Context) Session() *Session {
 	}
 
 	return ctx.session
+}
+
+// RequestID returns the request id of the request.
+func (ctx *Context) RequestID() string {
+	return ctx.requestID
 }
