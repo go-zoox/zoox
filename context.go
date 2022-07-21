@@ -301,6 +301,10 @@ func (ctx *Context) Forms() *safe.Map {
 // Params gets all params.
 func (ctx *Context) Params() *safe.Map {
 	m := safe.NewMap()
+	if ctx.param == nil {
+		return m
+	}
+
 	for k, v := range ctx.param.Iterator() {
 		m.Set(k, v)
 	}
