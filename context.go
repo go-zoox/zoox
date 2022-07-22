@@ -466,7 +466,7 @@ func (ctx *Context) Origin() string {
 // Cache returns the cache of the
 func (ctx *Context) Cache() *Cache {
 	if ctx.cache == nil {
-		ctx.cache = ctx.App.Cache
+		ctx.cache = ctx.App.Cache()
 	}
 
 	return ctx.cache

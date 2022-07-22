@@ -35,7 +35,7 @@ type Application struct {
 	LogLevel  string
 	//
 	CacheConfig *typing.Config
-	Cache       *Cache
+	cache       *Cache
 	//
 	Env    *Env
 	Logger *logger.Logger
@@ -53,8 +53,6 @@ func New() *Application {
 	app.groups = []*RouterGroup{app.RouterGroup}
 
 	app.Env = newEnv()
-
-	app.Cache = newCache(app)
 
 	app.Logger = logger.New(&logger.Options{
 		Level: app.LogLevel,
@@ -160,6 +158,15 @@ func (app *Application) CreateJSONRPC(path string) jsonrpc.Server[*Context] {
 	})
 
 	return rpc
+}
+
+// Cache ...
+func (app *Application) Cache() *Cache {
+	if app.cache == nil {
+		app.cache = newCache(app)
+	}
+
+	return app.cache
 }
 
 // H is a shortcut for map[string]interface{}

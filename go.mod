@@ -4,11 +4,11 @@ go 1.18
 
 require (
 	github.com/go-yaml/yaml v2.1.0+incompatible
-	github.com/go-zoox/core-utils v1.0.10
+	github.com/go-zoox/core-utils v1.0.13
 	github.com/go-zoox/crypto v1.0.3
 	github.com/go-zoox/fetch v1.3.5
 	github.com/go-zoox/jwt v1.0.0
-	github.com/go-zoox/kv v1.4.2
+	github.com/go-zoox/kv v1.4.3
 	github.com/go-zoox/logger v1.2.0
 	github.com/go-zoox/proxy v1.0.2
 	github.com/go-zoox/random v1.0.0
@@ -26,7 +26,7 @@ require (
 	github.com/go-zoox/chalk v1.0.1 // indirect
 	github.com/go-zoox/datetime v1.0.4 // indirect
 	github.com/go-zoox/encoding v1.0.7 // indirect
-	github.com/go-zoox/fs v1.2.4 // indirect
+	github.com/go-zoox/fs v1.2.5 // indirect
 	github.com/goccy/go-yaml v1.9.5 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
