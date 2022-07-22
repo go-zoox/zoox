@@ -24,7 +24,7 @@ func DefaultCorsConfig() *CorsConfig {
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Accept", "Content-Type", "Authorization"},
 		AllowCredentials: true,
-		ExposeHeaders:    []string{"Content-Length"},
+		ExposeHeaders:    []string{},
 	}
 }
 
