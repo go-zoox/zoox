@@ -70,7 +70,11 @@ func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Con
 		Path:       path,
 		StatusCode: 404,
 		index:      -1,
-		requestID:  uuid.V4(),
+	}
+
+	ctx.requestID = ctx.Get("X-Request-Id")
+	if ctx.requestID == "" {
+		ctx.requestID = uuid.V4()
 	}
 
 	ctx.Logger = logger.New(&logger.Options{
