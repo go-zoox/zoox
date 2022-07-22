@@ -1,5 +1,36 @@
 package zoox
 
+import (
+	"crypto/rand"
+	"encoding/base64"
+	"fmt"
+	"os"
+	"strings"
+	"sync/atomic"
+)
+
+var RequestIDHeader = "X-Request-Id"
+var requestIDPrefix string
+var requestID int64
+var hostname string
+
+func init() {
+	hostname, err := os.Hostname()
+	if hostname == "" || err != nil {
+		hostname = "localhost"
+	}
+
+	var buf [12]byte
+	var b64 string
+	if len(b64) < 10 {
+		rand.Read(buf[:])
+		b64 = base64.StdEncoding.EncodeToString(buf[:])
+		b64 = strings.NewReplacer("+", "", "/", "").Replace(b64)
+	}
+
+	requestIDPrefix = fmt.Sprintf("%s/%s", hostname, b64[0:10])
+}
+
 type Query struct {
 	ctx *Context
 }
@@ -69,4 +100,9 @@ func (f *Form) Get(key string, defaultValue ...string) string {
 	}
 
 	return value
+}
+
+func GenerateRequestID() string {
+	myID := atomic.AddInt64(&requestID, 1)
+	return fmt.Sprintf("%s-%06d", requestIDPrefix, myID)
 }

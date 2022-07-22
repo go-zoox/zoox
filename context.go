@@ -15,7 +15,6 @@ import (
 	"github.com/go-zoox/core-utils/safe"
 	"github.com/go-zoox/logger"
 	"github.com/go-zoox/tag"
-	"github.com/go-zoox/uuid"
 )
 
 // Context is the request context
@@ -72,9 +71,9 @@ func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Con
 		index:      -1,
 	}
 
-	ctx.requestID = ctx.Get("X-Request-Id")
+	ctx.requestID = ctx.Get(RequestIDHeader)
 	if ctx.requestID == "" {
-		ctx.requestID = uuid.V4()
+		ctx.requestID = GenerateRequestID()
 	}
 
 	ctx.Logger = logger.New(&logger.Options{
