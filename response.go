@@ -31,6 +31,8 @@ type responseWriter struct {
 	size   int
 	status int
 	ctx    *Context
+	//
+	isStatusWritten bool
 }
 
 func newResponseWriter(origin http.ResponseWriter) ResponseWriter {
@@ -54,6 +56,10 @@ func (w *responseWriter) Written() bool {
 }
 
 func (w *responseWriter) WriteHeader(code int) {
+	if !w.isStatusWritten {
+		w.isStatusWritten = true
+	}
+
 	if code > 0 && w.status != code {
 		w.status = code
 
@@ -64,7 +70,7 @@ func (w *responseWriter) WriteHeader(code int) {
 func (w *responseWriter) writeHeaderNow(isEmpty bool) {
 	if !w.Written() {
 		// @TODO io.Copy response write will not trigger writeHeader
-		if !isEmpty && w.status == 404 {
+		if !isEmpty && !w.isStatusWritten {
 			w.status = 200
 			w.ctx.StatusCode = 200
 		}
