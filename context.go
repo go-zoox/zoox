@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/go-yaml/yaml"
 	"github.com/go-zoox/core-utils/safe"
@@ -186,9 +187,24 @@ func (ctx *Context) Render(code int, name string, data interface{}) {
 }
 
 // Error writes the given error to the response.
+// Use for system errors
+//	1. Internal server error
+//  2. Not found
 func (ctx *Context) Error(status int, message string) {
-	ctx.Status(status)
-	ctx.Write([]byte(message))
+	// ctx.Status(status)
+	// ctx.Write([]byte(message))
+
+	if ctx.AcceptJSON() {
+		ctx.JSON(status, H{
+			"code":      -1,
+			"message":   message,
+			"path":      ctx.Path,
+			"timestamp": time.Now(),
+		})
+		return
+	}
+
+	ctx.String(status, message)
 }
 
 // Success writes the given data with code-message-result specification to the response.
