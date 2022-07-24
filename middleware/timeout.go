@@ -8,6 +8,7 @@ import (
 	"github.com/go-zoox/zoox"
 )
 
+// Timeout is a middleware that sets a timeout for the request.
 func Timeout(timeout time.Duration) zoox.Middleware {
 	return func(ctx *zoox.Context) {
 		c, cancel := context.WithTimeout(ctx.Request.Context(), timeout)

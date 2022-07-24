@@ -1,5 +1,6 @@
 package jsonrpc
 
+// Request is a JSON-RPC request.
 type Request struct {
 	JSONRPC string                 `json:"jsonrpc"`
 	Method  string                 `json:"method"`
@@ -7,6 +8,7 @@ type Request struct {
 	ID      string                 `json:"id"`
 }
 
+// Response is a JSON-RPC response.
 type Response struct {
 	JSONRPC string                 `json:"jsonrpc"`
 	Result  map[string]interface{} `json:"result"`
@@ -14,6 +16,7 @@ type Response struct {
 	ID      string                 `json:"id"`
 }
 
+// Error is a JSON-RPC error.
 type Error struct {
 	Code    int64  `json:"code"`
 	Message string `json:"message"`

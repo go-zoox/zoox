@@ -5,10 +5,12 @@ import (
 	"github.com/go-zoox/zoox"
 )
 
+// RewriteConfig is the configuration for the Rewrite middleware.
 type RewriteConfig struct {
 	Rewrites map[string]string
 }
 
+// Rewrite is a middleware that rewrites the request path.
 func Rewrite(cfg ...*RewriteConfig) zoox.Middleware {
 	cfgX := &RewriteConfig{}
 	if len(cfg) > 0 {

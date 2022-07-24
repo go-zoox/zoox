@@ -8,6 +8,7 @@ import (
 	"github.com/go-zoox/uuid"
 )
 
+// Client is a JSON-RPC client.
 type Client[C any] interface {
 	Call(method string, params map[string]interface{}) (map[string]interface{}, error)
 }
@@ -17,6 +18,7 @@ type client[C any] struct {
 	path   string
 }
 
+// NewClient creates a new JSON-RPC client.
 func NewClient[C any](server string, path ...string) Client[C] {
 	pathX := "/"
 	if len(path) > 0 {
@@ -31,6 +33,7 @@ func NewClient[C any](server string, path ...string) Client[C] {
 	}
 }
 
+// Call calls a JSON-RPC method.
 func (c *client[C]) Call(method string, params map[string]interface{}) (map[string]interface{}, error) {
 	response, err := fetch.Post(c.server+c.path, &fetch.Config{
 		Body: map[string]interface{}{

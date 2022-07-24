@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 )
 
+// Server is a JSON-RPC server.
 type Server[C any] interface {
 	Path() string
 	Register(method string, handler func(ctx C, params map[string]interface{}) (map[string]interface{}, error))
@@ -15,6 +16,7 @@ type server[C any] struct {
 	methods map[string]func(ctx C, params map[string]interface{}) (map[string]interface{}, error)
 }
 
+// NewServer creates a new JSON-RPC server.
 func NewServer[C any](path string) Server[C] {
 	return &server[C]{
 		path:    path,

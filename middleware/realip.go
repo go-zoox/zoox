@@ -12,6 +12,7 @@ var trueClientIP = http.CanonicalHeaderKey("True-Client-IP")
 var xForwardedFor = http.CanonicalHeaderKey("X-Forwarded-For")
 var xRealIP = http.CanonicalHeaderKey("X-Real-IP")
 
+// RealIP is a middleware that adds a "X-Real-IP" header to the request.
 func RealIP() zoox.Middleware {
 	return func(ctx *zoox.Context) {
 		if rip := realIP(ctx.Request); rip != "" {

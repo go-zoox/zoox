@@ -6,6 +6,7 @@ import (
 	"github.com/go-zoox/zoox"
 )
 
+// BasicAuth is a middleware that authenticates via Basic Auth.
 func BasicAuth(realm string, credentials map[string]string) zoox.Middleware {
 	return func(ctx *zoox.Context) {
 		user, pass, ok := ctx.Request.BasicAuth()

@@ -5,6 +5,7 @@ import (
 	"github.com/go-zoox/zoox"
 )
 
+// Jwt is a middleware that authenticates via JWT.
 func Jwt(secret string, algorithm ...string) zoox.Middleware {
 	algorithmX := "HS256"
 	if len(algorithm) > 0 {

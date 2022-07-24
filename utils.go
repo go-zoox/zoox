@@ -9,7 +9,9 @@ import (
 	"sync/atomic"
 )
 
+// RequestIDHeader is the name of the header that contains the request ID.
 var RequestIDHeader = "X-Request-Id"
+
 var requestIDPrefix string
 var requestID int64
 var hostname string
@@ -31,6 +33,7 @@ func init() {
 	requestIDPrefix = fmt.Sprintf("%s/%s", hostname, b64[0:10])
 }
 
+// Query ...
 type Query struct {
 	ctx *Context
 }
@@ -41,6 +44,7 @@ func newQuery(ctx *Context) *Query {
 	}
 }
 
+// Get gets request query with the given name.
 func (q *Query) Get(key string, defaultValue ...string) string {
 	value := q.ctx.Request.URL.Query().Get(key)
 	if value == "" && len(defaultValue) > 0 {
@@ -50,6 +54,7 @@ func (q *Query) Get(key string, defaultValue ...string) string {
 	return value
 }
 
+// Param ...
 type Param struct {
 	ctx *Context
 	//
@@ -63,6 +68,7 @@ func newParams(ctx *Context, value map[string]string) *Param {
 	}
 }
 
+// Get gets request param with the given name.
 func (q *Param) Get(key string, defaultValue ...string) string {
 	value, ok := q.params[key]
 	if ok {
@@ -76,10 +82,12 @@ func (q *Param) Get(key string, defaultValue ...string) string {
 	return value
 }
 
+// Iterator ...
 func (q *Param) Iterator() map[string]string {
 	return q.params
 }
 
+// Form ...
 type Form struct {
 	ctx *Context
 	//
@@ -93,6 +101,7 @@ func newForm(ctx *Context) *Form {
 	}
 }
 
+// Get gets request form with the given name.
 func (f *Form) Get(key string, defaultValue ...string) string {
 	value := f.ctx.Request.FormValue(key)
 	if value == "" && len(defaultValue) > 0 {
@@ -102,6 +111,7 @@ func (f *Form) Get(key string, defaultValue ...string) string {
 	return value
 }
 
+// GenerateRequestID generates a unique request ID.
 func GenerateRequestID() string {
 	myID := atomic.AddInt64(&requestID, 1)
 	return fmt.Sprintf("%s-%06d", requestIDPrefix, myID)

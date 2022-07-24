@@ -8,6 +8,7 @@ import (
 	"github.com/go-zoox/zoox"
 )
 
+// CorsConfig is the configuration for the CORS middleware.
 type CorsConfig struct {
 	IgnoreFunc       func(ctx *zoox.Context) bool
 	AllowOrigins     []string
@@ -18,6 +19,7 @@ type CorsConfig struct {
 	ExposeHeaders    []string
 }
 
+// DefaultCorsConfig is the default CORS configuration.
 func DefaultCorsConfig() *CorsConfig {
 	return &CorsConfig{
 		AllowOrigins:     []string{"*"},
@@ -28,6 +30,7 @@ func DefaultCorsConfig() *CorsConfig {
 	}
 }
 
+// CORS is a middleware for handling CORS (Cross-Origin Resource Sharing)
 func CORS(cfg ...*CorsConfig) zoox.Middleware {
 	cfgX := DefaultCorsConfig()
 	if len(cfg) > 0 {
