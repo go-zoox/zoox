@@ -25,6 +25,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5 // indirect
 	github.com/go-zoox/chalk v1.0.1 // indirect
 	github.com/go-zoox/datetime v1.0.4 // indirect
+	github.com/go-zoox/debug v1.0.1 // indirect
 	github.com/go-zoox/encoding v1.0.7 // indirect
 	github.com/go-zoox/fs v1.2.5 // indirect
 	github.com/goccy/go-yaml v1.9.5 // indirect

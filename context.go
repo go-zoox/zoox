@@ -38,6 +38,7 @@ type Context struct {
 	//
 	cache *Cache
 	env   *Env
+	debug *Debug
 	// middleware
 	handlers []HandlerFunc
 	index    int
@@ -470,6 +471,15 @@ func (ctx *Context) Cache() *Cache {
 	}
 
 	return ctx.cache
+}
+
+// Debug returns the debug of the app.
+func (ctx *Context) Debug() *Debug {
+	if ctx.debug == nil {
+		ctx.debug = ctx.App.Debug()
+	}
+
+	return ctx.debug
 }
 
 // Env returns the env of the

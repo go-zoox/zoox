@@ -39,6 +39,8 @@ type Application struct {
 	//
 	Env    *Env
 	Logger *logger.Logger
+	// Debug
+	debug *Debug
 }
 
 // New is the constructor of zoox.Application.
@@ -167,6 +169,15 @@ func (app *Application) Cache() *Cache {
 	}
 
 	return app.cache
+}
+
+// Debug ...
+func (app *Application) Debug() *Debug {
+	if app.cache == nil {
+		app.debug = newDebug(app)
+	}
+
+	return app.debug
 }
 
 // H is a shortcut for map[string]interface{}
