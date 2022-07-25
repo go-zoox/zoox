@@ -393,6 +393,10 @@ func (ctx *Context) Stream() io.ReadCloser {
 
 // BindJSON binds the request body into the given struct.
 func (ctx *Context) BindJSON(obj interface{}) error {
+	if !strings.Contains(ctx.Get("Content-Type"), "application/json") {
+		return errors.New("[BindJSON] content-type is not json")
+	}
+
 	if ctx.Request.Body == nil {
 		return errors.New("invalid request")
 	}

@@ -2,6 +2,9 @@ package zoox
 
 import "fmt"
 
+// HeaderContentType ...
+const HeaderContentType = "Content-Type"
+
 // DefaultMiddlewares is the default global middleware
 var DefaultMiddlewares = map[string]func(app *Application){
 	// Logger,
