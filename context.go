@@ -202,6 +202,7 @@ func (ctx *Context) Error(status int, message string) {
 		ctx.JSON(status, H{
 			"code":      -1,
 			"message":   message,
+			"method":    ctx.Method,
 			"path":      ctx.Path,
 			"timestamp": time.Now(),
 		})
