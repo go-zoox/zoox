@@ -94,7 +94,11 @@ func (g *RouterGroup) Any(path string, handler ...HandlerFunc) *RouterGroup {
 
 // WebSocket defines the method to add websocket route
 func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup {
-	upgrader := &websocket.Upgrader{}
+	upgrader := &websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
 
 	g.addRoute(http.MethodGet, path, func(ctx *Context) {
 		conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
