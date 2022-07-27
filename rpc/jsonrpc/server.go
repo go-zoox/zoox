@@ -2,29 +2,28 @@ package jsonrpc
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/go-zoox/logger"
 )
 
 // Server is a JSON-RPC server.
 type Server[C any] interface {
-	Register(method string, handler func(ctx C, params *map[string]interface{}) (*map[string]interface{}, error))
+	Register(method string, handler func(ctx C, params interface{}) (interface{}, error))
 	Invoke(ctx C, body []byte) ([]byte, error)
 }
 
 type server[C any] struct {
-	methods map[string]func(ctx C, params *map[string]interface{}) (*map[string]interface{}, error)
+	methods map[string]func(ctx C, params interface{}) (interface{}, error)
 }
 
 // NewServer creates a new JSON-RPC server.
 func NewServer[C any]() Server[C] {
 	return &server[C]{
-		methods: make(map[string]func(ctx C, params *map[string]interface{}) (*map[string]interface{}, error)),
+		methods: make(map[string]func(ctx C, params interface{}) (interface{}, error)),
 	}
 }
 
-func (s *server[C]) Register(method string, handler func(ctx C, params *map[string]interface{}) (*map[string]interface{}, error)) {
+func (s *server[C]) Register(method string, handler func(ctx C, params interface{}) (interface{}, error)) {
 	s.methods[method] = handler
 }
 
@@ -70,9 +69,9 @@ func (s *server[C]) Invoke(ctx C, body []byte) ([]byte, error) {
 		return json.Marshal(response)
 	}
 
-	fmt.Println("request.ID", request.ID)
-	fmt.Println("request.Method", request.Method)
-	fmt.Println("request.Params", request.Params)
+	// fmt.Println("request.ID", request.ID)
+	// fmt.Println("request.Method", request.Method)
+	// fmt.Println("request.Params", request.Params)
 
 	response.ID = request.ID
 
