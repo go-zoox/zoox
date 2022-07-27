@@ -10,7 +10,7 @@ import (
 
 // Client is a JSON-RPC client.
 type Client[C any] interface {
-	Call(method string, params map[string]interface{}) (map[string]interface{}, error)
+	Call(method string, params *map[string]interface{}) (*map[string]interface{}, error)
 }
 
 type client[C any] struct {
@@ -34,7 +34,7 @@ func NewClient[C any](server string, path ...string) Client[C] {
 }
 
 // Call calls a JSON-RPC method.
-func (c *client[C]) Call(method string, params map[string]interface{}) (map[string]interface{}, error) {
+func (c *client[C]) Call(method string, params *map[string]interface{}) (*map[string]interface{}, error) {
 	response, err := fetch.Post(c.server+c.path, &fetch.Config{
 		Body: map[string]interface{}{
 			"jsonrpc": "2.0",

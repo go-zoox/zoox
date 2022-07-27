@@ -3,6 +3,7 @@ package zoox
 import (
 	"encoding/json"
 
+	"github.com/go-zoox/zoox/rpc/jsonrpc"
 	"github.com/gorilla/websocket"
 )
 
@@ -41,6 +42,11 @@ func (c *WebSocketClient) WriteText(msg string) error {
 	return c.Write(websocket.TextMessage, []byte(msg))
 }
 
+// WriteBytes ...
+func (c *WebSocketClient) WriteBytes(msg []byte) error {
+	return c.Write(websocket.TextMessage, msg)
+}
+
 // WriteBinary ...
 func (c *WebSocketClient) WriteBinary(msg []byte) error {
 	return c.Write(websocket.BinaryMessage, msg)
@@ -54,4 +60,35 @@ func (c *WebSocketClient) WriteJSON(msg interface{}) error {
 	}
 
 	return c.Write(websocket.TextMessage, bytes)
+}
+
+// create json rpc
+func (c *WebSocketClient) CreateJSONRPC() jsonrpc.Server[any] {
+	rpc := jsonrpc.NewServer[any]()
+
+	onTextMessage := []func([]byte){}
+	if c.OnTextMessage != nil {
+		onTextMessage = append(onTextMessage, c.OnTextMessage)
+	}
+
+	onTextMessage = append(onTextMessage, func(msg []byte) {
+		resp, err := rpc.Invoke(c, msg)
+		if err != nil {
+			if c.OnError != nil {
+				c.OnError(err)
+			} else {
+				c.ctx.Logger.Error("ws error: %s", err)
+			}
+		}
+
+		c.WriteBytes(resp)
+	})
+
+	c.OnTextMessage = func(msg []byte) {
+		for _, f := range onTextMessage {
+			f(msg)
+		}
+	}
+
+	return rpc
 }

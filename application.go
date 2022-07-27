@@ -139,7 +139,7 @@ func (app *Application) IsProd() bool {
 
 // CreateJSONRPC creates a new CreateJSONRPC handler.
 func (app *Application) CreateJSONRPC(path string) jsonrpc.Server[*Context] {
-	rpc := jsonrpc.NewServer[*Context](path)
+	rpc := jsonrpc.NewServer[*Context]()
 
 	app.Post(path, func(ctx *Context) {
 		request, err := io.ReadAll(ctx.Request.Body)

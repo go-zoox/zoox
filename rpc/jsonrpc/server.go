@@ -2,33 +2,29 @@ package jsonrpc
 
 import (
 	"encoding/json"
+	"fmt"
+
+	"github.com/go-zoox/logger"
 )
 
 // Server is a JSON-RPC server.
 type Server[C any] interface {
-	Path() string
-	Register(method string, handler func(ctx C, params map[string]interface{}) (map[string]interface{}, error))
+	Register(method string, handler func(ctx C, params *map[string]interface{}) (*map[string]interface{}, error))
 	Invoke(ctx C, body []byte) ([]byte, error)
 }
 
 type server[C any] struct {
-	path    string
-	methods map[string]func(ctx C, params map[string]interface{}) (map[string]interface{}, error)
+	methods map[string]func(ctx C, params *map[string]interface{}) (*map[string]interface{}, error)
 }
 
 // NewServer creates a new JSON-RPC server.
-func NewServer[C any](path string) Server[C] {
+func NewServer[C any]() Server[C] {
 	return &server[C]{
-		path:    path,
-		methods: make(map[string]func(ctx C, params map[string]interface{}) (map[string]interface{}, error)),
+		methods: make(map[string]func(ctx C, params *map[string]interface{}) (*map[string]interface{}, error)),
 	}
 }
 
-func (s *server[C]) Path() string {
-	return s.path
-}
-
-func (s *server[C]) Register(method string, handler func(ctx C, params map[string]interface{}) (map[string]interface{}, error)) {
+func (s *server[C]) Register(method string, handler func(ctx C, params *map[string]interface{}) (*map[string]interface{}, error)) {
 	s.methods[method] = handler
 }
 
@@ -40,42 +36,49 @@ func (s *server[C]) Invoke(ctx C, body []byte) ([]byte, error) {
 	var request Request
 	err := json.Unmarshal(body, &request)
 	if err != nil {
-		response.Error = Error{
+		logger.Info("jsonrpc: invalid request: %s(%s)", err, string(body))
+
+		response.Error = &Error{
 			Code:    -32700,
 			Message: "Parse error",
 		}
+
 		return json.Marshal(response)
 	}
 
 	if request.JSONRPC != "2.0" {
-		response.Error = Error{
+		response.Error = &Error{
 			Code:    -32600,
-			Message: "Invalid Request",
+			Message: "Invalid Request (invlid JSON-RPC version)",
 		}
 		return json.Marshal(response)
 	}
 
 	if request.Method == "" {
-		response.Error = Error{
+		response.Error = &Error{
 			Code:    -32600,
-			Message: "Invalid Request",
+			Message: "Invalid Request (method is required)",
 		}
 		return json.Marshal(response)
 	}
 
 	if request.ID == "" {
-		response.Error = Error{
+		response.Error = &Error{
 			Code:    -32600,
-			Message: "Invalid Request",
+			Message: "Invalid Request (id is required)",
 		}
 		return json.Marshal(response)
 	}
+
+	fmt.Println("request.ID", request.ID)
+	fmt.Println("request.Method", request.Method)
+	fmt.Println("request.Params", request.Params)
 
 	response.ID = request.ID
 
 	handler, ok := s.methods[request.Method]
 	if !ok {
-		response.Error = Error{
+		response.Error = &Error{
 			Code:    -32601,
 			Message: "Method not found",
 		}
@@ -85,7 +88,7 @@ func (s *server[C]) Invoke(ctx C, body []byte) ([]byte, error) {
 
 	result, err := handler(ctx, request.Params)
 	if err != nil {
-		response.Error = Error{
+		response.Error = &Error{
 			Code:    -32603,
 			Message: err.Error(),
 		}
