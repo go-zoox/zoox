@@ -1,6 +1,8 @@
 package zoox
 
 import (
+	"fmt"
+	"mime"
 	"net/http"
 	"path"
 	"time"
@@ -159,6 +161,27 @@ func (g *RouterGroup) Use(middlewares ...HandlerFunc) {
 func (g *RouterGroup) createStaticHandler(relativePath string, fs http.FileSystem) HandlerFunc {
 	absolutePath := path.Join(g.prefix, relativePath)
 	fileServer := http.StripPrefix(absolutePath, http.FileServer(fs))
+
+	// fix mime types
+	var builtinMimeTypesLower = map[string]string{
+		".css":  "text/css; charset=utf-8",
+		".gif":  "image/gif",
+		".htm":  "text/html; charset=utf-8",
+		".html": "text/html; charset=utf-8",
+		".jpg":  "image/jpeg",
+		".js":   "application/javascript",
+		".wasm": "application/wasm",
+		".pdf":  "application/pdf",
+		".png":  "image/png",
+		".svg":  "image/svg+xml",
+		".xml":  "text/xml; charset=utf-8",
+	}
+
+	for k, v := range builtinMimeTypesLower {
+		if err := mime.AddExtensionType(k, v); err != nil {
+			panic(fmt.Errorf("failed to register mime type(%s): %s", k, err))
+		}
+	}
 
 	return func(ctx *Context) {
 		file := ctx.Param().Get("filepath")
