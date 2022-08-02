@@ -62,7 +62,7 @@ func (c *WebSocketClient) WriteJSON(msg interface{}) error {
 	return c.Write(websocket.TextMessage, bytes)
 }
 
-// create json rpc
+// CreateJSONRPC ...
 func (c *WebSocketClient) CreateJSONRPC() jsonrpc.Server[any] {
 	rpc := jsonrpc.NewServer[any]()
 
