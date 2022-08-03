@@ -11,7 +11,7 @@ require (
 	github.com/go-zoox/jwt v1.0.0
 	github.com/go-zoox/kv v1.4.3
 	github.com/go-zoox/logger v1.2.0
-	github.com/go-zoox/proxy v1.2.2
+	github.com/go-zoox/proxy v1.2.3
 	github.com/go-zoox/random v1.0.0
 	github.com/go-zoox/tag v1.0.9
 	github.com/go-zoox/uuid v0.0.1
@@ -38,7 +38,7 @@ require (
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	golang.org/x/crypto v0.0.0-20220313003712-b769efc7c000 // indirect
-	golang.org/x/net v0.0.0-20220728211354-c7608f3a8462 // indirect
+	golang.org/x/net v0.0.0-20220802222814-0bcc04d9c69b // indirect
 	golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
