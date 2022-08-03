@@ -1,9 +1,11 @@
 package middleware
 
 import (
+	"fmt"
+	"net/http/httputil"
+	"net/url"
 	"regexp"
 
-	"github.com/go-zoox/proxy"
 	"github.com/go-zoox/zoox"
 )
 
@@ -23,9 +25,20 @@ func Proxy(cfg *ProxyConfig) zoox.Middleware {
 	return func(ctx *zoox.Context) {
 		for key, value := range cfg.Rewrites {
 			if matched, err := regexp.MatchString(key, ctx.Path); err == nil && matched {
-				p := proxy.NewSingleTarget(value.Target, &proxy.SingleTargetConfig{
-					Rewrites: value.Rewrites,
-				})
+				// @BUG: this is not working
+				// p := proxy.NewSingleTarget(value.Target, &proxy.SingleTargetConfig{
+				// 	Rewrites: value.Rewrites,
+				// })
+
+				// p.ServeHTTP(ctx.Writer, ctx.Request)
+				// return
+
+				u, err := url.Parse(value.Target)
+				if err != nil {
+					panic(fmt.Errorf("invalid proxy target: %s", value.Target))
+				}
+
+				p := httputil.NewSingleHostReverseProxy(u)
 
 				p.ServeHTTP(ctx.Writer, ctx.Request)
 				return
