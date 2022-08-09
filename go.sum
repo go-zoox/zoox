@@ -24,6 +24,8 @@ github.com/go-zoox/compress v1.0.1 h1:EyNxo5NscMLua5fvUdiGSF+BwhuTfMeyppu7OwKAW7
 github.com/go-zoox/compress v1.0.1/go.mod h1:iV6CcNulf3OuEfA1h1VOsaBqYH81cVSg5wNi5HDx2h4=
 github.com/go-zoox/core-utils v1.0.13 h1:aI20hoVvPjVfJSgy01XUliEdIvvMmdlvEcrXBg7Pbkc=
 github.com/go-zoox/core-utils v1.0.13/go.mod h1:EknM3KLL6/kagL95wZbWE7mRRcYCG/fHqiJ/EH0ihAs=
+github.com/go-zoox/counter v1.0.1 h1:J9aai157VnjHNOq3klcxFTMwByaVksQUwHww2VYYPRQ=
+github.com/go-zoox/counter v1.0.1/go.mod h1:PICilZTrnO4dFstDPlXpjc6sdWYBG7hm/XDmjAcHaX0=
 github.com/go-zoox/crypto v1.0.3 h1:0Lyw4ouusKWevAsS2cb4LbhChstRQlTdsynKzvWxB14=
 github.com/go-zoox/crypto v1.0.3/go.mod h1:HaWRg4tHZamqNyOnNoaK+Rw5eto+su66i8bMMP8UCBU=
 github.com/go-zoox/datetime v1.0.4 h1:LIOfo7svKD9gpyaTxAM55t2EO+CFFFcXczqLSfM1sPo=
@@ -47,6 +49,8 @@ github.com/go-zoox/proxy v1.2.3 h1:bLEV1HKQTVzEROzDDxFRNMiLsC0m8kqvyc4G0JUrItc=
 github.com/go-zoox/proxy v1.2.3/go.mod h1:T+gbngAtIgvambbYibAbzrjwdu8j5pduJdA2j6RYi94=
 github.com/go-zoox/random v1.0.0 h1:SecY/LTpNUYuHzaH9Rm3yIHt5S9ayyE9q99ed2WKvxg=
 github.com/go-zoox/random v1.0.0/go.mod h1:W+PTQiInxaCngiXpSvycucAKvu1tE/tKlZ9kaMp2/Ys=
+github.com/go-zoox/ratelimit v1.0.1 h1:/+aK8unMhgSAp3lpdq4Bk/g6CADTkuOq/b0NkfD0J4s=
+github.com/go-zoox/ratelimit v1.0.1/go.mod h1:5MtLMrfQRbZHI+tKC4eyHZorrZX005Sy/Dldnk8qYOU=
 github.com/go-zoox/tag v1.0.9 h1:BGaFcufN6+lTuJDx+2EBYVVCIm/6y/hwxAuQQ+Lybkk=
 github.com/go-zoox/tag v1.0.9/go.mod h1:jrbJgC1dZAN5+vZlmrUKu1/UpbOo0xVyCC1MfLpGGqk=
 github.com/go-zoox/uuid v0.0.1 h1:txqmDavRTq68gzzqWfJQLorFyUp9a7M2lmq2KcwPGPA=

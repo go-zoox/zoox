@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/go-yaml/yaml v2.1.0+incompatible
 	github.com/go-zoox/core-utils v1.0.13
+	github.com/go-zoox/counter v1.0.1
 	github.com/go-zoox/crypto v1.0.3
 	github.com/go-zoox/debug v1.0.1
 	github.com/go-zoox/fetch v1.3.5
@@ -13,6 +14,7 @@ require (
 	github.com/go-zoox/logger v1.2.0
 	github.com/go-zoox/proxy v1.2.3
 	github.com/go-zoox/random v1.0.0
+	github.com/go-zoox/ratelimit v1.0.1
 	github.com/go-zoox/tag v1.0.9
 	github.com/go-zoox/uuid v0.0.1
 	github.com/gorilla/websocket v1.5.0
