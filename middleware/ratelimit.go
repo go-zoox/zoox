@@ -13,9 +13,10 @@ import (
 
 // RateLimitConfig ...
 type RateLimitConfig struct {
+	Period time.Duration
+	Limit  int64
+	//
 	Namespace string
-	MaxAge    time.Duration
-	MaxCount  int64
 	//
 	RedisHost     string
 	RedisPort     int
@@ -33,14 +34,14 @@ func RateLimit(cfg *RateLimitConfig) zoox.Middleware {
 	var limiter *ratelimit.RateLimit
 	var err error
 	if cfg.RedisHost != "" {
-		limiter, err = ratelimit.NewRedis(namespace, cfg.MaxAge, cfg.MaxCount, &bucket.RedisConfig{
+		limiter, err = ratelimit.NewRedis(namespace, cfg.Period, cfg.Limit, &bucket.RedisConfig{
 			Host:     cfg.RedisHost,
 			Port:     cfg.RedisPort,
 			DB:       cfg.RedisDB,
 			Password: cfg.RedisPassword,
 		})
 	} else {
-		limiter = ratelimit.NewMemory(namespace, cfg.MaxAge, cfg.MaxCount)
+		limiter = ratelimit.NewMemory(namespace, cfg.Period, cfg.Limit)
 	}
 
 	if err != nil {
