@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -174,6 +175,14 @@ func (ctx *Context) JSON(status int, obj interface{}) {
 	if err := encoder.Encode(obj); err != nil {
 		ctx.Error(http.StatusInternalServerError, err.Error())
 	}
+}
+
+// Data writes some data into the body stream and updates the HTTP code.
+// Align to gin framework.
+func (ctx *Context) Data(status int, contentType string, data []byte) {
+	ctx.Status(status)
+	ctx.SetHeader("content-type", contentType)
+	ctx.Write(data)
 }
 
 // HTML renders the given template with the given data and writes the result
@@ -389,6 +398,12 @@ func (ctx *Context) File(key string) (multipart.File, *multipart.FileHeader) {
 // Stream get the body stream.
 func (ctx *Context) Stream() io.ReadCloser {
 	return ctx.Request.Body
+}
+
+// GetRawData returns stream data.
+// Align to gin framework.
+func (ctx *Context) GetRawData() ([]byte, error) {
+	return ioutil.ReadAll(ctx.Request.Body)
 }
 
 // BindJSON binds the request body into the given struct.
