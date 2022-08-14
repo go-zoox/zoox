@@ -14,16 +14,26 @@ type ResponseWriter interface {
 	http.CloseNotifier
 	http.Flusher
 
+	setContext(ctx *Context)
+
+	// Status returns the HTTP response status code of the current request.
 	Status() int
 
+	// Size returns the number of bytes already written into the response http body.
+	// See Written()
 	Size() int
 
 	// WriteString writes the string into the response body.
 	WriteString(string) (int, error)
 
+	// Written returns true if the response body was already written.
 	Written() bool
 
-	setContext(ctx *Context)
+	// WriteHeaderNow forces to write the http header (status code + headers).
+	WriteHeaderNow()
+
+	// Pusher get the http.Pusher for server push
+	Pusher() http.Pusher
 }
 
 type responseWriter struct {
@@ -33,6 +43,8 @@ type responseWriter struct {
 	ctx    *Context
 	//
 	isStatusWritten bool
+	//
+	isEmpty bool
 }
 
 func newResponseWriter(origin http.ResponseWriter) ResponseWriter {
@@ -40,6 +52,7 @@ func newResponseWriter(origin http.ResponseWriter) ResponseWriter {
 		ResponseWriter: origin,
 		size:           -1,
 		status:         404, // default status 404
+		isEmpty:        true,
 	}
 }
 
@@ -67,10 +80,10 @@ func (w *responseWriter) WriteHeader(code int) {
 	}
 }
 
-func (w *responseWriter) writeHeaderNow(isEmpty bool) {
+func (w *responseWriter) WriteHeaderNow() {
 	if !w.Written() {
 		// @TODO io.Copy response write will not trigger writeHeader
-		if !isEmpty && !w.isStatusWritten {
+		if !w.isEmpty && !w.isStatusWritten {
 			w.status = 200
 			w.ctx.StatusCode = 200
 		}
@@ -81,14 +94,22 @@ func (w *responseWriter) writeHeaderNow(isEmpty bool) {
 }
 
 func (w *responseWriter) Write(b []byte) (n int, err error) {
-	w.writeHeaderNow(len(b) == 0)
+	if w.isEmpty {
+		w.isEmpty = len(b) == 0
+	}
+
+	w.WriteHeaderNow()
 	n, err = w.ResponseWriter.Write(b)
 	w.size += n
 	return
 }
 
 func (w *responseWriter) WriteString(s string) (n int, err error) {
-	w.writeHeaderNow(len(s) == 0)
+	if w.isEmpty {
+		w.isEmpty = len(s) == 0
+	}
+
+	w.WriteHeaderNow()
 	n, err = io.WriteString(w.ResponseWriter, s)
 	w.size += n
 	return
@@ -113,7 +134,14 @@ func (w *responseWriter) CloseNotify() <-chan bool {
 
 // Flush implements the http.Flusher interface.
 func (w *responseWriter) Flush() {
-	w.writeHeaderNow(true)
+	w.WriteHeaderNow()
 
 	w.ResponseWriter.(http.Flusher).Flush()
+}
+
+func (w *responseWriter) Pusher() (pusher http.Pusher) {
+	if pusher, ok := w.ResponseWriter.(http.Pusher); ok {
+		return pusher
+	}
+	return nil
 }
