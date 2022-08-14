@@ -14,6 +14,7 @@ import (
 
 	"github.com/go-yaml/yaml"
 	"github.com/go-zoox/core-utils/safe"
+	"github.com/go-zoox/fetch"
 	"github.com/go-zoox/logger"
 	"github.com/go-zoox/tag"
 )
@@ -550,4 +551,9 @@ func (ctx *Context) Session() *Session {
 // RequestID returns the request id of the request.
 func (ctx *Context) RequestID() string {
 	return ctx.requestID
+}
+
+// Fetch is the context request utils, based on go-zoox/fetch.
+func (ctx *Context) Fetch() *fetch.Fetch {
+	return fetch.New()
 }
