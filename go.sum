@@ -55,8 +55,9 @@ github.com/go-zoox/encoding v1.0.7 h1:vYo+rXx2QNexxSyomKHouwaKiXob7BTD4u12xTv4Mk
 github.com/go-zoox/encoding v1.0.7/go.mod h1:h6ZgI27IaUSBq1ntaZjnSruPdRFuBLNUmfp57TaPxs4=
 github.com/go-zoox/errors v1.0.2/go.mod h1:HJ5NKQb9cu3IbI0Jayw7xZiblLBEIglpaIOMxvQnWnk=
 github.com/go-zoox/fetch v1.3.5/go.mod h1:AkS6v/DlotjmUs+7qJsoFGFkpROr9LVtiKYb000v3Kw=
-github.com/go-zoox/fetch v1.4.4 h1:d9ILY5pvQBavXq+s8hUGpXOMKgD+ImC5+jgAcRh1Toc=
 github.com/go-zoox/fetch v1.4.4/go.mod h1:WExVnds3HZ1A6jJu9KuqtICfkJpvUdR4uONUnw9TG+0=
+github.com/go-zoox/fetch v1.4.7 h1:rFEzVHzpIxkHpV0zpBpbTYDRGCm8nWCBgcuN4sqGZK8=
+github.com/go-zoox/fetch v1.4.7/go.mod h1:WExVnds3HZ1A6jJu9KuqtICfkJpvUdR4uONUnw9TG+0=
 github.com/go-zoox/fs v1.2.4/go.mod h1:aywpClMqf6YO8+QnuwC3p3EvFWe88h0tWH65rpxtY00=
 github.com/go-zoox/fs v1.2.5 h1:OQGercbeDUZfDjgbN1fz18oPd3f/ii3XKxH4XZlfhi0=
 github.com/go-zoox/fs v1.2.5/go.mod h1:aywpClMqf6YO8+QnuwC3p3EvFWe88h0tWH65rpxtY00=
