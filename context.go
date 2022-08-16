@@ -210,7 +210,7 @@ func (ctx *Context) Error(status int, message string) {
 
 	if ctx.AcceptJSON() {
 		ctx.JSON(status, H{
-			"code":      -1,
+			"code":      400,
 			"message":   message,
 			"method":    ctx.Method,
 			"path":      ctx.Path,
@@ -238,7 +238,7 @@ func (ctx *Context) Fail(err error, code int, message string, status ...int) {
 		statusX = status[0]
 	}
 
-	fmt.Println("[context][fail]", err)
+	ctx.Logger.Error("[Fail]", err)
 
 	ctx.JSON(statusX, map[string]any{
 		"code":    code,
