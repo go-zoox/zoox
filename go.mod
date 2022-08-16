@@ -6,6 +6,7 @@ require (
 	github.com/go-yaml/yaml v2.1.0+incompatible
 	github.com/go-zoox/core-utils v1.0.13
 	github.com/go-zoox/counter v1.0.1
+	github.com/go-zoox/cron v1.0.1
 	github.com/go-zoox/crypto v1.0.3
 	github.com/go-zoox/debug v1.0.1
 	github.com/go-zoox/fetch v1.4.7
@@ -38,6 +39,7 @@ require (
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-sqlite3 v1.14.14 // indirect
+	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/tidwall/gjson v1.14.2 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect

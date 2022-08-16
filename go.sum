@@ -41,6 +41,8 @@ github.com/go-zoox/core-utils v1.0.13 h1:aI20hoVvPjVfJSgy01XUliEdIvvMmdlvEcrXBg7
 github.com/go-zoox/core-utils v1.0.13/go.mod h1:EknM3KLL6/kagL95wZbWE7mRRcYCG/fHqiJ/EH0ihAs=
 github.com/go-zoox/counter v1.0.1 h1:J9aai157VnjHNOq3klcxFTMwByaVksQUwHww2VYYPRQ=
 github.com/go-zoox/counter v1.0.1/go.mod h1:PICilZTrnO4dFstDPlXpjc6sdWYBG7hm/XDmjAcHaX0=
+github.com/go-zoox/cron v1.0.1 h1:v3ZO0YVGNVV8aTXkHCPeVQu4bsRHLQDmTf+FE342ke4=
+github.com/go-zoox/cron v1.0.1/go.mod h1:g89uYkmEcYiN2rCCn9bvSmkQeboXtr3o3k6jw72QjU0=
 github.com/go-zoox/crypto v1.0.3 h1:0Lyw4ouusKWevAsS2cb4LbhChstRQlTdsynKzvWxB14=
 github.com/go-zoox/crypto v1.0.3/go.mod h1:HaWRg4tHZamqNyOnNoaK+Rw5eto+su66i8bMMP8UCBU=
 github.com/go-zoox/datetime v1.0.4 h1:LIOfo7svKD9gpyaTxAM55t2EO+CFFFcXczqLSfM1sPo=
@@ -151,6 +153,8 @@ github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/robfig/cron/v3 v3.0.1 h1:WdRxkvbJztn8LMz/QEvLN5sBU+xKpSqwwUO1Pjr4qDs=
+github.com/robfig/cron/v3 v3.0.1/go.mod h1:eQICP3HwyT7UooqI/z+Ov+PtYAWygg1TEWWzGIFLtro=
 github.com/rogpeppe/go-internal v1.6.1/go.mod h1:xXDCJY+GAPziupqXw64V24skbSoqbTEfhy4qGm1nDQc=
 github.com/rogpeppe/go-internal v1.8.0 h1:FCbCCtXNOY3UtUuHUYaghJg4y7Fd14rXifAYUAtL9R8=
 github.com/rogpeppe/go-internal v1.8.0/go.mod h1:WmiCO8CzOY8rg0OYDC4/i/2WRWAB6poM+XZ2dLUbcbE=

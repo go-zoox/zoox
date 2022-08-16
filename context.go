@@ -39,6 +39,8 @@ type Context struct {
 	session *Session
 	//
 	cache *Cache
+	cron  *Cron
+	//
 	env   *Env
 	debug *Debug
 	// middleware
@@ -485,13 +487,22 @@ func (ctx *Context) Origin() string {
 	return ctx.Get("Origin")
 }
 
-// Cache returns the cache of the
+// Cache returns the cache of the application.
 func (ctx *Context) Cache() *Cache {
 	if ctx.cache == nil {
 		ctx.cache = ctx.App.Cache()
 	}
 
 	return ctx.cache
+}
+
+// Cron returns the cache of the application.
+func (ctx *Context) Cron() *Cron {
+	if ctx.cron == nil {
+		ctx.cron = ctx.App.Cron()
+	}
+
+	return ctx.cron
 }
 
 // Debug returns the debug of the app.

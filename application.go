@@ -37,6 +37,8 @@ type Application struct {
 	CacheConfig *typing.Config
 	cache       *Cache
 	//
+	cron *Cron
+	//
 	Env    *Env
 	Logger *logger.Logger
 	// Debug
@@ -172,6 +174,15 @@ func (app *Application) Cache() *Cache {
 	}
 
 	return app.cache
+}
+
+// Cron ...
+func (app *Application) Cron() *Cron {
+	if app.cron == nil {
+		app.cron = newCron()
+	}
+
+	return app.cron
 }
 
 // Debug ...
