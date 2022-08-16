@@ -34,6 +34,7 @@ require (
 	github.com/go-zoox/datetime v1.0.4 // indirect
 	github.com/go-zoox/encoding v1.0.7 // indirect
 	github.com/go-zoox/fs v1.2.5 // indirect
+	github.com/go-zoox/jobqueue v1.0.0 // indirect
 	github.com/goccy/go-yaml v1.9.5 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect

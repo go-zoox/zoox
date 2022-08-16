@@ -40,6 +40,7 @@ type Context struct {
 	//
 	cache *Cache
 	cron  *Cron
+	queue *Queue
 	//
 	env   *Env
 	debug *Debug
@@ -503,6 +504,15 @@ func (ctx *Context) Cron() *Cron {
 	}
 
 	return ctx.cron
+}
+
+// Queue returns the queue of the application.
+func (ctx *Context) Queue() *Queue {
+	if ctx.queue == nil {
+		ctx.queue = ctx.App.Queue()
+	}
+
+	return ctx.queue
 }
 
 // Debug returns the debug of the app.
