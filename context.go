@@ -241,7 +241,8 @@ func (ctx *Context) Fail(err error, code int, message string, status ...int) {
 		statusX = status[0]
 	}
 
-	ctx.Logger.Error("[Fail]", err)
+	// ctx.Logger.Error("[Fail] %s", err)
+	fmt.Println("[Fail]", err)
 
 	ctx.JSON(statusX, map[string]any{
 		"code":    code,
