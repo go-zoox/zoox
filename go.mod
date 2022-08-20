@@ -26,7 +26,7 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/go-redis/redis/v8 v8.11.5 // indirect
-	github.com/go-zoox/chalk v1.0.1 // indirect
+	github.com/go-zoox/chalk v1.0.2 // indirect
 	github.com/go-zoox/compress v1.0.1 // indirect
 	github.com/go-zoox/datetime v1.0.4 // indirect
 	github.com/go-zoox/encoding v1.0.7 // indirect
