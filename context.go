@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/go-yaml/yaml"
 	"github.com/go-zoox/core-utils/safe"
+	"github.com/go-zoox/fetch"
 	"github.com/go-zoox/logger"
 	"github.com/go-zoox/tag"
 )
@@ -37,6 +39,9 @@ type Context struct {
 	session *Session
 	//
 	cache *Cache
+	cron  *Cron
+	queue *Queue
+	//
 	env   *Env
 	debug *Debug
 	// middleware
@@ -176,6 +181,14 @@ func (ctx *Context) JSON(status int, obj interface{}) {
 	}
 }
 
+// Data writes some data into the body stream and updates the HTTP code.
+// Align to gin framework.
+func (ctx *Context) Data(status int, contentType string, data []byte) {
+	ctx.Status(status)
+	ctx.SetHeader("content-type", contentType)
+	ctx.Write(data)
+}
+
 // HTML renders the given template with the given data and writes the result
 func (ctx *Context) HTML(code int, name string, data interface{}) {
 	ctx.Status(code)
@@ -200,7 +213,7 @@ func (ctx *Context) Error(status int, message string) {
 
 	if ctx.AcceptJSON() {
 		ctx.JSON(status, H{
-			"code":      -1,
+			"code":      400,
 			"message":   message,
 			"method":    ctx.Method,
 			"path":      ctx.Path,
@@ -228,7 +241,8 @@ func (ctx *Context) Fail(err error, code int, message string, status ...int) {
 		statusX = status[0]
 	}
 
-	fmt.Println("[context][fail]", err)
+	// ctx.Logger.Error("[Fail] %s", err)
+	fmt.Println("[Fail]", err)
 
 	ctx.JSON(statusX, map[string]any{
 		"code":    code,
@@ -391,6 +405,12 @@ func (ctx *Context) Stream() io.ReadCloser {
 	return ctx.Request.Body
 }
 
+// GetRawData returns stream data.
+// Align to gin framework.
+func (ctx *Context) GetRawData() ([]byte, error) {
+	return ioutil.ReadAll(ctx.Request.Body)
+}
+
 // BindJSON binds the request body into the given struct.
 func (ctx *Context) BindJSON(obj interface{}) error {
 	if !strings.Contains(ctx.Get("Content-Type"), "application/json") {
@@ -469,13 +489,31 @@ func (ctx *Context) Origin() string {
 	return ctx.Get("Origin")
 }
 
-// Cache returns the cache of the
+// Cache returns the cache of the application.
 func (ctx *Context) Cache() *Cache {
 	if ctx.cache == nil {
 		ctx.cache = ctx.App.Cache()
 	}
 
 	return ctx.cache
+}
+
+// Cron returns the cache of the application.
+func (ctx *Context) Cron() *Cron {
+	if ctx.cron == nil {
+		ctx.cron = ctx.App.Cron()
+	}
+
+	return ctx.cron
+}
+
+// Queue returns the queue of the application.
+func (ctx *Context) Queue() *Queue {
+	if ctx.queue == nil {
+		ctx.queue = ctx.App.Queue()
+	}
+
+	return ctx.queue
 }
 
 // Debug returns the debug of the app.
@@ -535,4 +573,9 @@ func (ctx *Context) Session() *Session {
 // RequestID returns the request id of the request.
 func (ctx *Context) RequestID() string {
 	return ctx.requestID
+}
+
+// Fetch is the context request utils, based on go-zoox/fetch.
+func (ctx *Context) Fetch() *fetch.Fetch {
+	return fetch.New()
 }

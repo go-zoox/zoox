@@ -37,6 +37,9 @@ type Application struct {
 	CacheConfig *typing.Config
 	cache       *Cache
 	//
+	cron  *Cron
+	queue *Queue
+	//
 	Env    *Env
 	Logger *logger.Logger
 	// Debug
@@ -87,16 +90,19 @@ func (app *Application) Fallback(h HandlerFunc) {
 }
 
 // Run defines the method to start the server
-func (app *Application) Run(addr ...string) {
+func (app *Application) Run(addr ...string) error {
 	addrX := ":8080"
 	if len(addr) > 0 && addr[0] != "" {
 		addrX = addr[0]
 	}
 
 	logger.Info("Server started at %s", addrX)
+
 	if err := http.ListenAndServe(addrX, app); err != nil {
-		panic(err)
+		return err
 	}
+
+	return nil
 }
 
 func (app *Application) createContext(w http.ResponseWriter, req *http.Request) *Context {
@@ -169,6 +175,24 @@ func (app *Application) Cache() *Cache {
 	}
 
 	return app.cache
+}
+
+// Cron ...
+func (app *Application) Cron() *Cron {
+	if app.cron == nil {
+		app.cron = newCron()
+	}
+
+	return app.cron
+}
+
+// Queue ...
+func (app *Application) Queue() *Queue {
+	if app.queue == nil {
+		app.queue = newQueue()
+	}
+
+	return app.queue
 }
 
 // Debug ...

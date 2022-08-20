@@ -1,6 +1,8 @@
 package zoox
 
-import "net/http"
+import (
+	"net/http"
+)
 
 // WrapH wraps a http.Handler to a HandlerFunc
 func WrapH(handler http.Handler) HandlerFunc {
