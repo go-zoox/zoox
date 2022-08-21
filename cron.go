@@ -22,74 +22,74 @@ func newCron() *Cron {
 }
 
 // AddJob ...
-func (c *Cron) AddJob(spec string, job func() error) error {
+func (c *Cron) AddJob(name string, spec string, job func() error) error {
 	if !c.isStarted {
 		c.core.Start()
 	}
 
-	c.core.AddJob(spec, job)
+	c.core.AddJob(name, spec, job)
 	return nil
 }
 
 // AddSecondlyJob adds a schedule job run in every second.
-func (c *Cron) AddSecondlyJob(cmd func() error) {
+func (c *Cron) AddSecondlyJob(name string, cmd func() error) {
 	if !c.isStarted {
 		c.core.Start()
 	}
 
-	c.core.AddSecondlyJob(cmd)
+	c.core.AddSecondlyJob(name, cmd)
 }
 
 // AddMinutelyJob adds a schedule job run in every minute.
-func (c *Cron) AddMinutelyJob(cmd func() error) {
+func (c *Cron) AddMinutelyJob(name string, cmd func() error) {
 	if !c.isStarted {
 		c.core.Start()
 	}
 
-	c.core.AddMinutelyJob(cmd)
+	c.core.AddMinutelyJob(name, cmd)
 }
 
 // AddHourlyJob adds a schedule job run in every hour.
-func (c *Cron) AddHourlyJob(cmd func() error) {
+func (c *Cron) AddHourlyJob(name string, cmd func() error) {
 	if !c.isStarted {
 		c.core.Start()
 	}
 
-	c.core.AddHourlyJob(cmd)
+	c.core.AddHourlyJob(name, cmd)
 }
 
 // AddDailyJob adds a schedule job run in every day.
-func (c *Cron) AddDailyJob(cmd func() error) {
+func (c *Cron) AddDailyJob(name string, cmd func() error) {
 	if !c.isStarted {
 		c.core.Start()
 	}
 
-	c.core.AddDailyJob(cmd)
+	c.core.AddDailyJob(name, cmd)
 }
 
 // AddWeeklyJob adds a schedule job run in every week.
-func (c *Cron) AddWeeklyJob(cmd func() error) {
+func (c *Cron) AddWeeklyJob(name string, cmd func() error) {
 	if !c.isStarted {
 		c.core.Start()
 	}
 
-	c.core.AddWeeklyJob(cmd)
+	c.core.AddWeeklyJob(name, cmd)
 }
 
 // AddMonthlyJob adds a schedule job run in every month.
-func (c *Cron) AddMonthlyJob(cmd func() error) {
+func (c *Cron) AddMonthlyJob(name string, cmd func() error) {
 	if !c.isStarted {
 		c.core.Start()
 	}
 
-	c.core.AddMonthlyJob(cmd)
+	c.core.AddMonthlyJob(name, cmd)
 }
 
 // AddYearlyJob adds a schedule job run in every year.
-func (c *Cron) AddYearlyJob(cmd func() error) {
+func (c *Cron) AddYearlyJob(name string, cmd func() error) {
 	if !c.isStarted {
 		c.core.Start()
 	}
 
-	c.core.AddYearlyJob(cmd)
+	c.core.AddYearlyJob(name, cmd)
 }
