@@ -1,28 +1,13 @@
 package middleware
 
 import (
-	"github.com/go-zoox/jwt"
+	"github.com/go-zoox/crypto/jwt"
 	"github.com/go-zoox/zoox"
 )
 
 // Jwt is a middleware that authenticates via JWT.
-func Jwt(secret string, algorithm ...string) zoox.Middleware {
-	algorithmX := "HS256"
-	if len(algorithm) > 0 {
-		algorithmX = algorithm[0]
-	}
-
-	var j *jwt.Jwt
-	switch algorithmX {
-	case "HS256":
-		j = jwt.NewHS256(secret)
-	case "HS384":
-		j = jwt.NewHS384(secret)
-	case "HS512":
-		j = jwt.NewHS512(secret)
-	default:
-		panic("unknown algorithm, allowed: HS256, HS384, HS512")
-	}
+func Jwt(secret string, opts ...*jwt.Options) zoox.Middleware {
+	signer := jwt.New(secret, opts...)
 
 	return func(ctx *zoox.Context) {
 		authHeader := ctx.Get("Authorization")
@@ -41,7 +26,7 @@ func Jwt(secret string, algorithm ...string) zoox.Middleware {
 			return
 		}
 
-		if err := j.Verify(token); err != nil {
+		if _, err := signer.Verify(token); err != nil {
 			ctx.Status(401)
 			return
 		}

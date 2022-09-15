@@ -44,8 +44,9 @@ github.com/go-zoox/counter v1.0.1 h1:J9aai157VnjHNOq3klcxFTMwByaVksQUwHww2VYYPRQ
 github.com/go-zoox/counter v1.0.1/go.mod h1:PICilZTrnO4dFstDPlXpjc6sdWYBG7hm/XDmjAcHaX0=
 github.com/go-zoox/cron v1.0.4 h1:Ydbo1Ltdpx7nzoV6lMnbJHVlPh0Tr4DfxndNlJve5w8=
 github.com/go-zoox/cron v1.0.4/go.mod h1:fly3f3hs7gMAr3mhlcVar7Tr8YQXadkw0V3mAKUoxOg=
-github.com/go-zoox/crypto v1.0.3 h1:0Lyw4ouusKWevAsS2cb4LbhChstRQlTdsynKzvWxB14=
 github.com/go-zoox/crypto v1.0.3/go.mod h1:HaWRg4tHZamqNyOnNoaK+Rw5eto+su66i8bMMP8UCBU=
+github.com/go-zoox/crypto v1.1.5 h1:w9BB16udr97CD7acr7qNGcwkrrXK1eHGlxUPvvdgc8Y=
+github.com/go-zoox/crypto v1.1.5/go.mod h1:Pb2JoQT636Wk+H7IwcuPJqA8u6asC+YlZZ1mcgUYLdU=
 github.com/go-zoox/datetime v1.0.4 h1:LIOfo7svKD9gpyaTxAM55t2EO+CFFFcXczqLSfM1sPo=
 github.com/go-zoox/datetime v1.0.4/go.mod h1:os6lYW/GXNpCIseFrBr8DNcOiPuwl5Ttc/kxo4JnMjw=
 github.com/go-zoox/debug v1.0.1 h1:lAsUnofJ1xWnfpHQQ6O5ss0xS0J+8LVAYbv+qiH0ARQ=
@@ -70,7 +71,6 @@ github.com/go-zoox/gzip v1.0.0/go.mod h1:7g9vTpKek1dft1Yi1Ryi4A6dq9snMgq94Qq8wSt
 github.com/go-zoox/ini v1.0.4/go.mod h1:SisQneNLb1EBeZ5bA5GnrJd8FNg372hQrPh+gb3IzV4=
 github.com/go-zoox/jobqueue v1.0.0 h1:pVv/eGI0CLLHUP3rDVyn0ALzsobtaxTOnkWw/JhW9Vg=
 github.com/go-zoox/jobqueue v1.0.0/go.mod h1:jUCZxrQcM28orhac67eNLU7SBiVNXehxSelj7j4MM88=
-github.com/go-zoox/jwt v1.0.0 h1:atywT77nPkkg2q/iOoGnV4/0XazR5IUif+CAbCUefmM=
 github.com/go-zoox/jwt v1.0.0/go.mod h1:a6ANQHmSs+b9GJv5aad2cQLl8opFmP3hMOxZtgXRmis=
 github.com/go-zoox/kv v1.4.1/go.mod h1:dc3whoIvGrYmQA2wi6g6ZE0oOtRg+loxaJEj6bLKlJA=
 github.com/go-zoox/kv v1.4.3 h1:8LqH1QwZRhiVyH4cmnl3FVJqE9ffMCS1ZGfDyn0iHf4=
@@ -90,6 +90,7 @@ github.com/go-zoox/tag v1.0.6/go.mod h1:jrbJgC1dZAN5+vZlmrUKu1/UpbOo0xVyCC1MfLpG
 github.com/go-zoox/tag v1.0.9/go.mod h1:jrbJgC1dZAN5+vZlmrUKu1/UpbOo0xVyCC1MfLpGGqk=
 github.com/go-zoox/tag v1.1.0 h1:UArgZenBeaxJZelHm2imXkkFiOBEpO+nD0ueMKQqlpU=
 github.com/go-zoox/tag v1.1.0/go.mod h1:yMB7bMseqbOshUW9O9Dqfq0C7Mmy9OkccV/meEJHICs=
+github.com/go-zoox/testify v1.0.0 h1:zXuj+JMcudM/dWk8HgMfCKpGYDcyHbTUBGxH35SGubU=
 github.com/go-zoox/uuid v0.0.1 h1:txqmDavRTq68gzzqWfJQLorFyUp9a7M2lmq2KcwPGPA=
 github.com/go-zoox/uuid v0.0.1/go.mod h1:0/F4LdfLqFdyqOf7aXoiYXRkXHU324JQ5DZEytXYBPM=
 github.com/go-zoox/zoox v1.2.19/go.mod h1:xk3S3L58ugJIDyuZMCYrj3qIGLSxddbkARwTRkpxPVE=
@@ -182,6 +183,7 @@ github.com/tidwall/match v1.1.1 h1:+Ho715JplO36QYgwN9PGYNhgZvoUSc9X2c80KVTi+GA=
 github.com/tidwall/match v1.1.1/go.mod h1:eRSPERbgtNPcGhD8UCthc6PmLEQXEWd3PRB5JTxsfmM=
 github.com/tidwall/pretty v1.2.0 h1:RWIZEg2iJ8/g6fDDYzMpobmaoGh5OLl4AXtGUGPcqCs=
 github.com/tidwall/pretty v1.2.0/go.mod h1:ITEVvHYasfjBbM0u2Pg8T2nJnzm8xPwvNhhsoaGGjNU=
+github.com/ttacon/chalk v0.0.0-20160626202418-22c06c80ed31 h1:OXcKh35JaYsGMRzpvFkLv/MEyPuL49CThT1pZ8aSml4=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=

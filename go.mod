@@ -7,12 +7,11 @@ require (
 	github.com/go-zoox/core-utils v1.0.13
 	github.com/go-zoox/counter v1.0.1
 	github.com/go-zoox/cron v1.0.4
-	github.com/go-zoox/crypto v1.0.3
+	github.com/go-zoox/crypto v1.1.5
 	github.com/go-zoox/debug v1.0.1
 	github.com/go-zoox/fetch v1.4.7
 	github.com/go-zoox/gzip v1.0.0
 	github.com/go-zoox/jobqueue v1.0.0
-	github.com/go-zoox/jwt v1.0.0
 	github.com/go-zoox/kv v1.4.3
 	github.com/go-zoox/logger v1.2.0
 	github.com/go-zoox/proxy v1.2.3
