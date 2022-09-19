@@ -1,6 +1,10 @@
+// reference:
+//	MDN CORS Specification: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
+
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
@@ -16,6 +20,7 @@ type CorsConfig struct {
 	AllowMethods     []string
 	AllowHeaders     []string
 	AllowCredentials bool
+	MaxAge           int64
 	ExposeHeaders    []string
 }
 
@@ -40,16 +45,7 @@ func CORS(cfg ...*CorsConfig) zoox.Middleware {
 	return func(ctx *zoox.Context) {
 		origin := ctx.Origin()
 
-		isIgnored := false
-		if cfgX.IgnoreFunc != nil {
-			isIgnored = cfgX.IgnoreFunc(ctx)
-		}
-		isPreflight := ctx.Method == http.MethodOptions
-		if !isPreflight || isIgnored {
-			if len(cfgX.ExposeHeaders) > 0 {
-				ctx.Set("Access-Control-Expose-Headers", strings.Join(cfgX.ExposeHeaders, ","))
-			}
-
+		if cfgX.IgnoreFunc != nil && cfgX.IgnoreFunc(ctx) {
 			ctx.Next()
 			return
 		}
@@ -63,6 +59,11 @@ func CORS(cfg ...*CorsConfig) zoox.Middleware {
 			var matched bool
 			var err error
 			for _, allowOrigin := range cfgX.AllowOrigins {
+				if allowOrigin == "*" {
+					matched = true
+					break
+				}
+
 				if matched, err = regexp.MatchString(allowOrigin, origin); err == nil && matched {
 					break
 				}
@@ -76,12 +77,33 @@ func CORS(cfg ...*CorsConfig) zoox.Middleware {
 
 		ctx.Set("Access-Control-Allow-Origin", origin)
 
+		isPreflight := ctx.Method == http.MethodOptions
+		// not preflight
+		if !isPreflight {
+			// Note that simple GET requests are not preflighted, and so if a request is made for a resource with credentials,
+			//	if this header is not returned with the resource, the response is ignored by the browser and not returned to web content.
+			if ctx.Method == http.MethodGet && cfgX.AllowCredentials {
+				ctx.Set("Access-Control-Allow-Credentials", "true")
+			}
+
+			if len(cfgX.ExposeHeaders) > 0 {
+				ctx.Set("Access-Control-Expose-Headers", strings.Join(cfgX.ExposeHeaders, ","))
+			}
+
+			ctx.Next()
+			return
+		}
+
 		if len(cfgX.AllowMethods) > 0 {
 			ctx.Set("Access-Control-Allow-Methods", strings.Join(cfgX.AllowMethods, ","))
 		}
 
 		if len(cfgX.AllowHeaders) > 0 {
 			ctx.Set("Access-Control-Allow-Headers", strings.Join(cfgX.AllowHeaders, ","))
+		}
+
+		if cfgX.MaxAge != 0 {
+			ctx.Set("Access-Control-Max-Age", fmt.Sprintf("%d", cfgX.MaxAge))
 		}
 
 		if cfgX.AllowCredentials {
