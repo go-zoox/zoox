@@ -110,6 +110,6 @@ func CORS(cfg ...*CorsConfig) zoox.Middleware {
 			ctx.Set("Access-Control-Allow-Credentials", "true")
 		}
 
-		ctx.Next()
+		ctx.String(200, "OK")
 	}
 }
