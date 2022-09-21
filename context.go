@@ -490,6 +490,11 @@ func (ctx *Context) AcceptJSON() bool {
 	return strings.Contains(accept, "application/json")
 }
 
+// AcceptHTML returns true if the request accepts html.
+func (ctx *Context) AcceptHTML() bool {
+	return strings.Contains(ctx.Header("Accept"), "text/html")
+}
+
 // Origin returns the origin of the request.
 func (ctx *Context) Origin() string {
 	return ctx.Get("Origin")
