@@ -31,6 +31,7 @@ type Context struct {
 	param *Param
 	query *Query
 	form  *Form
+	body  *Body
 
 	// response
 	StatusCode int
@@ -120,6 +121,11 @@ func (ctx *Context) Param() *Param {
 	return ctx.param
 }
 
+// Header gets the header value by key.
+func (ctx *Context) Header() http.Header {
+	return ctx.Request.Header
+}
+
 // Form returns the form data from POST or PUT request body.
 func (ctx *Context) Form() *Form {
 	if ctx.form == nil {
@@ -127,6 +133,15 @@ func (ctx *Context) Form() *Form {
 	}
 
 	return ctx.form
+}
+
+// Body returns the request body.
+func (ctx *Context) Body() *Body {
+	if ctx.body == nil {
+		ctx.body = newBody(ctx)
+	}
+
+	return ctx.body
 }
 
 // Status sets the HTTP response status code.
@@ -137,7 +152,7 @@ func (ctx *Context) Status(status int) {
 
 // Get alias for ctx.Header.
 func (ctx *Context) Get(key string) string {
-	return ctx.Header(key)
+	return ctx.Header().Get(key)
 }
 
 // Set alias for ctx.SetHeader.
@@ -280,20 +295,15 @@ func (ctx *Context) URL() string {
 
 // IP gets the ip from X-Forwarded-For or X-Real-IP or RemoteAddr.
 func (ctx *Context) IP() string {
-	if xForwardedFor := ctx.Header("X-Forwarded-For"); xForwardedFor != "" {
+	if xForwardedFor := ctx.Get("X-Forwarded-For"); xForwardedFor != "" {
 		return strings.Split(xForwardedFor, ",")[0]
 	}
 
-	if xRealIP := ctx.Header("X-Real-IP"); xRealIP != "" {
+	if xRealIP := ctx.Get("X-Real-IP"); xRealIP != "" {
 		return xRealIP
 	}
 
 	return ctx.Request.RemoteAddr
-}
-
-// Header gets the header value by key.
-func (ctx *Context) Header(key string) string {
-	return ctx.Request.Header.Get(key)
 }
 
 // Headers gets all headers.
@@ -481,7 +491,7 @@ func (ctx *Context) SaveFile(key, path string) error {
 
 // AcceptJSON returns true if the request accepts json.
 func (ctx *Context) AcceptJSON() bool {
-	accept := ctx.Header("Accept")
+	accept := ctx.Get("Accept")
 	// for curl
 	if accept == "*/*" {
 		return true
@@ -492,7 +502,7 @@ func (ctx *Context) AcceptJSON() bool {
 
 // AcceptHTML returns true if the request accepts html.
 func (ctx *Context) AcceptHTML() bool {
-	return strings.Contains(ctx.Header("Accept"), "text/html")
+	return strings.Contains(ctx.Get("Accept"), "text/html")
 }
 
 // Origin returns the origin of the request.

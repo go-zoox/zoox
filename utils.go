@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 	"sync/atomic"
+
+	"github.com/go-zoox/core-utils/object"
 )
 
 // RequestIDHeader is the name of the header that contains the request ID.
@@ -107,6 +109,35 @@ func (f *Form) Get(key string, defaultValue ...string) string {
 	if value == "" && len(defaultValue) > 0 {
 		value = defaultValue[0]
 	}
+
+	return value
+}
+
+// Body ...
+type Body struct {
+	ctx *Context
+	//
+	data map[string]interface{}
+}
+
+func newBody(ctx *Context) *Body {
+	return &Body{
+		ctx: ctx,
+	}
+}
+
+// Get gets request form with the given name.
+func (f *Body) Get(key string, defaultValue ...interface{}) interface{} {
+	if f.data == nil {
+		f.data = f.ctx.Bodies()
+	}
+
+	value := object.Get(f.data, key)
+
+	// @TODO generic cannot compare zero value
+	// if value == "" && len(defaultValue) > 0 {
+	// 	value = defaultValue[0]
+	// }
 
 	return value
 }
