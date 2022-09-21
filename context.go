@@ -481,7 +481,13 @@ func (ctx *Context) SaveFile(key, path string) error {
 
 // AcceptJSON returns true if the request accepts json.
 func (ctx *Context) AcceptJSON() bool {
-	return strings.Contains(ctx.Header("Accept"), "application/json")
+	accept := ctx.Header("Accept")
+	// for curl
+	if accept == "*/*" {
+		return true
+	}
+
+	return strings.Contains(accept, "application/json")
 }
 
 // Origin returns the origin of the request.
