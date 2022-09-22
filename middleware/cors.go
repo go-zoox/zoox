@@ -45,6 +45,12 @@ func CORS(cfg ...*CorsConfig) zoox.Middleware {
 	return func(ctx *zoox.Context) {
 		origin := ctx.Origin()
 
+		// no origin, no cors
+		if origin == "" {
+			ctx.Next()
+			return
+		}
+
 		if cfgX.IgnoreFunc != nil && cfgX.IgnoreFunc(ctx) {
 			ctx.Next()
 			return
