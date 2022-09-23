@@ -14,7 +14,7 @@ require (
 	github.com/go-zoox/jobqueue v1.0.0
 	github.com/go-zoox/kv v1.4.3
 	github.com/go-zoox/logger v1.2.0
-	github.com/go-zoox/proxy v1.3.0
+	github.com/go-zoox/proxy v1.3.1
 	github.com/go-zoox/random v1.0.0
 	github.com/go-zoox/ratelimit v1.0.1
 	github.com/go-zoox/tag v1.1.0

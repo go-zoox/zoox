@@ -11,7 +11,7 @@ import (
 // ProxyConfig is the config of proxy middlewares
 type ProxyConfig struct {
 	// Rewrites map[string]ProxyRewrite
-	Rewrites ProxyGroupRewrites
+	Rewrites ProxyGroupRewrites `yaml:"rewrites" json:"rewrites"`
 }
 
 // ProxyGroupRewrites is a list of rewrite rules
@@ -19,15 +19,15 @@ type ProxyGroupRewrites []ProxyGroupRewrite
 
 // ProxyGroupRewrite is a group of proxy rewrites
 type ProxyGroupRewrite struct {
-	Name    string
-	RegExp  string
-	Rewrite ProxyRewrite
+	Name    string       `yaml:"name" json:"name"`
+	RegExp  string       `yaml:"regexp" json:"regexp"`
+	Rewrite ProxyRewrite `yaml:"rewrite" json:"rewrite"`
 }
 
 // ProxyRewrite ...
 type ProxyRewrite struct {
-	Target   string
-	Rewrites ProxyRewriteRules // map[string]string
+	Target   string            `yaml:"target" json:"target"`
+	Rewrites ProxyRewriteRules `yaml:"rewrites" json:"rewrites"`
 }
 
 // ProxyRewriteRules ...
