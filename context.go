@@ -175,6 +175,21 @@ func (ctx *Context) BasicAuth() (username string, password string, ok bool) {
 	return ctx.Request.BasicAuth()
 }
 
+// Authorization returns the authorization header for auth.
+func (ctx *Context) Authorization() string {
+	return ctx.Get("Authorization")
+}
+
+// BearerToken returns the token for bearer authentication.
+func (ctx *Context) BearerToken() (token string, ok bool) {
+	authorization := ctx.Authorization()
+	if len(authorization) < 8 {
+		return "", false
+	}
+
+	return authorization[7:], true
+}
+
 // Write writes the data to the connection.
 func (ctx *Context) Write(b []byte) {
 	ctx.Writer.Write(b)
