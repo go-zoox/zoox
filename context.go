@@ -171,7 +171,7 @@ func (ctx *Context) AddHeader(key string, value string) {
 }
 
 // BasicAuth returns the user/password pair for Basic Authentication.
-func (ctx *Context) BasicAuth() (string, string, bool) {
+func (ctx *Context) BasicAuth() (username string, password string, ok bool) {
 	return ctx.Request.BasicAuth()
 }
 
@@ -280,6 +280,11 @@ func (ctx *Context) Redirect(url string, status ...int) {
 	}
 
 	ctx.Status(code)
+}
+
+// Protocol returns the protocol, usally http or https
+func (ctx *Context) Protocol() string {
+	return ctx.Request.URL.Scheme
 }
 
 // Host gets the host from HTTP Header.
