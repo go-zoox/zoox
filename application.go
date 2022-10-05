@@ -2,6 +2,7 @@ package zoox
 
 import (
 	"io"
+	"net"
 	"net/http"
 	"strings"
 	"text/template"
@@ -98,7 +99,25 @@ func (app *Application) Run(addr ...string) error {
 
 	logger.Info("Server started at %s", addrX)
 
-	if err := http.ListenAndServe(addrX, app); err != nil {
+	// if err := http.ListenAndServe(addrX, app); err != nil {
+	// 	return err
+	// }
+
+	typ := "tcp"
+	if addrX[0] == '/' {
+		typ = "unix"
+	} else if strings.HasPrefix(addrX, "unix://") {
+		typ = "unix"
+		addrX = addrX[7:]
+	}
+
+	listener, err := net.Listen(typ, addrX)
+	if err != nil {
+		return err
+	}
+	defer listener.Close()
+
+	if err := http.Serve(listener, app); err != nil {
 		return err
 	}
 
