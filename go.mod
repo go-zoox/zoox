@@ -6,7 +6,7 @@ require (
 	github.com/go-yaml/yaml v2.1.0+incompatible
 	github.com/go-zoox/core-utils v1.1.0
 	github.com/go-zoox/counter v1.0.1
-	github.com/go-zoox/cron v1.0.4
+	github.com/go-zoox/cron v1.1.0
 	github.com/go-zoox/crypto v1.1.7
 	github.com/go-zoox/debug v1.0.1
 	github.com/go-zoox/fetch v1.4.7
@@ -53,3 +53,4 @@ require (
 )
 
 // replace github.com/go-zoox/proxy => ../proxy
+// replace github.com/go-zoox/cron => ../cron
