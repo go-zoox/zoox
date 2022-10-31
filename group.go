@@ -103,6 +103,8 @@ func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup
 	}
 
 	g.addRoute(http.MethodGet, path, func(ctx *Context) {
+		ctx.Status(200)
+
 		conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 		if err != nil {
 			ctx.Logger.Error("ws error: %s", err)
