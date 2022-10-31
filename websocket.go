@@ -3,6 +3,7 @@ package zoox
 import (
 	"encoding/json"
 
+	"github.com/go-zoox/uuid"
 	"github.com/go-zoox/zoox/rpc/jsonrpc"
 	"github.com/gorilla/websocket"
 )
@@ -10,7 +11,9 @@ import (
 // WebSocketClient ...
 type WebSocketClient struct {
 	ctx  *Context
-	conn *websocket.Conn
+	Conn *websocket.Conn
+
+	ID string
 
 	OnConnect       func()
 	OnDisconnect    func()
@@ -20,21 +23,25 @@ type WebSocketClient struct {
 	OnError         func(err error)
 }
 
+// WebSocketCloseError is the error on client.
+type WebSocketCloseError = websocket.CloseError
+
 func newWebSocket(ctx *Context, conn *websocket.Conn) *WebSocketClient {
 	return &WebSocketClient{
 		ctx:  ctx,
-		conn: conn,
+		Conn: conn,
+		ID:   uuid.V4(),
 	}
 }
 
 // Disconnect ...
 func (c *WebSocketClient) Disconnect() {
-	c.conn.Close()
+	c.Conn.Close()
 }
 
 // Write ...
 func (c *WebSocketClient) Write(typ int, msg []byte) error {
-	return c.conn.WriteMessage(typ, msg)
+	return c.Conn.WriteMessage(typ, msg)
 }
 
 // WriteText ...

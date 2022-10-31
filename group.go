@@ -113,6 +113,14 @@ func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup
 		client := newWebSocket(ctx, conn)
 		handler(ctx, client)
 
+		defer func() {
+			if client.OnDisconnect != nil {
+				client.OnDisconnect()
+			}
+
+			conn.Close()
+		}()
+
 		// ctx.Logger.Info("ws connected")
 		if client.OnConnect != nil {
 			client.OnConnect()
@@ -120,16 +128,27 @@ func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup
 
 		for {
 			mt, message, err := conn.ReadMessage()
-			if mt == -1 {
-				if client.OnDisconnect != nil {
-					client.OnDisconnect()
-				}
-			} else if err != nil {
-				// ctx.Logger.Info("read err: %s %d", err, mt)
+			// if mt == -1 {
+			// 	ctx.Logger.Info("xxx disconnected: %s", message)
+			// 	if client.OnDisconnect != nil {
+			// 		client.OnDisconnect()
+			// 	}
+			// } else if err != nil {
+			// 	// ctx.Logger.Info("read err: %s %d", err, mt)
 
+			// 	if client.OnError != nil {
+			// 		client.OnError(err)
+			// 	}
+			// 	return
+			// }
+
+			if err != nil {
 				if client.OnError != nil {
 					client.OnError(err)
+				} else {
+					ctx.Logger.Error("read err: %s (type: %d)", err, mt)
 				}
+
 				return
 			}
 
@@ -142,6 +161,11 @@ func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup
 				if client.OnBinaryMessage != nil {
 					client.OnBinaryMessage(message)
 				}
+			case websocket.CloseMessage:
+			case websocket.PingMessage:
+			case websocket.PongMessage:
+			default:
+				ctx.Logger.Warn("unknown message type: %d", mt)
 			}
 
 			if client.OnMessage != nil {
