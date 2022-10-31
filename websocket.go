@@ -21,6 +21,8 @@ type WebSocketClient struct {
 	OnTextMessage   func(msg []byte)
 	OnBinaryMessage func(msg []byte)
 	OnError         func(err error)
+	OnPing          func()
+	OnPong          func()
 }
 
 // WebSocketCloseError is the error on client.

@@ -162,8 +162,15 @@ func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup
 					client.OnBinaryMessage(message)
 				}
 			case websocket.CloseMessage:
+				// @TODO
 			case websocket.PingMessage:
+				if client.OnPing != nil {
+					client.OnPing()
+				}
 			case websocket.PongMessage:
+				if client.OnPong != nil {
+					client.OnPong()
+				}
 			default:
 				ctx.Logger.Warn("unknown message type: %d", mt)
 			}
