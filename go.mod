@@ -13,7 +13,7 @@ require (
 	github.com/go-zoox/gzip v1.0.0
 	github.com/go-zoox/jobqueue v1.0.0
 	github.com/go-zoox/kv v1.4.3
-	github.com/go-zoox/logger v1.2.2
+	github.com/go-zoox/logger v1.3.0
 	github.com/go-zoox/proxy v1.3.2
 	github.com/go-zoox/random v1.0.0
 	github.com/go-zoox/ratelimit v1.0.1
