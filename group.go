@@ -86,6 +86,12 @@ func (g *RouterGroup) Options(path string, handler ...HandlerFunc) *RouterGroup 
 	return g
 }
 
+// Connect defines the method to add CONNECT request
+func (g *RouterGroup) Connect(path string, handler ...HandlerFunc) *RouterGroup {
+	g.addRoute(http.MethodConnect, path, handler...)
+	return g
+}
+
 // Any defines all request methods (anyMethods)
 func (g *RouterGroup) Any(path string, handler ...HandlerFunc) *RouterGroup {
 	for _, method := range anyMethods {
