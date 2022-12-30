@@ -308,6 +308,18 @@ func (ctx *Context) Host() string {
 	return ctx.Request.Host
 }
 
+// Hostname gets the hostname from HTTP Header.
+// format: `hostname`
+func (ctx *Context) Hostname() string {
+	hostname := ctx.Request.URL.Hostname()
+	if hostname != "" {
+		return hostname
+	}
+
+	hostname, _ = splitHostPort(ctx.Request.Host)
+	return hostname
+}
+
 // URL is http.Request.RequestURI.
 func (ctx *Context) URL() string {
 	return ctx.Request.RequestURI
