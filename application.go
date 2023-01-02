@@ -45,6 +45,10 @@ type Application struct {
 	Logger *logger.Logger
 	// Debug
 	debug *Debug
+
+	// TLS
+	TLSCertFile string
+	TLSKeyFile  string
 }
 
 // New is the constructor of zoox.Application.
@@ -97,8 +101,6 @@ func (app *Application) Run(addr ...string) error {
 		addrX = addr[0]
 	}
 
-	logger.Info("Server started at %s", addrX)
-
 	// if err := http.ListenAndServe(addrX, app); err != nil {
 	// 	return err
 	// }
@@ -117,6 +119,25 @@ func (app *Application) Run(addr ...string) error {
 	}
 	defer listener.Close()
 
+	// TLS
+	if app.TLSCertFile != "" {
+		// if app.TLSCertFile != "" && app.TLSCert == nil {
+		// 	tlsCaCert, err := ioutil.ReadFile(app.TLSCertFile)
+		// 	if err != nil {
+		// 		return err
+		// 	}
+		// 	app.TLSCert = tlsCaCert
+		// }
+
+		logger.Info("Server started at https://%s", addrX)
+		if err := http.ServeTLS(listener, app, app.TLSCertFile, app.TLSKeyFile); err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	logger.Info("Server started at %s", addrX)
 	if err := http.Serve(listener, app); err != nil {
 		return err
 	}
