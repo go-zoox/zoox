@@ -95,6 +95,15 @@ func (app *Application) Fallback(h HandlerFunc) {
 }
 
 // Run defines the method to start the server
+// Example:
+//
+//		IP:
+//	   default(http://0.0.0.0:8080): Run(":8080")
+//		 port(http://0.0.0.0:8888): Run(":8888")
+//		 host+port(http://127.0.0.1:8888): Run("127.0.0.1:8888")
+//
+//		Unix Domain Socket:
+//			/tmp/xxx.sock: Run("unix:///tmp/xxx.sock")
 func (app *Application) Run(addr ...string) error {
 	addrX := ":8080"
 	if len(addr) > 0 && addr[0] != "" {
@@ -129,7 +138,12 @@ func (app *Application) Run(addr ...string) error {
 		// 	app.TLSCert = tlsCaCert
 		// }
 
-		logger.Info("Server started at https://%s", addrX)
+		if typ == "unix" {
+			logger.Info("Server started at unixs://%s", addrX)
+		} else {
+			logger.Info("Server started at https://%s", addrX)
+		}
+
 		if err := http.ServeTLS(listener, app, app.TLSCertFile, app.TLSKeyFile); err != nil {
 			return err
 		}
@@ -137,7 +151,11 @@ func (app *Application) Run(addr ...string) error {
 		return nil
 	}
 
-	logger.Info("Server started at %s", addrX)
+	if typ == "unix" {
+		logger.Info("Server started at unix://%s", addrX)
+	} else {
+		logger.Info("Server started at http://%s", addrX)
+	}
 	if err := http.Serve(listener, app); err != nil {
 		return err
 	}
