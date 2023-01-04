@@ -118,7 +118,7 @@ func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup
 		}
 		defer conn.Close()
 
-		client := newWebSocket(ctx, conn)
+		client := NewWebSocketClient(ctx, conn)
 		handler(ctx, client)
 
 		defer func() {
@@ -168,16 +168,6 @@ func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup
 			case websocket.BinaryMessage:
 				if client.OnBinaryMessage != nil {
 					client.OnBinaryMessage(message)
-				}
-			case websocket.CloseMessage:
-				// @TODO
-			case websocket.PingMessage:
-				if client.OnPing != nil {
-					client.OnPing()
-				}
-			case websocket.PongMessage:
-				if client.OnPong != nil {
-					client.OnPong()
 				}
 			default:
 				ctx.Logger.Warn("unknown message type: %d", mt)
