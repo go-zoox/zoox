@@ -5,8 +5,8 @@ import (
 	"github.com/go-zoox/zoox/middleware"
 )
 
-// Default returns a new default zoox.
-func Default() *zoox.Application {
+// Application returns a new default zoox.
+func Application() *zoox.Application {
 	zoox.DefaultMiddleware("recovery", func(app *zoox.Application) {
 		app.Use(middleware.Recovery())
 	})
