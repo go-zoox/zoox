@@ -192,6 +192,17 @@ func NewWebSocketClient(ctx *Context, conn WebSocketConn) *WebSocketClient {
 	return instance
 }
 
+func (c *WebSocketClient) GetGorillaWebsocketConn() *websocket.Conn {
+	conn := c.WebSocketConn.(*websocket.Conn)
+
+	// reset handlers
+	conn.SetPingHandler(nil)
+	conn.SetPongHandler(nil)
+	conn.SetCloseHandler(nil)
+
+	return conn
+}
+
 // Disconnect ...
 func (c *WebSocketClient) Disconnect() error {
 	return c.WebSocketConn.Close()

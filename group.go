@@ -182,6 +182,30 @@ func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup
 	return g
 }
 
+// WebSocket defines the method to add websocket route
+func (g *RouterGroup) WebSocketGorilla(path string, handler WsGorillaHandlerFunc) *RouterGroup {
+	upgrader := &websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
+
+	g.addRoute(http.MethodGet, path, func(ctx *Context) {
+		ctx.Status(200)
+
+		conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+		if err != nil {
+			ctx.Logger.Error("ws error: %s", err)
+			return
+		}
+		defer conn.Close()
+
+		handler(ctx, conn)
+	})
+
+	return g
+}
+
 // Use adds a middleware to the group
 func (g *RouterGroup) Use(middlewares ...HandlerFunc) {
 	g.middlewares = append(g.middlewares, middlewares...)

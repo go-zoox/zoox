@@ -14,6 +14,7 @@ import (
 	"github.com/go-zoox/kv/typing"
 	"github.com/go-zoox/logger"
 	"github.com/go-zoox/zoox/rpc/jsonrpc"
+	"github.com/gorilla/websocket"
 )
 
 // HandlerFunc defines the request handler used by gee
@@ -24,6 +25,9 @@ type Middleware = HandlerFunc
 
 // WsHandlerFunc defines the websocket handler used by gee
 type WsHandlerFunc func(ctx *Context, client *WebSocketClient)
+
+// WsHandlerFunc defines the websocket handler used by gee
+type WsGorillaHandlerFunc func(ctx *Context, client *websocket.Conn)
 
 // Application is the handler for all requests.
 type Application struct {
