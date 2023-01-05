@@ -1,4 +1,4 @@
-package zd
+package defaults
 
 import (
 	"github.com/go-zoox/zoox"
