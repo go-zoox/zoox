@@ -220,8 +220,14 @@ func (ctx *Context) Data(status int, contentType string, data []byte) {
 }
 
 // HTML renders the given template with the given data and writes the result
-func (ctx *Context) HTML(code int, name string, data interface{}) {
-	ctx.Status(code)
+func (ctx *Context) HTML(status int, html string) {
+	ctx.SetHeader("content-type", "text/html")
+	ctx.String(status, html)
+}
+
+// Template renders the given template with the given data and writes the result
+func (ctx *Context) Template(status int, name string, data interface{}) {
+	ctx.Status(status)
 	ctx.SetHeader("content-type", "text/html")
 	if err := ctx.App.templates.ExecuteTemplate(ctx.Writer, name, data); err != nil {
 		ctx.Fail(err, http.StatusInternalServerError, err.Error())
@@ -229,13 +235,13 @@ func (ctx *Context) HTML(code int, name string, data interface{}) {
 }
 
 // Render renders a template with data and writes the result to the response.
-func (ctx *Context) Render(code int, name string, data interface{}) {
-	ctx.HTML(code, name, data)
+func (ctx *Context) Render(status int, name string, data interface{}) {
+	ctx.Template(status, name, data)
 }
 
 // Error writes the given error to the response.
 // Use for system errors
-//	1. Internal server error
+//  1. Internal server error
 //  2. Not found
 func (ctx *Context) Error(status int, message string) {
 	// ctx.Status(status)
