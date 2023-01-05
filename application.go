@@ -1,7 +1,11 @@
 package zoox
 
 import (
+	"crypto/tls"
+	"crypto/x509"
+	"fmt"
 	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"strings"
@@ -46,9 +50,12 @@ type Application struct {
 	// Debug
 	debug *Debug
 
-	// TLS
+	// TLS Certificate
 	TLSCertFile string
-	TLSKeyFile  string
+	// TLS Private Key
+	TLSKeyFile string
+	// TLS Ca Certificate
+	TLSCaCertFile string
 }
 
 // New is the constructor of zoox.Application.
@@ -128,7 +135,29 @@ func (app *Application) Run(addr ...string) error {
 	}
 	defer listener.Close()
 
-	// TLS
+	server := &http.Server{
+		Addr:    ":8088",
+		Handler: app,
+	}
+
+	// TLS Ca Certificate
+	if app.TLSCaCertFile != "" {
+		pool := x509.NewCertPool()
+		caCrt, err := ioutil.ReadFile(app.TLSCaCertFile)
+		if err != nil {
+			return fmt.Errorf("failed to read tls ca certificate")
+		}
+		pool.AppendCertsFromPEM(caCrt)
+
+		if server.TLSConfig == nil {
+			server.TLSConfig = &tls.Config{
+				ClientCAs:  pool,
+				ClientAuth: tls.RequireAndVerifyClientCert,
+			}
+		}
+	}
+
+	// TLS Certificate and Private Key
 	if app.TLSCertFile != "" {
 		// if app.TLSCertFile != "" && app.TLSCert == nil {
 		// 	tlsCaCert, err := ioutil.ReadFile(app.TLSCertFile)
@@ -144,11 +173,11 @@ func (app *Application) Run(addr ...string) error {
 			logger.Info("Server started at https://%s", addrX)
 		}
 
-		if err := http.ServeTLS(listener, app, app.TLSCertFile, app.TLSKeyFile); err != nil {
-			return err
-		}
+		// if err := http.ServeTLS(listener, app, app.TLSCertFile, app.TLSKeyFile); err != nil {
+		// 	return err
+		// }
 
-		return nil
+		return server.ServeTLS(listener, app.TLSCertFile, app.TLSKeyFile)
 	}
 
 	if typ == "unix" {
@@ -156,11 +185,16 @@ func (app *Application) Run(addr ...string) error {
 	} else {
 		logger.Info("Server started at http://%s", addrX)
 	}
-	if err := http.Serve(listener, app); err != nil {
-		return err
+	// if err := http.Serve(listener, app); err != nil {
+	// 	return err
+	// }
+
+	// if only config tls ca, should reset nil
+	if server.TLSConfig != nil {
+		server.TLSConfig = nil
 	}
 
-	return nil
+	return server.Serve(listener)
 }
 
 func (app *Application) createContext(w http.ResponseWriter, req *http.Request) *Context {
