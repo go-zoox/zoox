@@ -26,7 +26,7 @@ type Middleware = HandlerFunc
 // WsHandlerFunc defines the websocket handler used by gee
 type WsHandlerFunc func(ctx *Context, client *WebSocketClient)
 
-// WsHandlerFunc defines the websocket handler used by gee
+// WsGorillaHandlerFunc defines the websocket handler used by gee
 type WsGorillaHandlerFunc func(ctx *Context, client *websocket.Conn)
 
 // Application is the handler for all requests.

@@ -49,8 +49,8 @@ github.com/go-zoox/crypto v1.0.3/go.mod h1:HaWRg4tHZamqNyOnNoaK+Rw5eto+su66i8bMM
 github.com/go-zoox/crypto v1.1.7 h1:aZZmVHjpWL4B2s0YS0Bt0yTMG/Qx7mCPs5SWOMNOywQ=
 github.com/go-zoox/crypto v1.1.7/go.mod h1:JqgNr9HcFFGQkMCGLJ9djtfg/RWVLxtunG01HD3lUXM=
 github.com/go-zoox/datetime v1.0.4/go.mod h1:os6lYW/GXNpCIseFrBr8DNcOiPuwl5Ttc/kxo4JnMjw=
-github.com/go-zoox/datetime v1.1.0 h1:L37HNXrlAjTJuEvNytqoUEs0QZ2CpglM3mqfbqxA+Hg=
-github.com/go-zoox/datetime v1.1.0/go.mod h1:os6lYW/GXNpCIseFrBr8DNcOiPuwl5Ttc/kxo4JnMjw=
+github.com/go-zoox/datetime v1.1.1 h1:ORZbMuSLMW3KSV9dDaGf7iKL5XqYoIn9eQuK6QMeRDY=
+github.com/go-zoox/datetime v1.1.1/go.mod h1:os6lYW/GXNpCIseFrBr8DNcOiPuwl5Ttc/kxo4JnMjw=
 github.com/go-zoox/debug v1.0.1 h1:lAsUnofJ1xWnfpHQQ6O5ss0xS0J+8LVAYbv+qiH0ARQ=
 github.com/go-zoox/debug v1.0.1/go.mod h1:7HvnBeV1dVuuGVnXSLdJ5OE6X/wIXAjIEyiaA7NqQPA=
 github.com/go-zoox/dotenv v1.0.7/go.mod h1:N2bXxghq3Zk+lpiOxv+m+0yjnGubVqJGJDR/9jWm3N0=
@@ -79,8 +79,8 @@ github.com/go-zoox/kv v1.4.3/go.mod h1:hRCBcPBHilKmeSEsn4o67LBaXurX0+m3Tq9Ec4aIR
 github.com/go-zoox/kv v1.5.0 h1:GmSqN2t4AMfa0Yv4CsI2CSgKZoZcz8KwCGbHLN+fJ8M=
 github.com/go-zoox/kv v1.5.0/go.mod h1:u/IbVscKbZk4AyDvvnsK9DiaWshH/Nz3twlGDRyC9pA=
 github.com/go-zoox/logger v1.2.0/go.mod h1:mBImRV6zpbGtiIjDz/C9vWi80wWc2OTOl9N9P0SAJgk=
-github.com/go-zoox/logger v1.3.0 h1:5VlOdgfeQTKNokLD0H76yFAh4nwiIL9gqLzTkcfgEF0=
-github.com/go-zoox/logger v1.3.0/go.mod h1:o7ddvv/gMoMa0TomPhHoIz11ZWRbQ92pF6rwYbOY3iQ=
+github.com/go-zoox/logger v1.3.2 h1:xZJsthkgCySiYYuKX5jN/Dn4qcIgIVBwQJIJb2GvetI=
+github.com/go-zoox/logger v1.3.2/go.mod h1:o7ddvv/gMoMa0TomPhHoIz11ZWRbQ92pF6rwYbOY3iQ=
 github.com/go-zoox/proxy v1.2.3/go.mod h1:T+gbngAtIgvambbYibAbzrjwdu8j5pduJdA2j6RYi94=
 github.com/go-zoox/proxy v1.3.2 h1:IaY1KLvjL/N3t9fxcwRqYif4w//AnuRRLbIpRVkmAX4=
 github.com/go-zoox/proxy v1.3.2/go.mod h1:T+gbngAtIgvambbYibAbzrjwdu8j5pduJdA2j6RYi94=

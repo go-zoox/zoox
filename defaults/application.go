@@ -6,5 +6,5 @@ import (
 
 // Application returns a new default zoox.
 func Application() *zoox.Application {
-	return Default()
+	return Defaults()
 }

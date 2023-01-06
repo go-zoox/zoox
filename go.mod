@@ -13,7 +13,7 @@ require (
 	github.com/go-zoox/gzip v1.0.0
 	github.com/go-zoox/jobqueue v1.0.0
 	github.com/go-zoox/kv v1.5.0
-	github.com/go-zoox/logger v1.3.0
+	github.com/go-zoox/logger v1.3.2
 	github.com/go-zoox/proxy v1.3.2
 	github.com/go-zoox/random v1.0.0
 	github.com/go-zoox/ratelimit v1.0.1
@@ -31,7 +31,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5 // indirect
 	github.com/go-zoox/chalk v1.0.2 // indirect
 	github.com/go-zoox/compress v1.0.1 // indirect
-	github.com/go-zoox/datetime v1.1.0 // indirect
+	github.com/go-zoox/datetime v1.1.1 // indirect
 	github.com/go-zoox/encoding v1.0.7 // indirect
 	github.com/go-zoox/errors v1.0.2 // indirect
 	github.com/go-zoox/fs v1.2.5 // indirect

@@ -113,7 +113,7 @@ func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup
 
 		conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 		if err != nil {
-			ctx.Logger.Error("ws error: %s", err)
+			ctx.Logger.Errorf("ws error: %s", err)
 			return
 		}
 		defer conn.Close()
@@ -154,7 +154,7 @@ func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup
 				if client.OnError != nil {
 					client.OnError(err)
 				} else {
-					ctx.Logger.Error("read err: %s (type: %d)", err, mt)
+					ctx.Logger.Errorf("read err: %s (type: %d)", err, mt)
 				}
 
 				return
@@ -182,7 +182,7 @@ func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup
 	return g
 }
 
-// WebSocket defines the method to add websocket route
+// WebSocketGorilla defines the method to add websocket route
 func (g *RouterGroup) WebSocketGorilla(path string, handler WsGorillaHandlerFunc) *RouterGroup {
 	upgrader := &websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
@@ -195,7 +195,7 @@ func (g *RouterGroup) WebSocketGorilla(path string, handler WsGorillaHandlerFunc
 
 		conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 		if err != nil {
-			ctx.Logger.Error("ws error: %s", err)
+			ctx.Logger.Errorf("ws error: %s", err)
 			return
 		}
 		defer conn.Close()

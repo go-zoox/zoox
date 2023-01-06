@@ -151,6 +151,7 @@ type WebSocketClient struct {
 // WebSocketCloseError is the error on client.
 type WebSocketCloseError = websocket.CloseError
 
+// NewWebSocketClient creates a new websocket client, can be used for mock.
 func NewWebSocketClient(ctx *Context, conn WebSocketConn) *WebSocketClient {
 	instance := &WebSocketClient{
 		WebSocketConn: conn,
@@ -192,6 +193,7 @@ func NewWebSocketClient(ctx *Context, conn WebSocketConn) *WebSocketClient {
 	return instance
 }
 
+// GetGorillaWebsocketConn gets the origin gorilla websocket connection.
 func (c *WebSocketClient) GetGorillaWebsocketConn() *websocket.Conn {
 	conn := c.WebSocketConn.(*websocket.Conn)
 
@@ -261,9 +263,9 @@ func (c *WebSocketClient) CreateJSONRPC() jsonrpc.Server[any] {
 				c.OnError(err)
 			} else {
 				if c.ctx != nil {
-					c.ctx.Logger.Error("ws error: %s", err)
+					c.ctx.Logger.Errorf("ws error: %s", err)
 				} else {
-					logger.Error("ws error: %s", err)
+					logger.Errorf("ws error: %s", err)
 				}
 			}
 		}
