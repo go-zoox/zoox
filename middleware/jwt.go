@@ -12,7 +12,7 @@ func Jwt(secret string, opts ...*jwt.Options) zoox.Middleware {
 	return func(ctx *zoox.Context) {
 		authHeader := ctx.Get("Authorization")
 		if authHeader == "" {
-			authHeader = ctx.Query().Get("access_token")
+			authHeader = ctx.Query().Get("access_token").ToString()
 		}
 
 		if authHeader == "" {
