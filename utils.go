@@ -7,8 +7,10 @@ import (
 	"os"
 	"strings"
 	"sync/atomic"
+	"time"
 
 	"github.com/go-zoox/core-utils/object"
+	"github.com/spf13/cast"
 )
 
 // RequestIDHeader is the name of the header that contains the request ID.
@@ -35,6 +37,54 @@ func init() {
 	requestIDPrefix = fmt.Sprintf("%s/%s", hostname, b64[0:10])
 }
 
+// ZValue is the value string to cast to new type with spf13/cast.
+type ZValue string
+
+// ToInt ...
+func (s ZValue) ToInt() int {
+	return cast.ToInt(s)
+}
+
+// ToInt64 ...
+func (s ZValue) ToInt64() int64 {
+	return cast.ToInt64(s)
+}
+
+// ToUInt ...
+func (s ZValue) ToUInt() uint {
+	return cast.ToUint(s)
+}
+
+// ToUint64 ...
+func (s ZValue) ToUint64() uint64 {
+	return cast.ToUint64(s)
+}
+
+// ToBool ...
+func (s ZValue) ToBool() bool {
+	return cast.ToBool(s)
+}
+
+// ToFloat64 ...
+func (s ZValue) ToFloat64() float64 {
+	return cast.ToFloat64(s)
+}
+
+// ToTime ...
+func (s ZValue) ToTime() time.Time {
+	return cast.ToTime(s)
+}
+
+// ToDuration ...
+func (s ZValue) ToDuration() time.Duration {
+	return cast.ToDuration(s)
+}
+
+// ToString ...
+func (s ZValue) ToString() string {
+	return string(s)
+}
+
 // Query ...
 type Query struct {
 	ctx *Context
@@ -47,13 +97,13 @@ func newQuery(ctx *Context) *Query {
 }
 
 // Get gets request query with the given name.
-func (q *Query) Get(key string, defaultValue ...string) string {
+func (q *Query) Get(key string, defaultValue ...string) ZValue {
 	value := q.ctx.Request.URL.Query().Get(key)
 	if value == "" && len(defaultValue) > 0 {
 		value = defaultValue[0]
 	}
 
-	return value
+	return ZValue(value)
 }
 
 // Param ...
@@ -71,17 +121,17 @@ func newParams(ctx *Context, value map[string]string) *Param {
 }
 
 // Get gets request param with the given name.
-func (q *Param) Get(key string, defaultValue ...string) string {
+func (q *Param) Get(key string, defaultValue ...string) ZValue {
 	value, ok := q.params[key]
 	if ok {
-		return value
+		return ZValue(value)
 	}
 
 	if value == "" && len(defaultValue) > 0 {
 		value = defaultValue[0]
 	}
 
-	return value
+	return ZValue(value)
 }
 
 // Iterator ...
