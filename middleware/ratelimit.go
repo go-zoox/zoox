@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-zoox/counter/bucket"
+	"github.com/go-zoox/headers"
 	"github.com/go-zoox/ratelimit"
 	"github.com/go-zoox/zoox"
 )
@@ -52,9 +53,15 @@ func RateLimit(cfg *RateLimitConfig) zoox.Middleware {
 		ip := ctx.Request.RemoteAddr
 		limiter.Inc(ip)
 
-		ctx.Set("X-RateLimit-Remaing", fmt.Sprintf("%d", limiter.Remaining(ip)))
-		ctx.Set("X-RateLimit-Reset-After", fmt.Sprintf("%d", limiter.ResetAfter(ip)))
-		ctx.Set("X-RateLimit-Total", fmt.Sprintf("%d", limiter.Total(ip)))
+		resetAfter := fmt.Sprintf("%d", limiter.ResetAfter(ip))
+
+		// GitHub Standard
+		ctx.Set(headers.XRateLimitRemaining, fmt.Sprintf("%d", limiter.Remaining(ip)))
+		ctx.Set(headers.XRateLimitReset, resetAfter)
+		ctx.Set(headers.XRateLimitLimit, fmt.Sprintf("%d", limiter.Total(ip)))
+
+		// MDN
+		ctx.Set(headers.RetryAfter, resetAfter)
 
 		if limiter.IsExceeded(ip) {
 			ctx.Fail(errors.New("too many requests"), http.StatusTooManyRequests, "Too Many Requests", http.StatusTooManyRequests)
