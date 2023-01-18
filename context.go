@@ -15,6 +15,7 @@ import (
 	"github.com/go-yaml/yaml"
 	"github.com/go-zoox/core-utils/safe"
 	"github.com/go-zoox/fetch"
+	"github.com/go-zoox/headers"
 	"github.com/go-zoox/logger"
 	"github.com/go-zoox/tag"
 )
@@ -177,7 +178,7 @@ func (ctx *Context) BasicAuth() (username string, password string, ok bool) {
 
 // Authorization returns the authorization header for auth.
 func (ctx *Context) Authorization() string {
-	return ctx.Get("Authorization")
+	return ctx.Get(headers.Authorization)
 }
 
 // BearerToken returns the token for bearer authentication.
@@ -188,6 +189,21 @@ func (ctx *Context) BearerToken() (token string, ok bool) {
 	}
 
 	return authorization[7:], true
+}
+
+// Accept returns the request accept header.
+func (ctx *Context) Accept() string {
+	return ctx.Get(headers.Accept)
+}
+
+// AcceptLanguage returns the request accept header.
+func (ctx *Context) AcceptLanguage() string {
+	return ctx.Get(headers.AcceptLanguage)
+}
+
+// AcceptEncoding returns the request accept header.
+func (ctx *Context) AcceptEncoding() string {
+	return ctx.Get(headers.AcceptEncoding)
 }
 
 // Write writes the data to the connection.
@@ -204,7 +220,7 @@ func (ctx *Context) String(status int, format string, values ...interface{}) {
 // JSON serializes the given struct as JSON into the response body.
 func (ctx *Context) JSON(status int, obj interface{}) {
 	ctx.Status(status)
-	ctx.SetHeader("content-type", "application/json")
+	ctx.SetHeader(headers.ContentType, "application/json")
 	encoder := json.NewEncoder(ctx.Writer)
 	if err := encoder.Encode(obj); err != nil {
 		ctx.Error(http.StatusInternalServerError, err.Error())
@@ -215,20 +231,20 @@ func (ctx *Context) JSON(status int, obj interface{}) {
 // Align to gin framework.
 func (ctx *Context) Data(status int, contentType string, data []byte) {
 	ctx.Status(status)
-	ctx.SetHeader("content-type", contentType)
+	ctx.SetHeader(headers.ContentType, contentType)
 	ctx.Write(data)
 }
 
 // HTML renders the given template with the given data and writes the result
 func (ctx *Context) HTML(status int, html string) {
-	ctx.SetHeader("content-type", "text/html")
+	ctx.SetHeader(headers.ContentType, "text/html")
 	ctx.String(status, html)
 }
 
 // Template renders the given template with the given data and writes the result
 func (ctx *Context) Template(status int, name string, data interface{}) {
 	ctx.Status(status)
-	ctx.SetHeader("content-type", "text/html")
+	ctx.SetHeader(headers.ContentType, "text/html")
 	if err := ctx.App.templates.ExecuteTemplate(ctx.Writer, name, data); err != nil {
 		ctx.Fail(err, http.StatusInternalServerError, err.Error())
 	}
