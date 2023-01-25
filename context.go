@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/go-yaml/yaml"
+	"github.com/go-zoox/cookie"
 	"github.com/go-zoox/core-utils/safe"
 	"github.com/go-zoox/fetch"
 	"github.com/go-zoox/headers"
@@ -37,7 +38,7 @@ type Context struct {
 	// response
 	StatusCode int
 	//
-	cookie  *Cookie
+	cookie  cookie.Cookie
 	session *Session
 	//
 	cache *Cache
@@ -628,7 +629,7 @@ func (ctx *Context) User() *User {
 }
 
 // Cookie returns the cookie of the request.
-func (ctx *Context) Cookie() *Cookie {
+func (ctx *Context) Cookie() cookie.Cookie {
 	if ctx.cookie == nil {
 		ctx.cookie = newCookie(ctx)
 	}
