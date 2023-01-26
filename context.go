@@ -18,6 +18,7 @@ import (
 	"github.com/go-zoox/fetch"
 	"github.com/go-zoox/headers"
 	"github.com/go-zoox/logger"
+	"github.com/go-zoox/session"
 	"github.com/go-zoox/tag"
 )
 
@@ -39,7 +40,7 @@ type Context struct {
 	StatusCode int
 	//
 	cookie  cookie.Cookie
-	session *Session
+	session session.Session
 	//
 	cache *Cache
 	cron  *Cron
@@ -638,7 +639,7 @@ func (ctx *Context) Cookie() cookie.Cookie {
 }
 
 // Session returns the session of the request.
-func (ctx *Context) Session() *Session {
+func (ctx *Context) Session() session.Session {
 	if ctx.session == nil {
 		ctx.session = newSession(ctx)
 	}

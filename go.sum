@@ -49,8 +49,8 @@ github.com/go-zoox/counter v1.0.1/go.mod h1:PICilZTrnO4dFstDPlXpjc6sdWYBG7hm/XDm
 github.com/go-zoox/cron v1.1.1 h1:qaXVcjSllbAWDmyCNfW1wbfF5lZSDpcCAGcZF4RyvxI=
 github.com/go-zoox/cron v1.1.1/go.mod h1:7aOIpwGDyyg+NqX+041NO+9f8FhAngWiLqBPBN6kZ9k=
 github.com/go-zoox/crypto v1.0.3/go.mod h1:HaWRg4tHZamqNyOnNoaK+Rw5eto+su66i8bMMP8UCBU=
-github.com/go-zoox/crypto v1.1.7 h1:aZZmVHjpWL4B2s0YS0Bt0yTMG/Qx7mCPs5SWOMNOywQ=
-github.com/go-zoox/crypto v1.1.7/go.mod h1:JqgNr9HcFFGQkMCGLJ9djtfg/RWVLxtunG01HD3lUXM=
+github.com/go-zoox/crypto v1.1.8 h1:oI2KPLy+SsGeb+h5A99n9MTQVp4jBhwJWkqjStUzz9I=
+github.com/go-zoox/crypto v1.1.8/go.mod h1:JqgNr9HcFFGQkMCGLJ9djtfg/RWVLxtunG01HD3lUXM=
 github.com/go-zoox/datetime v1.0.4/go.mod h1:os6lYW/GXNpCIseFrBr8DNcOiPuwl5Ttc/kxo4JnMjw=
 github.com/go-zoox/datetime v1.1.1 h1:ORZbMuSLMW3KSV9dDaGf7iKL5XqYoIn9eQuK6QMeRDY=
 github.com/go-zoox/datetime v1.1.1/go.mod h1:os6lYW/GXNpCIseFrBr8DNcOiPuwl5Ttc/kxo4JnMjw=
@@ -95,6 +95,8 @@ github.com/go-zoox/ratelimit v1.0.1 h1:/+aK8unMhgSAp3lpdq4Bk/g6CADTkuOq/b0NkfD0J
 github.com/go-zoox/ratelimit v1.0.1/go.mod h1:5MtLMrfQRbZHI+tKC4eyHZorrZX005Sy/Dldnk8qYOU=
 github.com/go-zoox/safe v1.0.1 h1:JwWK7xCyv7eyzBbwzQvhK/Ajm8gG2Q9Cvd/KXpdF2zI=
 github.com/go-zoox/safe v1.0.1/go.mod h1:lT0iEBmpoia7xfh2bWzdurzdv++4QRUAfeEzIhCnpoA=
+github.com/go-zoox/session v1.0.5 h1:zHzCn8jTwI6Dr2MZYORuxtedRbig4HCB653gYsQOcr8=
+github.com/go-zoox/session v1.0.5/go.mod h1:YE5k6gFpDNwpzefBfNwc3PWq22AwT+j4WOc2GJfpiRw=
 github.com/go-zoox/tag v1.0.2/go.mod h1:TNFY+IN6FgsD0KGV6mrnuVXONUq7zpH01k53BcNsT8k=
 github.com/go-zoox/tag v1.0.6/go.mod h1:jrbJgC1dZAN5+vZlmrUKu1/UpbOo0xVyCC1MfLpGGqk=
 github.com/go-zoox/tag v1.0.9/go.mod h1:jrbJgC1dZAN5+vZlmrUKu1/UpbOo0xVyCC1MfLpGGqk=
@@ -209,8 +211,9 @@ golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9/go.mod h1:LzIPMQfyMNhhGPh
 golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=
 golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3/go.mod h1:IxCIyHEi3zRg3s0A5j5BB6A9Jmi73HwBIUl50j+osU4=
 golang.org/x/crypto v0.0.0-20220313003712-b769efc7c000/go.mod h1:IxCIyHEi3zRg3s0A5j5BB6A9Jmi73HwBIUl50j+osU4=
-golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa h1:zuSxTR4o9y82ebqCUJYNGJbGPo6sKVl54f/TVDObg1c=
 golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa/go.mod h1:IxCIyHEi3zRg3s0A5j5BB6A9Jmi73HwBIUl50j+osU4=
+golang.org/x/crypto v0.5.0 h1:U/0M97KRkSFvyD/3FSmdP5W5swImpNgle/EHFhOsQPE=
+golang.org/x/crypto v0.5.0/go.mod h1:NK/OQwhpMQP3MwtdjgLlYHnH9ebylxKWv3e0fK+mkQU=
 golang.org/x/mod v0.3.0/go.mod h1:s0Qsj1ACt9ePp/hMypM3fl4fZqREWJwdYDEqhRiZZUA=
 golang.org/x/net v0.0.0-20180906233101-161cd47e91fd/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
 golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3/go.mod h1:t9HGtf8HONx5eT2rtn7q6eTqICYqUVnKs3thJo3Qplg=
