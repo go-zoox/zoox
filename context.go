@@ -17,6 +17,7 @@ import (
 	"github.com/go-zoox/core-utils/safe"
 	"github.com/go-zoox/fetch"
 	"github.com/go-zoox/headers"
+	"github.com/go-zoox/jwt"
 	"github.com/go-zoox/logger"
 	"github.com/go-zoox/session"
 	"github.com/go-zoox/tag"
@@ -41,6 +42,7 @@ type Context struct {
 	//
 	cookie  cookie.Cookie
 	session session.Session
+	jwt     jwt.Jwt
 	//
 	cache *Cache
 	cron  *Cron
@@ -645,6 +647,15 @@ func (ctx *Context) Session() session.Session {
 	}
 
 	return ctx.session
+}
+
+// Jwt returns the jwt of the request.
+func (ctx *Context) Jwt() jwt.Jwt {
+	if ctx.jwt == nil {
+		ctx.jwt = newJwt(ctx)
+	}
+
+	return ctx.jwt
 }
 
 // RequestID returns the request id of the request.
