@@ -1,15 +1,15 @@
-package zoox
+package router
 
 import "strings"
 
-type node struct {
-	path     string
+type Node struct {
+	Path     string
 	part     string
-	children []*node
+	children []*Node
 	isWild   bool
 }
 
-func (n *node) matchChild(part string) *node {
+func (n *Node) MatchChild(part string) *Node {
 	for _, child := range n.children {
 		for child.part == part || child.isWild {
 			return child
@@ -19,8 +19,8 @@ func (n *node) matchChild(part string) *node {
 	return nil
 }
 
-func (n *node) matchChildren(part string) []*node {
-	nodes := []*node{}
+func (n *Node) matchChildren(part string) []*Node {
+	nodes := []*Node{}
 
 	for _, child := range n.children {
 		if child.part == part || child.isWild {
@@ -31,28 +31,28 @@ func (n *node) matchChildren(part string) []*node {
 	return nodes
 }
 
-func (n *node) insert(pattern string, parts []string, height int) {
+func (n *Node) Insert(pattern string, parts []string, height int) {
 	if len(parts) == height {
-		n.path = pattern
+		n.Path = pattern
 		return
 	}
 
 	part := parts[height]
-	child := n.matchChild(part)
+	child := n.MatchChild(part)
 	if child == nil {
-		child = &node{
+		child = &Node{
 			part:   part,
 			isWild: part[0] == ':' || part[0] == '*',
 		}
 		n.children = append(n.children, child)
 	}
 
-	child.insert(pattern, parts, height+1)
+	child.Insert(pattern, parts, height+1)
 }
 
-func (n *node) search(parts []string, height int) *node {
+func (n *Node) Search(parts []string, height int) *Node {
 	if len(parts) == height || strings.HasPrefix(n.part, "*") {
-		if n.path == "" {
+		if n.Path == "" {
 			return nil
 		}
 
@@ -63,7 +63,7 @@ func (n *node) search(parts []string, height int) *node {
 	children := n.matchChildren(part)
 
 	for _, child := range children {
-		result := child.search(parts, height+1)
+		result := child.Search(parts, height+1)
 		if result != nil {
 			return result
 		}

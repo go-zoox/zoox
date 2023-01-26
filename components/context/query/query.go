@@ -1,6 +1,10 @@
-package zoox
+package query
 
-import "github.com/go-zoox/core-utils/strings"
+import (
+	"net/http"
+
+	"github.com/go-zoox/core-utils/strings"
+)
 
 // Query ...
 type Query interface {
@@ -8,18 +12,18 @@ type Query interface {
 }
 
 type query struct {
-	ctx *Context
+	request *http.Request
 }
 
-func newQuery(ctx *Context) *query {
+func New(request *http.Request) *query {
 	return &query{
-		ctx: ctx,
+		request: request,
 	}
 }
 
 // Get gets request query with the given name.
 func (q *query) Get(key string, defaultValue ...string) strings.Value {
-	value := q.ctx.Request.URL.Query().Get(key)
+	value := q.request.URL.Query().Get(key)
 	if value == "" && len(defaultValue) > 0 {
 		value = defaultValue[0]
 	}

@@ -1,4 +1,4 @@
-package zoox
+package user
 
 // User is the user for request context.
 type User interface {
@@ -12,7 +12,7 @@ type user struct {
 	u interface{}
 }
 
-func newUser() User {
+func New() User {
 	return &user{}
 }
 

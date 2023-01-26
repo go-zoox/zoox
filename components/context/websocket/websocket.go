@@ -1,4 +1,4 @@
-package zoox
+package websocket
 
 import (
 	"encoding/json"
@@ -10,8 +10,20 @@ import (
 	"github.com/go-zoox/logger"
 	"github.com/go-zoox/uuid"
 	"github.com/go-zoox/zoox/rpc/jsonrpc"
-	"github.com/gorilla/websocket"
+	gowebsocket "github.com/gorilla/websocket"
 )
+
+// Conn ...
+type Conn = gowebsocket.Conn
+
+// Upgrader ...
+type Upgrader = gowebsocket.Upgrader
+
+// TextMessage ...
+const TextMessage = gowebsocket.TextMessage
+
+// BinaryMessage ...
+const BinaryMessage = gowebsocket.BinaryMessage
 
 // WebSocketConn is the interface from websocket.Conn struct
 type WebSocketConn interface {
@@ -37,7 +49,7 @@ type WebSocketConn interface {
 	// PongMessage) are supported.
 	NextWriter(messageType int) (io.WriteCloser, error)
 	// WritePreparedMessage writes prepared message into connection.
-	WritePreparedMessage(pm *websocket.PreparedMessage) error
+	WritePreparedMessage(pm *gowebsocket.PreparedMessage) error
 	// WriteMessage is a helper method for getting a writer using NextWriter,
 	// writing the message and closing the writer.
 	WriteMessage(messageType int, data []byte) error
@@ -124,8 +136,6 @@ type WebSocketConn interface {
 type WebSocketClient struct {
 	WebSocketConn
 
-	ctx *Context
-
 	ID string
 
 	OnConnect       func()
@@ -149,13 +159,12 @@ type WebSocketClient struct {
 }
 
 // WebSocketCloseError is the error on client.
-type WebSocketCloseError = websocket.CloseError
+type WebSocketCloseError = gowebsocket.CloseError
 
-// NewWebSocketClient creates a new websocket client, can be used for mock.
-func NewWebSocketClient(ctx *Context, conn WebSocketConn) *WebSocketClient {
+// New creates a new websocket client, can be used for mock.
+func New(conn WebSocketConn) *WebSocketClient {
 	instance := &WebSocketClient{
 		WebSocketConn: conn,
-		ctx:           ctx,
 		ID:            uuid.V4(),
 		isAlive:       true,
 	}
@@ -184,8 +193,8 @@ func NewWebSocketClient(ctx *Context, conn WebSocketConn) *WebSocketClient {
 		instance.isAlive = false
 		instance.closedCode = code
 
-		message := websocket.FormatCloseMessage(code, "")
-		conn.WriteControl(websocket.CloseMessage, message, time.Now().Add(time.Second))
+		message := gowebsocket.FormatCloseMessage(code, "")
+		conn.WriteControl(gowebsocket.CloseMessage, message, time.Now().Add(time.Second))
 		instance.closedReason = message
 		return nil
 	})
@@ -194,8 +203,8 @@ func NewWebSocketClient(ctx *Context, conn WebSocketConn) *WebSocketClient {
 }
 
 // GetGorillaWebsocketConn gets the origin gorilla websocket connection.
-func (c *WebSocketClient) GetGorillaWebsocketConn() *websocket.Conn {
-	conn := c.WebSocketConn.(*websocket.Conn)
+func (c *WebSocketClient) GetGorillaWebsocketConn() *gowebsocket.Conn {
+	conn := c.WebSocketConn.(*gowebsocket.Conn)
 
 	// reset handlers
 	conn.SetPingHandler(nil)
@@ -213,7 +222,7 @@ func (c *WebSocketClient) Disconnect() error {
 // Write ...
 func (c *WebSocketClient) Write(typ int, msg []byte) error {
 	if c.WriteHandler != nil {
-		return c.WriteHandler(websocket.BinaryMessage, msg)
+		return c.WriteHandler(gowebsocket.BinaryMessage, msg)
 	}
 
 	return c.WebSocketConn.WriteMessage(typ, msg)
@@ -225,7 +234,7 @@ func (c *WebSocketClient) WriteText(msg []byte) error {
 		return c.WriteTextHandler(msg)
 	}
 
-	return c.Write(websocket.TextMessage, msg)
+	return c.Write(gowebsocket.TextMessage, msg)
 }
 
 // WriteBinary ...
@@ -234,7 +243,7 @@ func (c *WebSocketClient) WriteBinary(msg []byte) error {
 		return c.WriteBinaryHandler(msg)
 	}
 
-	return c.Write(websocket.BinaryMessage, msg)
+	return c.Write(gowebsocket.BinaryMessage, msg)
 }
 
 // WriteJSON ...
@@ -244,7 +253,7 @@ func (c *WebSocketClient) WriteJSON(msg interface{}) error {
 		return err
 	}
 
-	return c.Write(websocket.TextMessage, bytes)
+	return c.Write(gowebsocket.TextMessage, bytes)
 }
 
 // CreateJSONRPC ...
@@ -262,11 +271,7 @@ func (c *WebSocketClient) CreateJSONRPC() jsonrpc.Server[any] {
 			if c.OnError != nil {
 				c.OnError(err)
 			} else {
-				if c.ctx != nil {
-					c.ctx.Logger.Errorf("ws error: %s", err)
-				} else {
-					logger.Errorf("ws error: %s", err)
-				}
+				logger.Errorf("ws error: %s", err)
 			}
 		}
 
@@ -299,8 +304,8 @@ func (c *WebSocketClient) ClosedReason() []byte {
 
 // Pong ...
 func (c *WebSocketClient) Pong(message string) error {
-	err := c.WebSocketConn.WriteControl(websocket.PongMessage, []byte(message), time.Now().Add(time.Second))
-	if err == websocket.ErrCloseSent {
+	err := c.WebSocketConn.WriteControl(gowebsocket.PongMessage, []byte(message), time.Now().Add(time.Second))
+	if err == gowebsocket.ErrCloseSent {
 		return nil
 	} else if e, ok := err.(net.Error); ok && e.Temporary() {
 		return nil

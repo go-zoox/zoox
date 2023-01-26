@@ -1,4 +1,4 @@
-package zoox
+package body
 
 import "github.com/go-zoox/core-utils/object"
 
@@ -9,21 +9,21 @@ type Body interface {
 
 // body ...
 type body struct {
-	ctx *Context
+	getter func() map[string]any
 	//
 	data map[string]interface{}
 }
 
-func newBody(ctx *Context) Body {
+func New(getter func() map[string]any) Body {
 	return &body{
-		ctx: ctx,
+		getter: getter,
 	}
 }
 
 // Get gets request form with the given name.
 func (f *body) Get(key string, defaultValue ...interface{}) interface{} {
 	if f.data == nil {
-		f.data = f.ctx.Bodies()
+		f.data = f.getter()
 	}
 
 	value := object.Get(f.data, key)

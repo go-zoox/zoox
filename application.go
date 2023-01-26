@@ -11,10 +11,14 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/go-zoox/kv/typing"
 	"github.com/go-zoox/logger"
+	"github.com/go-zoox/zoox/components/context/cache"
+	"github.com/go-zoox/zoox/components/context/cron"
+	"github.com/go-zoox/zoox/components/context/debug"
+	"github.com/go-zoox/zoox/components/context/env"
+	"github.com/go-zoox/zoox/components/context/queue"
+	"github.com/go-zoox/zoox/components/context/websocket"
 	"github.com/go-zoox/zoox/rpc/jsonrpc"
-	"github.com/gorilla/websocket"
 )
 
 // HandlerFunc defines the request handler used by gee
@@ -24,7 +28,7 @@ type HandlerFunc func(ctx *Context)
 type Middleware = HandlerFunc
 
 // WsHandlerFunc defines the websocket handler used by gee
-type WsHandlerFunc func(ctx *Context, client *WebSocketClient)
+type WsHandlerFunc func(ctx *Context, client *websocket.WebSocketClient)
 
 // WsGorillaHandlerFunc defines the websocket handler used by gee
 type WsGorillaHandlerFunc func(ctx *Context, client *websocket.Conn)
@@ -43,16 +47,16 @@ type Application struct {
 	SecretKey string
 	LogLevel  string
 	//
-	CacheConfig *typing.Config
-	cache       Cache
+	CacheConfig *cache.Config
+	cache       cache.Cache
 	//
-	cron  Cron
-	queue Queue
+	cron  cron.Cron
+	queue queue.Queue
 	//
-	Env    Env
+	Env    env.Env
 	Logger *logger.Logger
 	// Debug
-	debug *Debug
+	debug debug.Debug
 
 	// TLS Certificate
 	TLSCertFile string
@@ -73,7 +77,7 @@ func New() *Application {
 	app.RouterGroup = newRouterGroup(app, "")
 	app.groups = []*RouterGroup{app.RouterGroup}
 
-	app.Env = newEnv()
+	app.Env = env.New()
 
 	app.Logger = logger.New(&logger.Options{
 		Level: app.LogLevel,
@@ -265,36 +269,36 @@ func (app *Application) CreateJSONRPC(path string) jsonrpc.Server[*Context] {
 }
 
 // Cache ...
-func (app *Application) Cache() Cache {
+func (app *Application) Cache() cache.Cache {
 	if app.cache == nil {
-		app.cache = newCache(app)
+		app.cache = cache.New(app.CacheConfig)
 	}
 
 	return app.cache
 }
 
 // Cron ...
-func (app *Application) Cron() Cron {
+func (app *Application) Cron() cron.Cron {
 	if app.cron == nil {
-		app.cron = newCron()
+		app.cron = cron.New()
 	}
 
 	return app.cron
 }
 
 // Queue ...
-func (app *Application) Queue() Queue {
+func (app *Application) Queue() queue.Queue {
 	if app.queue == nil {
-		app.queue = newQueue()
+		app.queue = queue.New()
 	}
 
 	return app.queue
 }
 
 // Debug ...
-func (app *Application) Debug() *Debug {
+func (app *Application) Debug() debug.Debug {
 	if app.cache == nil {
-		app.debug = newDebug(app)
+		app.debug = debug.New(app.Logger)
 	}
 
 	return app.debug

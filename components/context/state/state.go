@@ -1,4 +1,4 @@
-package zoox
+package state
 
 // State is the state for request context.
 type State interface {
@@ -10,7 +10,7 @@ type state struct {
 	data map[string]interface{}
 }
 
-func newState() *state {
+func New() State {
 	return &state{
 		data: make(map[string]interface{}),
 	}

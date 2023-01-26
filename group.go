@@ -7,7 +7,7 @@ import (
 	"path"
 	"time"
 
-	"github.com/gorilla/websocket"
+	"github.com/go-zoox/zoox/components/context/websocket"
 )
 
 var anyMethods = []string{
@@ -118,7 +118,7 @@ func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup
 		}
 		defer conn.Close()
 
-		client := NewWebSocketClient(ctx, conn)
+		client := websocket.New(conn)
 		handler(ctx, client)
 
 		defer func() {

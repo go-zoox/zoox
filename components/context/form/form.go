@@ -1,4 +1,6 @@
-package zoox
+package form
+
+import "net/http"
 
 // Form ...
 type Form interface {
@@ -6,21 +8,21 @@ type Form interface {
 }
 
 type form struct {
-	ctx *Context
+	request *http.Request
 	//
 	params map[string]string
 }
 
-func newForm(ctx *Context) Form {
+func New(request *http.Request) Form {
 	return &form{
-		ctx:    ctx,
-		params: make(map[string]string),
+		request: request,
+		params:  make(map[string]string),
 	}
 }
 
 // Get gets request form with the given name.
 func (f *form) Get(key string, defaultValue ...string) string {
-	value := f.ctx.Request.FormValue(key)
+	value := f.request.FormValue(key)
 	if value == "" && len(defaultValue) > 0 {
 		value = defaultValue[0]
 	}

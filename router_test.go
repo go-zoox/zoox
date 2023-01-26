@@ -37,8 +37,8 @@ func TestGetRoute(t *testing.T) {
 		t.Fatal("Expected node, got nil")
 	}
 
-	if n.path != "/hello/:name" {
-		t.Errorf("Expected /hello/:name, got %s", n.path)
+	if n.Path != "/hello/:name" {
+		t.Errorf("Expected /hello/:name, got %s", n.Path)
 	}
 
 	if ps["name"] != "zoox" {

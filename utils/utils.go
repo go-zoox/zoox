@@ -1,4 +1,4 @@
-package zoox
+package utils
 
 import (
 	"crypto/rand"
@@ -41,10 +41,10 @@ func GenerateRequestID() string {
 	return fmt.Sprintf("%s-%06d", requestIDPrefix, myID)
 }
 
-// splitHostPort separates host and port. If the port is not valid, it returns
+// SplitHostPort separates host and port. If the port is not valid, it returns
 // the entire input as host, and it doesn't check the validity of the host.
 // Unlike net.SplitHostPort, but per RFC 3986, it requires ports to be numeric.
-func splitHostPort(hostPort string) (host, port string) {
+func SplitHostPort(hostPort string) (host, port string) {
 	host = hostPort
 
 	colon := gostrings.LastIndexByte(host, ':')

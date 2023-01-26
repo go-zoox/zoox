@@ -12,6 +12,19 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-zoox/zoox/components/context/body"
+	"github.com/go-zoox/zoox/components/context/cache"
+	"github.com/go-zoox/zoox/components/context/cron"
+	"github.com/go-zoox/zoox/components/context/debug"
+	"github.com/go-zoox/zoox/components/context/env"
+	"github.com/go-zoox/zoox/components/context/form"
+	"github.com/go-zoox/zoox/components/context/param"
+	"github.com/go-zoox/zoox/components/context/query"
+	"github.com/go-zoox/zoox/components/context/queue"
+	"github.com/go-zoox/zoox/components/context/state"
+	"github.com/go-zoox/zoox/components/context/user"
+	"github.com/go-zoox/zoox/utils"
+
 	"github.com/go-yaml/yaml"
 	"github.com/go-zoox/cookie"
 	"github.com/go-zoox/core-utils/safe"
@@ -19,6 +32,7 @@ import (
 	"github.com/go-zoox/headers"
 	"github.com/go-zoox/jwt"
 	"github.com/go-zoox/logger"
+	"github.com/go-zoox/random"
 	"github.com/go-zoox/session"
 	"github.com/go-zoox/tag"
 )
@@ -32,10 +46,10 @@ type Context struct {
 	Method string
 	Path   string
 	//
-	param Param
-	query Query
-	form  Form
-	body  Body
+	param param.Param
+	query query.Query
+	form  form.Form
+	body  body.Body
 
 	// response
 	StatusCode int
@@ -44,12 +58,12 @@ type Context struct {
 	session session.Session
 	jwt     jwt.Jwt
 	//
-	cache Cache
-	cron  Cron
-	queue Queue
+	cache cache.Cache
+	cron  cron.Cron
+	queue queue.Queue
 	//
-	env   Env
-	debug *Debug
+	env   env.Env
+	debug debug.Debug
 	// middleware
 	handlers []HandlerFunc
 	index    int
@@ -59,8 +73,8 @@ type Context struct {
 	Logger *logger.Logger
 	//
 	//
-	state State
-	user  User
+	state state.State
+	user  user.User
 	// request id
 	requestID string
 }
@@ -83,9 +97,9 @@ func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Con
 		index:      -1,
 	}
 
-	ctx.requestID = ctx.Get(RequestIDHeader)
+	ctx.requestID = ctx.Get(utils.RequestIDHeader)
 	if ctx.requestID == "" {
-		ctx.requestID = GenerateRequestID()
+		ctx.requestID = utils.GenerateRequestID()
 	}
 
 	ctx.Logger = logger.New(&logger.Options{
@@ -113,16 +127,16 @@ func (ctx *Context) Next() {
 }
 
 // Query returns the query string parameter with the given name.
-func (ctx *Context) Query() Query {
+func (ctx *Context) Query() query.Query {
 	if ctx.query == nil {
-		ctx.query = newQuery(ctx)
+		ctx.query = query.New(ctx.Request)
 	}
 
 	return ctx.query
 }
 
 // Param returns the named URL parameter value if it exists.
-func (ctx *Context) Param() Param {
+func (ctx *Context) Param() param.Param {
 	return ctx.param
 }
 
@@ -132,18 +146,18 @@ func (ctx *Context) Header() http.Header {
 }
 
 // Form returns the form data from POST or PUT request body.
-func (ctx *Context) Form() Form {
+func (ctx *Context) Form() form.Form {
 	if ctx.form == nil {
-		ctx.form = newForm(ctx)
+		ctx.form = form.New(ctx.Request)
 	}
 
 	return ctx.form
 }
 
 // Body returns the request body.
-func (ctx *Context) Body() Body {
+func (ctx *Context) Body() body.Body {
 	if ctx.body == nil {
-		ctx.body = newBody(ctx)
+		ctx.body = body.New(ctx.Bodies)
 	}
 
 	return ctx.body
@@ -342,7 +356,7 @@ func (ctx *Context) Hostname() string {
 		return hostname
 	}
 
-	hostname, _ = splitHostPort(ctx.Request.Host)
+	hostname, _ = utils.SplitHostPort(ctx.Request.Host)
 	return hostname
 }
 
@@ -569,7 +583,7 @@ func (ctx *Context) Origin() string {
 }
 
 // Cache returns the cache of the application.
-func (ctx *Context) Cache() Cache {
+func (ctx *Context) Cache() cache.Cache {
 	if ctx.cache == nil {
 		ctx.cache = ctx.App.Cache()
 	}
@@ -578,7 +592,7 @@ func (ctx *Context) Cache() Cache {
 }
 
 // Cron returns the cache of the application.
-func (ctx *Context) Cron() Cron {
+func (ctx *Context) Cron() cron.Cron {
 	if ctx.cron == nil {
 		ctx.cron = ctx.App.Cron()
 	}
@@ -587,7 +601,7 @@ func (ctx *Context) Cron() Cron {
 }
 
 // Queue returns the queue of the application.
-func (ctx *Context) Queue() Queue {
+func (ctx *Context) Queue() queue.Queue {
 	if ctx.queue == nil {
 		ctx.queue = ctx.App.Queue()
 	}
@@ -596,7 +610,7 @@ func (ctx *Context) Queue() Queue {
 }
 
 // Debug returns the debug of the app.
-func (ctx *Context) Debug() *Debug {
+func (ctx *Context) Debug() debug.Debug {
 	if ctx.debug == nil {
 		ctx.debug = ctx.App.Debug()
 	}
@@ -605,7 +619,7 @@ func (ctx *Context) Debug() *Debug {
 }
 
 // Env returns the env of the
-func (ctx *Context) Env() Env {
+func (ctx *Context) Env() env.Env {
 	if ctx.env == nil {
 		ctx.env = ctx.App.Env
 	}
@@ -614,18 +628,18 @@ func (ctx *Context) Env() Env {
 }
 
 // State returns the state of the
-func (ctx *Context) State() State {
+func (ctx *Context) State() state.State {
 	if ctx.state == nil {
-		ctx.state = newState()
+		ctx.state = state.New()
 	}
 
 	return ctx.state
 }
 
 // User returns the user of the
-func (ctx *Context) User() User {
+func (ctx *Context) User() user.User {
 	if ctx.user == nil {
-		ctx.user = newUser()
+		ctx.user = user.New()
 	}
 
 	return ctx.user
@@ -634,7 +648,10 @@ func (ctx *Context) User() User {
 // Cookie returns the cookie of the request.
 func (ctx *Context) Cookie() cookie.Cookie {
 	if ctx.cookie == nil {
-		ctx.cookie = newCookie(ctx)
+		ctx.cookie = cookie.New(
+			ctx.Writer,
+			ctx.Request,
+		)
 	}
 
 	return ctx.cookie
@@ -643,7 +660,13 @@ func (ctx *Context) Cookie() cookie.Cookie {
 // Session returns the session of the request.
 func (ctx *Context) Session() session.Session {
 	if ctx.session == nil {
-		ctx.session = newSession(ctx)
+
+		secretKey := ctx.App.SecretKey
+		if secretKey == "" {
+			secretKey = "go-zoox_" + random.String(24)
+		}
+
+		ctx.session = session.New(ctx.Cookie(), secretKey)
 	}
 
 	return ctx.session
@@ -652,7 +675,12 @@ func (ctx *Context) Session() session.Session {
 // Jwt returns the jwt of the request.
 func (ctx *Context) Jwt() jwt.Jwt {
 	if ctx.jwt == nil {
-		ctx.jwt = newJwt(ctx)
+		secretKey := ctx.App.SecretKey
+		if secretKey == "" {
+			secretKey = "go-zoox_" + random.String(24)
+		}
+
+		ctx.jwt = jwt.New(secretKey)
 	}
 
 	return ctx.jwt

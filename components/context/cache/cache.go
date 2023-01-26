@@ -1,4 +1,4 @@
-package zoox
+package cache
 
 import (
 	"time"
@@ -6,6 +6,8 @@ import (
 	"github.com/go-zoox/kv"
 	"github.com/go-zoox/kv/typing"
 )
+
+type Config = typing.Config
 
 // Cache ...
 type Cache interface {
@@ -18,12 +20,11 @@ type cache struct {
 	core kv.KV
 }
 
-func newCache(app *Application) Cache {
-	cfg := &typing.Config{
-		Engine: "memory",
-	}
-	if app.CacheConfig != nil {
-		cfg = app.CacheConfig
+func New(cfg *Config) Cache {
+	if cfg == nil {
+		cfg = &typing.Config{
+			Engine: "memory",
+		}
 	}
 
 	core, err := kv.New(cfg)

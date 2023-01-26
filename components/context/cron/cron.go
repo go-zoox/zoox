@@ -1,4 +1,4 @@
-package zoox
+package cron
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ type cron struct {
 	core      *gocron.Cron
 }
 
-func newCron() *cron {
+func New() *cron {
 	core, err := gocron.New()
 	if err != nil {
 		panic(err)

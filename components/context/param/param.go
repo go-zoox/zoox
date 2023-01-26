@@ -1,4 +1,4 @@
-package zoox
+package param
 
 import "github.com/go-zoox/core-utils/strings"
 
@@ -9,14 +9,11 @@ type Param interface {
 }
 
 type param struct {
-	ctx *Context
-	//
 	params map[string]string
 }
 
-func newParams(ctx *Context, value map[string]string) Param {
+func New(value map[string]string) Param {
 	return &param{
-		ctx:    ctx,
 		params: value,
 	}
 }

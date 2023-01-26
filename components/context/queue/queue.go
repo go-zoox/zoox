@@ -1,4 +1,4 @@
-package zoox
+package queue
 
 import (
 	"runtime"
@@ -17,7 +17,7 @@ type queue struct {
 	core      *jobqueue.JobQueue
 }
 
-func newQueue() Queue {
+func New() Queue {
 	core := jobqueue.New(runtime.NumCPU())
 
 	return &queue{

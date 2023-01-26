@@ -3,16 +3,19 @@ package zoox
 import (
 	"fmt"
 	"strings"
+
+	"github.com/go-zoox/zoox/components/context/param"
+	route "github.com/go-zoox/zoox/components/router"
 )
 
 type router struct {
-	roots    map[string]*node
+	roots    map[string]*route.Node
 	handlers map[string][]HandlerFunc
 }
 
 func newRouter() *router {
 	return &router{
-		roots:    make(map[string]*node),
+		roots:    make(map[string]*route.Node),
 		handlers: make(map[string][]HandlerFunc),
 	}
 }
@@ -41,14 +44,14 @@ func (r *router) addRoute(method string, path string, handler ...HandlerFunc) {
 
 	key := fmt.Sprintf("%s %s", method, path)
 	if _, ok := r.roots[method]; !ok {
-		r.roots[method] = &node{}
+		r.roots[method] = &route.Node{}
 	}
 
-	r.roots[method].insert(path, parts, 0)
+	r.roots[method].Insert(path, parts, 0)
 	r.handlers[key] = handler
 }
 
-func (r *router) getRoute(method string, path string) (*node, map[string]string) {
+func (r *router) getRoute(method string, path string) (*route.Node, map[string]string) {
 	searchParts := parsePath(path)
 	params := make(map[string]string)
 	root, ok := r.roots[method]
@@ -57,8 +60,8 @@ func (r *router) getRoute(method string, path string) (*node, map[string]string)
 		return nil, nil
 	}
 
-	if n := root.search(searchParts, 0); n != nil {
-		parts := parsePath(n.path)
+	if n := root.Search(searchParts, 0); n != nil {
+		parts := parsePath(n.Path)
 		for i, part := range parts {
 			if part[0] == ':' {
 				params[part[1:]] = searchParts[i]
@@ -77,9 +80,9 @@ func (r *router) getRoute(method string, path string) (*node, map[string]string)
 func (r *router) handle(ctx *Context) {
 	n, params := r.getRoute(ctx.Method, ctx.Path)
 	if n != nil {
-		ctx.param = newParams(ctx, params)
+		ctx.param = param.New(params)
 
-		key := fmt.Sprintf("%s %s", ctx.Method, n.path)
+		key := fmt.Sprintf("%s %s", ctx.Method, n.Path)
 		if handler, ok := r.handlers[key]; ok {
 			ctx.handlers = append(ctx.handlers, handler...)
 		} else {

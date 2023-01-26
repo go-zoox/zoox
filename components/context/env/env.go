@@ -1,4 +1,4 @@
-package zoox
+package env
 
 import "os"
 
@@ -10,7 +10,7 @@ type Env interface {
 type env struct {
 }
 
-func newEnv() *env {
+func New() *env {
 	return &env{}
 }
 
