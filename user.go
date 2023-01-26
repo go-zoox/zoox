@@ -1,20 +1,27 @@
 package zoox
 
 // User is the user for request context.
-type User struct {
+type User interface {
+	// Get gets user from request context
+	Get() interface{}
+	// Set sets user to request context
+	Set(user interface{})
+}
+
+type user struct {
 	u interface{}
 }
 
-func newUser() *User {
-	return &User{}
+func newUser() User {
+	return &user{}
 }
 
 // Get gets user from request context
-func (s *User) Get() interface{} {
+func (s *user) Get() interface{} {
 	return s.u
 }
 
 // Set sets user to request context
-func (s *User) Set(user interface{}) {
+func (s *user) Set(user interface{}) {
 	s.u = user
 }

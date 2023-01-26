@@ -8,11 +8,17 @@ import (
 )
 
 // Cache ...
-type Cache struct {
+type Cache interface {
+	Get(key string, value interface{}) error
+	Set(key string, value interface{}, ttl time.Duration) error
+	Del(key string) error
+}
+
+type cache struct {
 	core kv.KV
 }
 
-func newCache(app *Application) *Cache {
+func newCache(app *Application) Cache {
 	cfg := &typing.Config{
 		Engine: "memory",
 	}
@@ -25,22 +31,22 @@ func newCache(app *Application) *Cache {
 		panic(err)
 	}
 
-	return &Cache{
+	return &cache{
 		core: core,
 	}
 }
 
 // Get ...
-func (c *Cache) Get(key string, value interface{}) error {
+func (c *cache) Get(key string, value interface{}) error {
 	return c.core.Get(key, value)
 }
 
 // Set ...
-func (c *Cache) Set(key string, value interface{}, ttl time.Duration) error {
+func (c *cache) Set(key string, value interface{}, ttl time.Duration) error {
 	return c.core.Set(key, value, ttl)
 }
 
 // Del ...
-func (c *Cache) Del(key string) error {
+func (c *cache) Del(key string) error {
 	return c.core.Delete(key)
 }

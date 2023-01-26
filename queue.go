@@ -7,21 +7,26 @@ import (
 )
 
 // Queue is a simple job queue.
-type Queue struct {
+type Queue interface {
+	AddJob(job jobqueue.Job) error
+	AddJobFunc(task func(), callback func(status int, err error)) error
+}
+
+type queue struct {
 	isStarted bool
 	core      *jobqueue.JobQueue
 }
 
-func newQueue() *Queue {
+func newQueue() Queue {
 	core := jobqueue.New(runtime.NumCPU())
 
-	return &Queue{
+	return &queue{
 		core: core,
 	}
 }
 
 // AddJob ...
-func (q *Queue) AddJob(job jobqueue.Job) error {
+func (q *queue) AddJob(job jobqueue.Job) error {
 	if !q.isStarted {
 		q.core.Start()
 	}
@@ -31,7 +36,7 @@ func (q *Queue) AddJob(job jobqueue.Job) error {
 }
 
 // AddJobFunc ...
-func (q *Queue) AddJobFunc(task func(), callback func(status int, err error)) error {
+func (q *queue) AddJobFunc(task func(), callback func(status int, err error)) error {
 	if !q.isStarted {
 		q.core.Start()
 	}

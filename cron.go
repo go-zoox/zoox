@@ -3,28 +3,41 @@ package zoox
 import (
 	"fmt"
 
-	"github.com/go-zoox/cron"
+	gocron "github.com/go-zoox/cron"
 )
 
 // Cron ...
-type Cron struct {
-	isStarted bool
-	core      *cron.Cron
+type Cron interface {
+	AddJob(name string, spec string, job func() error) (id int, err error)
+	RemoveJob(id int) error
+	ClearJobs() error
+	AddSecondlyJob(name string, cmd func() error) (id int, err error)
+	AddMinutelyJob(name string, cmd func() error) (id int, err error)
+	AddHourlyJob(name string, cmd func() error) (id int, err error)
+	AddDailyJob(name string, cmd func() error) (id int, err error)
+	AddWeeklyJob(name string, cmd func() error) (id int, err error)
+	AddMonthlyJob(name string, cmd func() error) (id int, err error)
+	AddYearlyJob(name string, cmd func() error) (id int, err error)
 }
 
-func newCron() *Cron {
-	core, err := cron.New()
+type cron struct {
+	isStarted bool
+	core      *gocron.Cron
+}
+
+func newCron() *cron {
+	core, err := gocron.New()
 	if err != nil {
 		panic(err)
 	}
 
-	return &Cron{
+	return &cron{
 		core: core,
 	}
 }
 
 // AddJob ...
-func (c *Cron) AddJob(name string, spec string, job func() error) (id int, err error) {
+func (c *cron) AddJob(name string, spec string, job func() error) (id int, err error) {
 	if !c.isStarted {
 		c.core.Start()
 	}
@@ -33,7 +46,7 @@ func (c *Cron) AddJob(name string, spec string, job func() error) (id int, err e
 }
 
 // RemoveJob ...
-func (c *Cron) RemoveJob(id int) error {
+func (c *cron) RemoveJob(id int) error {
 	if !c.isStarted {
 		return fmt.Errorf("cron job is not started yet")
 	}
@@ -42,7 +55,7 @@ func (c *Cron) RemoveJob(id int) error {
 }
 
 // ClearJobs clears all jobs.
-func (c *Cron) ClearJobs() error {
+func (c *cron) ClearJobs() error {
 	if !c.isStarted {
 		return fmt.Errorf("cron job is not started yet")
 	}
@@ -51,7 +64,7 @@ func (c *Cron) ClearJobs() error {
 }
 
 // AddSecondlyJob adds a schedule job run in every second.
-func (c *Cron) AddSecondlyJob(name string, cmd func() error) (id int, err error) {
+func (c *cron) AddSecondlyJob(name string, cmd func() error) (id int, err error) {
 	if !c.isStarted {
 		c.core.Start()
 	}
@@ -60,7 +73,7 @@ func (c *Cron) AddSecondlyJob(name string, cmd func() error) (id int, err error)
 }
 
 // AddMinutelyJob adds a schedule job run in every minute.
-func (c *Cron) AddMinutelyJob(name string, cmd func() error) (id int, err error) {
+func (c *cron) AddMinutelyJob(name string, cmd func() error) (id int, err error) {
 	if !c.isStarted {
 		c.core.Start()
 	}
@@ -69,7 +82,7 @@ func (c *Cron) AddMinutelyJob(name string, cmd func() error) (id int, err error)
 }
 
 // AddHourlyJob adds a schedule job run in every hour.
-func (c *Cron) AddHourlyJob(name string, cmd func() error) (id int, err error) {
+func (c *cron) AddHourlyJob(name string, cmd func() error) (id int, err error) {
 	if !c.isStarted {
 		c.core.Start()
 	}
@@ -78,7 +91,7 @@ func (c *Cron) AddHourlyJob(name string, cmd func() error) (id int, err error) {
 }
 
 // AddDailyJob adds a schedule job run in every day.
-func (c *Cron) AddDailyJob(name string, cmd func() error) (id int, err error) {
+func (c *cron) AddDailyJob(name string, cmd func() error) (id int, err error) {
 	if !c.isStarted {
 		c.core.Start()
 	}
@@ -87,7 +100,7 @@ func (c *Cron) AddDailyJob(name string, cmd func() error) (id int, err error) {
 }
 
 // AddWeeklyJob adds a schedule job run in every week.
-func (c *Cron) AddWeeklyJob(name string, cmd func() error) (id int, err error) {
+func (c *cron) AddWeeklyJob(name string, cmd func() error) (id int, err error) {
 	if !c.isStarted {
 		c.core.Start()
 	}
@@ -96,7 +109,7 @@ func (c *Cron) AddWeeklyJob(name string, cmd func() error) (id int, err error) {
 }
 
 // AddMonthlyJob adds a schedule job run in every month.
-func (c *Cron) AddMonthlyJob(name string, cmd func() error) (id int, err error) {
+func (c *cron) AddMonthlyJob(name string, cmd func() error) (id int, err error) {
 	if !c.isStarted {
 		c.core.Start()
 	}
@@ -105,7 +118,7 @@ func (c *Cron) AddMonthlyJob(name string, cmd func() error) (id int, err error) 
 }
 
 // AddYearlyJob adds a schedule job run in every year.
-func (c *Cron) AddYearlyJob(name string, cmd func() error) (id int, err error) {
+func (c *cron) AddYearlyJob(name string, cmd func() error) (id int, err error) {
 	if !c.isStarted {
 		c.core.Start()
 	}

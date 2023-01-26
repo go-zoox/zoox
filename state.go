@@ -1,22 +1,27 @@
 package zoox
 
 // State is the state for request context.
-type State struct {
+type State interface {
+	Get(key string) interface{}
+	Set(key string, value interface{})
+}
+
+type state struct {
 	data map[string]interface{}
 }
 
-func newState() *State {
-	return &State{
+func newState() *state {
+	return &state{
 		data: make(map[string]interface{}),
 	}
 }
 
 // Get gets the value from context state with the given key.
-func (s *State) Get(key string) interface{} {
+func (s *state) Get(key string) interface{} {
 	return s.data[key]
 }
 
 // Set sets the value to context state with the given key.
-func (s *State) Set(key string, value interface{}) {
+func (s *state) Set(key string, value interface{}) {
 	s.data[key] = value
 }

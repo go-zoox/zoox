@@ -32,10 +32,10 @@ type Context struct {
 	Method string
 	Path   string
 	//
-	param *Param
-	query *Query
-	form  *Form
-	body  *Body
+	param Param
+	query Query
+	form  Form
+	body  Body
 
 	// response
 	StatusCode int
@@ -44,11 +44,11 @@ type Context struct {
 	session session.Session
 	jwt     jwt.Jwt
 	//
-	cache *Cache
-	cron  *Cron
-	queue *Queue
+	cache Cache
+	cron  Cron
+	queue Queue
 	//
-	env   *Env
+	env   Env
 	debug *Debug
 	// middleware
 	handlers []HandlerFunc
@@ -59,8 +59,8 @@ type Context struct {
 	Logger *logger.Logger
 	//
 	//
-	state *State
-	user  *User
+	state State
+	user  User
 	// request id
 	requestID string
 }
@@ -113,7 +113,7 @@ func (ctx *Context) Next() {
 }
 
 // Query returns the query string parameter with the given name.
-func (ctx *Context) Query() *Query {
+func (ctx *Context) Query() Query {
 	if ctx.query == nil {
 		ctx.query = newQuery(ctx)
 	}
@@ -122,7 +122,7 @@ func (ctx *Context) Query() *Query {
 }
 
 // Param returns the named URL parameter value if it exists.
-func (ctx *Context) Param() *Param {
+func (ctx *Context) Param() Param {
 	return ctx.param
 }
 
@@ -132,7 +132,7 @@ func (ctx *Context) Header() http.Header {
 }
 
 // Form returns the form data from POST or PUT request body.
-func (ctx *Context) Form() *Form {
+func (ctx *Context) Form() Form {
 	if ctx.form == nil {
 		ctx.form = newForm(ctx)
 	}
@@ -141,7 +141,7 @@ func (ctx *Context) Form() *Form {
 }
 
 // Body returns the request body.
-func (ctx *Context) Body() *Body {
+func (ctx *Context) Body() Body {
 	if ctx.body == nil {
 		ctx.body = newBody(ctx)
 	}
@@ -569,7 +569,7 @@ func (ctx *Context) Origin() string {
 }
 
 // Cache returns the cache of the application.
-func (ctx *Context) Cache() *Cache {
+func (ctx *Context) Cache() Cache {
 	if ctx.cache == nil {
 		ctx.cache = ctx.App.Cache()
 	}
@@ -578,7 +578,7 @@ func (ctx *Context) Cache() *Cache {
 }
 
 // Cron returns the cache of the application.
-func (ctx *Context) Cron() *Cron {
+func (ctx *Context) Cron() Cron {
 	if ctx.cron == nil {
 		ctx.cron = ctx.App.Cron()
 	}
@@ -587,7 +587,7 @@ func (ctx *Context) Cron() *Cron {
 }
 
 // Queue returns the queue of the application.
-func (ctx *Context) Queue() *Queue {
+func (ctx *Context) Queue() Queue {
 	if ctx.queue == nil {
 		ctx.queue = ctx.App.Queue()
 	}
@@ -605,7 +605,7 @@ func (ctx *Context) Debug() *Debug {
 }
 
 // Env returns the env of the
-func (ctx *Context) Env() *Env {
+func (ctx *Context) Env() Env {
 	if ctx.env == nil {
 		ctx.env = ctx.App.Env
 	}
@@ -614,7 +614,7 @@ func (ctx *Context) Env() *Env {
 }
 
 // State returns the state of the
-func (ctx *Context) State() *State {
+func (ctx *Context) State() State {
 	if ctx.state == nil {
 		ctx.state = newState()
 	}
@@ -623,7 +623,7 @@ func (ctx *Context) State() *State {
 }
 
 // User returns the user of the
-func (ctx *Context) User() *User {
+func (ctx *Context) User() User {
 	if ctx.user == nil {
 		ctx.user = newUser()
 	}

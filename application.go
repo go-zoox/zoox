@@ -44,12 +44,12 @@ type Application struct {
 	LogLevel  string
 	//
 	CacheConfig *typing.Config
-	cache       *Cache
+	cache       Cache
 	//
-	cron  *Cron
-	queue *Queue
+	cron  Cron
+	queue Queue
 	//
-	Env    *Env
+	Env    Env
 	Logger *logger.Logger
 	// Debug
 	debug *Debug
@@ -265,7 +265,7 @@ func (app *Application) CreateJSONRPC(path string) jsonrpc.Server[*Context] {
 }
 
 // Cache ...
-func (app *Application) Cache() *Cache {
+func (app *Application) Cache() Cache {
 	if app.cache == nil {
 		app.cache = newCache(app)
 	}
@@ -274,7 +274,7 @@ func (app *Application) Cache() *Cache {
 }
 
 // Cron ...
-func (app *Application) Cron() *Cron {
+func (app *Application) Cron() Cron {
 	if app.cron == nil {
 		app.cron = newCron()
 	}
@@ -283,7 +283,7 @@ func (app *Application) Cron() *Cron {
 }
 
 // Queue ...
-func (app *Application) Queue() *Queue {
+func (app *Application) Queue() Queue {
 	if app.queue == nil {
 		app.queue = newQueue()
 	}
