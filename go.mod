@@ -19,7 +19,7 @@ require (
 	github.com/go-zoox/proxy v1.3.6
 	github.com/go-zoox/random v1.0.2
 	github.com/go-zoox/ratelimit v1.0.1
-	github.com/go-zoox/session v1.0.5
+	github.com/go-zoox/session v1.0.6
 	github.com/go-zoox/tag v1.2.0
 	github.com/go-zoox/uuid v0.0.1
 	github.com/gorilla/websocket v1.5.0
