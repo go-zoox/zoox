@@ -666,7 +666,9 @@ func (ctx *Context) Session() session.Session {
 			secretKey = "go-zoox_" + random.String(24)
 		}
 
-		ctx.session = session.New(ctx.Cookie(), secretKey)
+		ctx.session = session.New(ctx.Cookie(), secretKey, &session.Config{
+			MaxAge: ctx.App.SessionMaxAge,
+		})
 	}
 
 	return ctx.session

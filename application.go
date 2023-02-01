@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/go-zoox/logger"
 	"github.com/go-zoox/zoox/components/context/cache"
@@ -45,7 +46,9 @@ type Application struct {
 	notfound HandlerFunc
 	//
 	SecretKey string
-	LogLevel  string
+	//
+	SessionMaxAge time.Duration
+	LogLevel      string
 	//
 	CacheConfig *cache.Config
 	cache       cache.Cache
