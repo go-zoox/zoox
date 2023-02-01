@@ -14,7 +14,7 @@ func Jwt() zoox.Middleware {
 
 		token, ok := ctx.BearerToken()
 		if !ok {
-			token = ctx.Query().Get("access_token").ToString()
+			token = ctx.Query().Get("access_token").String()
 		}
 
 		signer := ctx.Jwt()

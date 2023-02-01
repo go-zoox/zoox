@@ -239,7 +239,7 @@ func (g *RouterGroup) createStaticHandler(relativePath string, fs http.FileSyste
 	return func(ctx *Context) {
 		file := ctx.Param().Get("filepath")
 		// Check if file exists and/or is not a directory
-		f, err := fs.Open(file.ToString())
+		f, err := fs.Open(file.String())
 		if err != nil {
 			// ctx.Status(http.StatusNotFound)
 			ctx.handlers = append(ctx.handlers, ctx.App.notfound)
