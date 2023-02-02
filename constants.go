@@ -1,9 +1,11 @@
 package zoox
 
-import "fmt"
+import (
+	"fmt"
+	"time"
 
-// HeaderContentType ...
-const HeaderContentType = "Content-Type"
+	"github.com/go-zoox/random"
+)
 
 // DefaultMiddlewares is the default global middleware
 var DefaultMiddlewares = map[string]func(app *Application){
@@ -26,3 +28,6 @@ func DefaultGroup(prefix string, fn func(r *RouterGroup)) {
 
 	DefaultGroupsFns[prefix] = fn
 }
+
+var DefaultSecretKey = random.String(16)
+var DefaultSessionMaxAge = 1 * 24 * time.Hour

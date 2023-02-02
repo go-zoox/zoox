@@ -112,6 +112,19 @@ func (app *Application) Fallback(h HandlerFunc) {
 	app.NotFound(h)
 }
 
+// defaultConfig
+func (app *Application) applyDefaultConfig() error {
+	if app.SecretKey == "" {
+		app.SecretKey = DefaultSecretKey
+	}
+
+	if app.SessionMaxAge == 0 {
+		app.SessionMaxAge = DefaultSessionMaxAge
+	}
+
+	return nil
+}
+
 // Run defines the method to start the server
 // Example:
 //
@@ -131,6 +144,11 @@ func (app *Application) Run(addr ...string) error {
 	// if err := http.ListenAndServe(addrX, app); err != nil {
 	// 	return err
 	// }
+
+	// config
+	if err := app.applyDefaultConfig(); err != nil {
+		return fmt.Errorf("failed to apply default config: %v", err)
+	}
 
 	typ := "tcp"
 	if addrX[0] == '/' {
