@@ -8,10 +8,13 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"net/url"
 	"strings"
 	"text/template"
 	"time"
 
+	"github.com/go-zoox/core-utils/cast"
+	"github.com/go-zoox/core-utils/regexp"
 	"github.com/go-zoox/logger"
 	"github.com/go-zoox/zoox/components/context/cache"
 	"github.com/go-zoox/zoox/components/context/cron"
@@ -67,6 +70,14 @@ type Application struct {
 	TLSKeyFile string
 	// TLS Ca Certificate
 	TLSCaCertFile string
+
+	//
+	Protocol string
+	Host     string
+	Port     int
+	//
+	NetworkType      string
+	UnixDomainSocket string
 }
 
 // New is the constructor of zoox.Application.
@@ -118,6 +129,22 @@ func (app *Application) applyDefaultConfig() error {
 		app.SecretKey = DefaultSecretKey
 	}
 
+	if app.Protocol == "" {
+		app.Protocol = "http"
+	}
+
+	if app.Host == "" {
+		app.Host = "0.0.0.0"
+	}
+
+	if app.Port == 0 {
+		app.Port = 8080
+	}
+
+	if app.NetworkType == "" {
+		app.NetworkType = "tcp"
+	}
+
 	if app.SessionMaxAge == 0 {
 		app.SessionMaxAge = DefaultSessionMaxAge
 	}
@@ -128,44 +155,66 @@ func (app *Application) applyDefaultConfig() error {
 // Run defines the method to start the server
 // Example:
 //
-//		IP:
-//	   default(http://0.0.0.0:8080): Run(":8080")
-//		 port(http://0.0.0.0:8888): Run(":8888")
-//		 host+port(http://127.0.0.1:8888): Run("127.0.0.1:8888")
+//			IP:
+//		   default(http://0.0.0.0:8080): Run(":8080")
+//			 port(http://0.0.0.0:8888): Run(":8888")
+//			 host+port(http://127.0.0.1:8888): Run("127.0.0.1:8888")
 //
-//		Unix Domain Socket:
-//			/tmp/xxx.sock: Run("unix:///tmp/xxx.sock")
-func (app *Application) Run(addr ...string) error {
-	addrX := ":8080"
+//	   HTTP:
+//			 scheme://host+port(http://127.0.0.1:8888): Run("http://127.0.0.1:8888")
+//
+//			Unix Domain Socket:
+//				/tmp/xxx.sock: Run("unix:///tmp/xxx.sock")
+func (app *Application) Run(addr ...string) (err error) {
+	var addrX string
 	if len(addr) > 0 && addr[0] != "" {
 		addrX = addr[0]
 	}
 
-	// if err := http.ListenAndServe(addrX, app); err != nil {
-	// 	return err
-	// }
+	// Pattern@1 => :8080
+	if regexp.Match(addrX, ":\\d+") {
+		app.Port = cast.ToInt(addrX[1:])
+	} else if regexp.Match(addrX, "\\s+:\\d+") {
+		// Pattern@2 => 127.0.0.1:8080
+		parts := strings.Split(addrX, ":")
+		app.Host = cast.ToString(parts[0])
+		app.Port = cast.ToInt(parts[1])
+	} else if regexp.Match(addrX, "^http://\\s+:\\d+") {
+		// Pattern@3 => http://127.0.0.1:8080
+		u, err := url.Parse(addrX)
+		if err != nil {
+			return fmt.Errorf("failed to parse addr(%s): %v", addrX, err)
+		}
+
+		app.Protocol = u.Scheme
+		parts := strings.Split(u.Host, ":")
+		app.Host = cast.ToString(parts[0])
+		app.Port = cast.ToInt(parts[1])
+	} else if regexp.Match(addrX, "^unix://") {
+		// Pattern@4 => unix:///tmp/xxx.sock
+		app.Protocol = "unix"
+		app.NetworkType = "unix"
+		app.UnixDomainSocket = addrX[7:]
+	} else if regexp.Match(addrX, "^/") {
+		// Pattern@4 => /tmp/xxx.sock
+		app.Protocol = "unix"
+		app.NetworkType = "unix"
+		app.UnixDomainSocket = addrX
+	}
 
 	// config
 	if err := app.applyDefaultConfig(); err != nil {
 		return fmt.Errorf("failed to apply default config: %v", err)
 	}
 
-	typ := "tcp"
-	if addrX[0] == '/' {
-		typ = "unix"
-	} else if strings.HasPrefix(addrX, "unix://") {
-		typ = "unix"
-		addrX = addrX[7:]
-	}
-
-	listener, err := net.Listen(typ, addrX)
+	listener, err := net.Listen(app.NetworkType, app.Address())
 	if err != nil {
 		return err
 	}
 	defer listener.Close()
 
 	server := &http.Server{
-		Addr:    ":8088",
+		Addr:    app.Address(),
 		Handler: app,
 	}
 
@@ -196,10 +245,10 @@ func (app *Application) Run(addr ...string) error {
 		// 	app.TLSCert = tlsCaCert
 		// }
 
-		if typ == "unix" {
-			logger.Info("Server started at unixs://%s", addrX)
+		if app.NetworkType == "unix" {
+			logger.Info("Server started at unixs://%s", app.Address())
 		} else {
-			logger.Info("Server started at https://%s", addrX)
+			logger.Info("Server started at https://%s", app.Address())
 		}
 
 		// if err := http.ServeTLS(listener, app, app.TLSCertFile, app.TLSKeyFile); err != nil {
@@ -209,10 +258,10 @@ func (app *Application) Run(addr ...string) error {
 		return server.ServeTLS(listener, app.TLSCertFile, app.TLSKeyFile)
 	}
 
-	if typ == "unix" {
-		logger.Info("Server started at unix://%s", addrX)
+	if app.NetworkType == "unix" {
+		logger.Info("Server started at unix://%s", app.Address())
 	} else {
-		logger.Info("Server started at http://%s", addrX)
+		logger.Info("Server started at http://%s", app.Address())
 	}
 	// if err := http.Serve(listener, app); err != nil {
 	// 	return err
@@ -323,6 +372,15 @@ func (app *Application) Debug() debug.Debug {
 	}
 
 	return app.debug
+}
+
+// Address ...
+func (app *Application) Address() string {
+	if app.NetworkType == "unix" {
+		return app.UnixDomainSocket
+	} else {
+		return fmt.Sprintf("%s:%d", app.Host, app.Port)
+	}
 }
 
 // H is a shortcut for map[string]interface{}
