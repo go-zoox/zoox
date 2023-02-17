@@ -250,9 +250,9 @@ func (app *Application) Run(addr ...string) (err error) {
 		// }
 
 		if app.NetworkType == "unix" {
-			logger.Info("Server started at unixs://%s", app.Address())
+			logger.Info("Server started at unixs://%s", app.AddressForLog())
 		} else {
-			logger.Info("Server started at https://%s", app.Address())
+			logger.Info("Server started at https://%s", app.AddressForLog())
 		}
 
 		// if err := http.ServeTLS(listener, app, app.TLSCertFile, app.TLSKeyFile); err != nil {
@@ -263,9 +263,9 @@ func (app *Application) Run(addr ...string) (err error) {
 	}
 
 	if app.NetworkType == "unix" {
-		logger.Info("Server started at unix://%s", app.Address())
+		logger.Info("Server started at unix://%s", app.AddressForLog())
 	} else {
-		logger.Info("Server started at http://%s", app.Address())
+		logger.Info("Server started at http://%s", app.AddressForLog())
 	}
 	// if err := http.Serve(listener, app); err != nil {
 	// 	return err
@@ -382,9 +382,22 @@ func (app *Application) Debug() debug.Debug {
 func (app *Application) Address() string {
 	if app.NetworkType == "unix" {
 		return app.UnixDomainSocket
-	} else {
-		return fmt.Sprintf("%s:%d", app.Host, app.Port)
 	}
+
+	return fmt.Sprintf("%s:%d", app.Host, app.Port)
+}
+
+// AddressForLog ...
+func (app *Application) AddressForLog() string {
+	if app.NetworkType == "unix" {
+		return app.UnixDomainSocket
+	}
+
+	if app.Host == "0.0.0.0" {
+		return fmt.Sprintf("127.0.0.1:%d", app.Port)
+	}
+
+	return fmt.Sprintf("%s:%d", app.Host, app.Port)
 }
 
 // H is a shortcut for map[string]interface{}
