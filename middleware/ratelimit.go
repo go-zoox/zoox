@@ -53,15 +53,13 @@ func RateLimit(cfg *RateLimitConfig) zoox.Middleware {
 		ip := ctx.Request.RemoteAddr
 		limiter.Inc(ip)
 
-		resetAfter := fmt.Sprintf("%d", limiter.ResetAfter(ip))
-
 		// GitHub Standard
 		ctx.Set(headers.XRateLimitRemaining, fmt.Sprintf("%d", limiter.Remaining(ip)))
-		ctx.Set(headers.XRateLimitReset, resetAfter)
+		ctx.Set(headers.XRateLimitReset, fmt.Sprintf("%d", limiter.ResetAt(ip)/1000))
 		ctx.Set(headers.XRateLimitLimit, fmt.Sprintf("%d", limiter.Total(ip)))
 
 		// MDN
-		ctx.Set(headers.RetryAfter, resetAfter)
+		ctx.Set(headers.RetryAfter, fmt.Sprintf("%d", limiter.ResetAfter(ip)))
 
 		if limiter.IsExceeded(ip) {
 			ctx.Fail(errors.New("too many requests"), http.StatusTooManyRequests, "Too Many Requests", http.StatusTooManyRequests)
