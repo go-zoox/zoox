@@ -171,41 +171,45 @@ func (app *Application) Run(addr ...string) (err error) {
 		addrX = addr[0]
 	}
 
-	// Pattern@1 => :8080
-	if regexp.Match(addrX, ":\\d+") {
-		app.Port = cast.ToInt(addrX[1:])
-	} else if regexp.Match(addrX, "\\s+:\\d+") {
-		// Pattern@2 => 127.0.0.1:8080
-		parts := strings.Split(addrX, ":")
-		app.Host = cast.ToString(parts[0])
-		app.Port = cast.ToInt(parts[1])
-	} else if regexp.Match(addrX, "^http://\\s+:\\d+") {
-		// Pattern@3 => http://127.0.0.1:8080
-		u, err := url.Parse(addrX)
-		if err != nil {
-			return fmt.Errorf("failed to parse addr(%s): %v", addrX, err)
-		}
+	if addrX != "" {
+		// Pattern@1 => :8080
+		if regexp.Match("^:\\d+", addrX) {
+			app.Port = cast.ToInt(addrX[1:])
+		} else if regexp.Match("\\s+:\\d+", addrX) {
+			// Pattern@2 => 127.0.0.1:8080
+			parts := strings.Split(addrX, ":")
+			app.Host = cast.ToString(parts[0])
+			app.Port = cast.ToInt(parts[1])
+		} else if regexp.Match("^http://\\s+:\\d+", addrX) {
+			// Pattern@3 => http://127.0.0.1:8080
+			u, err := url.Parse(addrX)
+			if err != nil {
+				return fmt.Errorf("failed to parse addr(%s): %v", addrX, err)
+			}
 
-		app.Protocol = u.Scheme
-		parts := strings.Split(u.Host, ":")
-		app.Host = cast.ToString(parts[0])
-		app.Port = cast.ToInt(parts[1])
-	} else if regexp.Match(addrX, "^unix://") {
-		// Pattern@4 => unix:///tmp/xxx.sock
-		app.Protocol = "unix"
-		app.NetworkType = "unix"
-		app.UnixDomainSocket = addrX[7:]
-	} else if regexp.Match(addrX, "^/") {
-		// Pattern@4 => /tmp/xxx.sock
-		app.Protocol = "unix"
-		app.NetworkType = "unix"
-		app.UnixDomainSocket = addrX
+			app.Protocol = u.Scheme
+			parts := strings.Split(u.Host, ":")
+			app.Host = cast.ToString(parts[0])
+			app.Port = cast.ToInt(parts[1])
+		} else if regexp.Match("^unix://", addrX) {
+			// Pattern@4 => unix:///tmp/xxx.sock
+			app.Protocol = "unix"
+			app.NetworkType = "unix"
+			app.UnixDomainSocket = addrX[7:]
+		} else if regexp.Match("^/", addrX) {
+			// Pattern@4 => /tmp/xxx.sock
+			app.Protocol = "unix"
+			app.NetworkType = "unix"
+			app.UnixDomainSocket = addrX
+		}
 	}
 
 	// config
 	if err := app.applyDefaultConfig(); err != nil {
 		return fmt.Errorf("failed to apply default config: %v", err)
 	}
+
+	app.Debug().Info(app)
 
 	listener, err := net.Listen(app.NetworkType, app.Address())
 	if err != nil {

@@ -30,5 +30,5 @@ func New(logger *logger.Logger) Debug {
 
 // Info logs debug info.
 func (c *debug) Info(args ...interface{}) {
-	c.core.Info(args...)
+	c.core.Debug(args...)
 }
