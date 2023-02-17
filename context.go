@@ -77,6 +77,10 @@ type Context struct {
 	user  user.User
 	// request id
 	requestID string
+
+	//
+	isUpgrade    bool
+	isUpgradeSet bool
 }
 
 func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Context {
@@ -222,6 +226,21 @@ func (ctx *Context) AcceptLanguage() string {
 // AcceptEncoding returns the request accept header.
 func (ctx *Context) AcceptEncoding() string {
 	return ctx.Get(headers.AcceptEncoding)
+}
+
+// Connection return the request connection header.
+func (ctx *Context) Connection() string {
+	return ctx.Get(headers.Connection)
+}
+
+// IsConnectionUpgrade checks if the connection upgrade.
+func (ctx *Context) IsConnectionUpgrade() bool {
+	if !ctx.isUpgradeSet {
+		ctx.isUpgradeSet = true
+		ctx.isUpgrade = strings.ToLower(ctx.Connection()) == "upgrade"
+	}
+
+	return ctx.isUpgrade
 }
 
 // Write writes the data to the connection.

@@ -11,9 +11,14 @@ import (
 func Logger() zoox.Middleware {
 	return func(ctx *zoox.Context) {
 		t := time.Now()
+		if ctx.IsConnectionUpgrade() {
+			logger.Info("[%s] %s %s %d +%dms (connection: Upgrade)", ctx.Request.RemoteAddr, ctx.Method, ctx.Path, ctx.StatusCode, time.Since(t)/time.Millisecond)
+		}
 
 		ctx.Next()
 
-		logger.Info("[%s] %s %s %d +%dms", ctx.Request.RemoteAddr, ctx.Method, ctx.Path, ctx.StatusCode, time.Since(t)/time.Millisecond)
+		if !ctx.IsConnectionUpgrade() {
+			logger.Info("[%s] %s %s %d +%dms", ctx.Request.RemoteAddr, ctx.Method, ctx.Path, ctx.StatusCode, time.Since(t)/time.Millisecond)
+		}
 	}
 }
