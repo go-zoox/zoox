@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/go-zoox/zoox/components/context/websocket"
+	gowebsocket "github.com/gorilla/websocket"
 )
 
 var anyMethods = []string{
@@ -154,7 +155,20 @@ func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup
 				if client.OnError != nil {
 					client.OnError(err)
 				} else {
-					ctx.Logger.Errorf("read err: %s (type: %d)", err, mt)
+					if e, ok := err.(*gowebsocket.CloseError); ok {
+						switch e.Code {
+						case gowebsocket.CloseGoingAway:
+							// @TODO
+							// user auto leave, for example, close browser or go other page
+							// we should not log as an error, it is very common.
+							// action => ignored.
+							// ctx.Logger.Warnf("read err: %s (type: %d)", err, mt)
+						default:
+							ctx.Logger.Errorf("read err: %s (type: %d)", err, mt)
+						}
+					} else {
+						ctx.Logger.Errorf("read err: %s (type: %d)", err, mt)
+					}
 				}
 
 				return
