@@ -25,7 +25,6 @@ import (
 	"github.com/go-zoox/zoox/components/context/user"
 	"github.com/go-zoox/zoox/utils"
 
-	"github.com/go-yaml/yaml"
 	"github.com/go-zoox/cookie"
 	"github.com/go-zoox/core-utils/safe"
 	"github.com/go-zoox/fetch"
@@ -35,6 +34,7 @@ import (
 	"github.com/go-zoox/random"
 	"github.com/go-zoox/session"
 	"github.com/go-zoox/tag"
+	"gopkg.in/yaml.v3"
 )
 
 // Context is the request context
