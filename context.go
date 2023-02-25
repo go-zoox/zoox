@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"mime/multipart"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -385,17 +386,31 @@ func (ctx *Context) URL() string {
 	return ctx.Request.RequestURI
 }
 
-// IP gets the ip from X-Forwarded-For or X-Real-IP or RemoteAddr.
+// IP gets the ip from X-Forwarded-For or X-Real-IP or RemoteIP.
+// RemoteIP parses the IP from Request.RemoteAddr, normializes and returns the IP (without the port).
 func (ctx *Context) IP() string {
-	if xForwardedFor := ctx.Get("X-Forwarded-For"); xForwardedFor != "" {
-		return strings.Split(xForwardedFor, ",")[0]
+	if xForwardedFor := ctx.Get(headers.XForwardedFor); xForwardedFor != "" {
+		parts := strings.Split(xForwardedFor, ",")
+		if len(parts) > 0 && parts[0] != "" {
+			return parts[0]
+		}
 	}
 
-	if xRealIP := ctx.Get("X-Real-IP"); xRealIP != "" {
+	if xRealIP := ctx.Get(headers.XRealIP); xRealIP != "" {
 		return xRealIP
 	}
 
-	return ctx.Request.RemoteAddr
+	ip, _, err := net.SplitHostPort(strings.TrimSpace(ctx.Request.RemoteAddr))
+	if err != nil {
+		return ""
+	}
+
+	return ip
+}
+
+// ClientIP is the client ip.
+func (ctx *Context) ClientIP() string {
+	return ctx.IP()
 }
 
 // Headers gets all headers.

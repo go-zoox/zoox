@@ -10,7 +10,7 @@ require (
 	github.com/go-zoox/debug v1.0.1
 	github.com/go-zoox/fetch v1.7.4
 	github.com/go-zoox/gzip v1.0.0
-	github.com/go-zoox/headers v1.0.5
+	github.com/go-zoox/headers v1.0.6
 	github.com/go-zoox/jobqueue v1.0.0
 	github.com/go-zoox/jwt v1.2.0
 	github.com/go-zoox/kv v1.5.0
