@@ -7,6 +7,7 @@ import (
 	"path"
 	"time"
 
+	"github.com/go-zoox/proxy"
 	"github.com/go-zoox/zoox/components/context/websocket"
 	gowebsocket "github.com/gorilla/websocket"
 )
@@ -99,6 +100,22 @@ func (g *RouterGroup) Any(path string, handler ...HandlerFunc) *RouterGroup {
 		g.addRoute(method, path, handler...)
 	}
 	return g
+}
+
+// Proxy defines the method to proxy the request to the backend service.
+//
+// Example:
+//
+//	app.Proxy("/api/v1/tasks", "http://zmicro.services.tasks:8080", &proxy.SingleTargetConfig{
+//		Rewrites: rewriter.Rewriters{
+//	    {From: "/api/v1/tasks/(.*)", To: "/$1"},
+//	  },
+//	})
+func (g *RouterGroup) Proxy(path, target string, cfg *proxy.SingleTargetConfig) *RouterGroup {
+	p := proxy.NewSingleTarget(target, cfg)
+	return g.Any(path, func(ctx *Context) {
+		p.ServeHTTP(ctx.Writer, ctx.Request)
+	})
 }
 
 // WebSocket defines the method to add websocket route
