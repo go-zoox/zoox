@@ -25,16 +25,19 @@ import (
 	"github.com/go-zoox/zoox/rpc/jsonrpc"
 )
 
-// HandlerFunc defines the request handler used by gee
+// HandlerFunc defines the request handler used by zoox
 type HandlerFunc func(ctx *Context)
+
+// GroupFunc defines the group handler used by zoox
+type GroupFunc func(group *RouterGroup)
 
 // Middleware defines the signature of the middleware function.
 type Middleware = HandlerFunc
 
-// WsHandlerFunc defines the websocket handler used by gee
+// WsHandlerFunc defines the websocket handler used by zoox
 type WsHandlerFunc func(ctx *Context, client *websocket.WebSocketClient)
 
-// WsGorillaHandlerFunc defines the websocket handler used by gee
+// WsGorillaHandlerFunc defines the websocket handler used by zoox
 type WsGorillaHandlerFunc func(ctx *Context, client *websocket.Conn)
 
 // Application is the handler for all requests.
