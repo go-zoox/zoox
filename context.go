@@ -84,6 +84,9 @@ type Context struct {
 	//
 	isUpgrade    bool
 	isUpgradeSet bool
+
+	// bodyBytes is used to copy body
+	bodyBytes []byte
 }
 
 func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Context {
@@ -530,7 +533,7 @@ func (ctx *Context) GetRawData() ([]byte, error) {
 }
 
 // BindJSON binds the request body into the given struct.
-func (ctx *Context) BindJSON(obj interface{}) error {
+func (ctx *Context) BindJSON(obj interface{}) (err error) {
 	if !strings.Contains(ctx.Get("Content-Type"), "application/json") {
 		return errors.New("[BindJSON] content-type is not json")
 	}
@@ -541,33 +544,31 @@ func (ctx *Context) BindJSON(obj interface{}) error {
 
 	if ctx.debug.IsDebugMode() {
 		// refernece: golang复用http.request.body - https://zhuanlan.zhihu.com/p/47313038
-		bodyBytes, err := ioutil.ReadAll(ctx.Request.Body)
+		_, err = ctx.CloneBody()
 		if err != nil {
 			return fmt.Errorf("failed to read request body: %v", err)
 		}
 
-		ctx.Logger.Infof("[debug][ctx.BindJSON] body: %v", bodyBytes)
-		ctx.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+		ctx.Logger.Infof("[debug][ctx.BindJSON] body: %v", ctx.bodyBytes)
 	}
 
 	return json.NewDecoder(ctx.Request.Body).Decode(obj)
 }
 
 // BindYAML binds the request body into the given struct.
-func (ctx *Context) BindYAML(obj interface{}) error {
+func (ctx *Context) BindYAML(obj interface{}) (err error) {
 	if ctx.Request.Body == nil {
 		return errors.New("invalid request")
 	}
 
 	if ctx.debug.IsDebugMode() {
 		// refernece: golang复用http.request.body - https://zhuanlan.zhihu.com/p/47313038
-		bodyBytes, err := ioutil.ReadAll(ctx.Request.Body)
+		_, err = ctx.CloneBody()
 		if err != nil {
 			return fmt.Errorf("failed to read request body: %v", err)
 		}
 
-		ctx.Logger.Infof("[debug][ctx.BindYAML] body: %v", bodyBytes)
-		ctx.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+		ctx.Logger.Infof("[debug][ctx.BindYAML] body: %v", ctx.bodyBytes)
 	}
 
 	return yaml.NewDecoder(ctx.Request.Body).Decode(obj)
@@ -791,4 +792,20 @@ func (ctx *Context) Fetch() *fetch.Fetch {
 // Proxy customize the request to proxy the backend services.
 func (ctx *Context) Proxy(target string, cfg *proxy.SingleTargetConfig) {
 	WrapH(proxy.NewSingleTarget(target, cfg))(ctx)
+}
+
+// CloneBody clones the body of the request, should be used carefully.
+func (ctx *Context) CloneBody() (body io.ReadCloser, err error) {
+	if ctx.bodyBytes == nil {
+		// refernece: golang复用http.request.body - https://zhuanlan.zhihu.com/p/47313038
+		ctx.bodyBytes, err = ioutil.ReadAll(ctx.Request.Body)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read request body: %v", err)
+		}
+
+		// recovery to request body
+		ctx.Request.Body = ioutil.NopCloser(bytes.NewBuffer(ctx.bodyBytes))
+	}
+
+	return ioutil.NopCloser(bytes.NewBuffer(ctx.bodyBytes)), nil
 }
