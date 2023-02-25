@@ -34,10 +34,15 @@ func newRouterGroup(app *Application, prefix string) *RouterGroup {
 }
 
 // Group defines a new router group
-func (g *RouterGroup) Group(prefix string) *RouterGroup {
+func (g *RouterGroup) Group(prefix string, cb ...func(g *RouterGroup)) *RouterGroup {
 	newGroup := newRouterGroup(g.app, g.prefix+prefix)
 	newGroup.parent = g
 	g.app.groups = append(g.app.groups, newGroup)
+
+	for _, fn := range cb {
+		fn(newGroup)
+	}
+
 	return newGroup
 }
 
