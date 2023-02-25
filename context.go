@@ -1,6 +1,7 @@
 package zoox
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -522,6 +523,17 @@ func (ctx *Context) BindJSON(obj interface{}) error {
 		return errors.New("invalid request")
 	}
 
+	if ctx.debug.IsDebugMode() {
+		// refernece: golang复用http.request.body - https://zhuanlan.zhihu.com/p/47313038
+		bodyBytes, err := ioutil.ReadAll(ctx.Request.Body)
+		if err != nil {
+			return fmt.Errorf("failed to read request body: %v", err)
+		}
+
+		ctx.Logger.Infof("[debug][ctx.BindJSON] body: %v", bodyBytes)
+		ctx.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+	}
+
 	return json.NewDecoder(ctx.Request.Body).Decode(obj)
 }
 
@@ -531,27 +543,70 @@ func (ctx *Context) BindYAML(obj interface{}) error {
 		return errors.New("invalid request")
 	}
 
+	if ctx.debug.IsDebugMode() {
+		// refernece: golang复用http.request.body - https://zhuanlan.zhihu.com/p/47313038
+		bodyBytes, err := ioutil.ReadAll(ctx.Request.Body)
+		if err != nil {
+			return fmt.Errorf("failed to read request body: %v", err)
+		}
+
+		ctx.Logger.Infof("[debug][ctx.BindYAML] body: %v", bodyBytes)
+		ctx.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+	}
+
 	return yaml.NewDecoder(ctx.Request.Body).Decode(obj)
 }
 
 // BindForm binds the query into the given struct.
 func (ctx *Context) BindForm(obj interface{}) error {
-	return tag.New("form", ctx.Forms()).Decode(obj)
+	forms := ctx.Forms()
+	if ctx.debug.IsDebugMode() {
+		ctx.Logger.Infof("[debug][ctx.BindForm]")
+		for k, v := range forms.ToMap() {
+			ctx.Logger.Infof("[debug][ctx.BindForm][detail] %s = %s", k, v)
+		}
+	}
+
+	return tag.New("form", forms).Decode(obj)
 }
 
 // BindParams binds the params into the given struct.
 func (ctx *Context) BindParams(obj interface{}) error {
-	return tag.New("param", ctx.Params()).Decode(obj)
+	params := ctx.Params()
+	if ctx.debug.IsDebugMode() {
+		ctx.Logger.Infof("[debug][ctx.BindParams]")
+		for k, v := range params.ToMap() {
+			ctx.Logger.Infof("[debug][ctx.BindParams][detail] %s = %s", k, v)
+		}
+	}
+
+	return tag.New("param", params).Decode(obj)
 }
 
 // BindHeader binds the header into the given struct.
 func (ctx *Context) BindHeader(obj interface{}) error {
-	return tag.New("header", ctx.Headers()).Decode(obj)
+	headers := ctx.Headers()
+	if ctx.debug.IsDebugMode() {
+		ctx.Logger.Infof("[debug][ctx.BindHeader]")
+		for k, v := range headers.ToMap() {
+			ctx.Logger.Infof("[debug][ctx.BindHeader][detail] %s = %s", k, v)
+		}
+	}
+
+	return tag.New("header", headers).Decode(obj)
 }
 
 // BindQuery binds the query into the given struct.
 func (ctx *Context) BindQuery(obj interface{}) error {
-	return tag.New("query", ctx.Queries()).Decode(obj)
+	queries := ctx.Queries()
+	if ctx.debug.IsDebugMode() {
+		ctx.Logger.Infof("[debug][ctx.BindQuery]")
+		for k, v := range queries.ToMap() {
+			ctx.Logger.Infof("[debug][ctx.BindQuery][detail] %s = %s", k, v)
+		}
+	}
+
+	return tag.New("query", queries).Decode(obj)
 }
 
 // // BindBody binds the body into the given struct.

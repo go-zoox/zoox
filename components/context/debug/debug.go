@@ -11,6 +11,7 @@ const DebugEnv = "GO_ZOOX_DEBUG"
 // Debug ...
 type Debug interface {
 	Info(args ...interface{})
+	IsDebugMode() bool
 }
 
 type debug struct {
@@ -31,4 +32,9 @@ func New(logger *logger.Logger) Debug {
 // Info logs debug info.
 func (c *debug) Info(args ...interface{}) {
 	c.core.Debug(args...)
+}
+
+// Info logs debug info.
+func (c *debug) IsDebugMode() bool {
+	return c.core.IsDebugMode()
 }
