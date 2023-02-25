@@ -112,10 +112,7 @@ func (g *RouterGroup) Any(path string, handler ...HandlerFunc) *RouterGroup {
 //	  },
 //	})
 func (g *RouterGroup) Proxy(path, target string, cfg *proxy.SingleTargetConfig) *RouterGroup {
-	p := proxy.NewSingleTarget(target, cfg)
-	return g.Any(path, func(ctx *Context) {
-		p.ServeHTTP(ctx.Writer, ctx.Request)
-	})
+	return g.Any(path, WrapH(proxy.NewSingleTarget(target, cfg)))
 }
 
 // WebSocket defines the method to add websocket route

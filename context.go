@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-zoox/proxy"
 	"github.com/go-zoox/zoox/components/context/body"
 	"github.com/go-zoox/zoox/components/context/cache"
 	"github.com/go-zoox/zoox/components/context/cron"
@@ -785,4 +786,9 @@ func (ctx *Context) RequestID() string {
 // Fetch is the context request utils, based on go-zoox/fetch.
 func (ctx *Context) Fetch() *fetch.Fetch {
 	return fetch.New()
+}
+
+// Proxy customize the request to proxy the backend services.
+func (ctx *Context) Proxy(target string, cfg *proxy.SingleTargetConfig) {
+	WrapH(proxy.NewSingleTarget(target, cfg))(ctx)
 }
