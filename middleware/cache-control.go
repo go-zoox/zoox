@@ -37,6 +37,11 @@ func CacheControl(cfg *CacheControlConfig) zoox.Middleware {
 	}
 
 	return func(ctx *zoox.Context) {
+		if ctx.Method != "GET" {
+			ctx.Next()
+			return
+		}
+
 		if cfg.Items != nil {
 			for _, item := range cfg.Items {
 				if item.Path.Match(ctx.Path) {
