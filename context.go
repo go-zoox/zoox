@@ -542,7 +542,7 @@ func (ctx *Context) BindJSON(obj interface{}) (err error) {
 		return errors.New("invalid request")
 	}
 
-	if ctx.debug.IsDebugMode() {
+	if ctx.Debug().IsDebugMode() {
 		// refernece: golang复用http.request.body - https://zhuanlan.zhihu.com/p/47313038
 		_, err = ctx.CloneBody()
 		if err != nil {
@@ -561,7 +561,7 @@ func (ctx *Context) BindYAML(obj interface{}) (err error) {
 		return errors.New("invalid request")
 	}
 
-	if ctx.debug.IsDebugMode() {
+	if ctx.Debug().IsDebugMode() {
 		// refernece: golang复用http.request.body - https://zhuanlan.zhihu.com/p/47313038
 		_, err = ctx.CloneBody()
 		if err != nil {
@@ -577,7 +577,7 @@ func (ctx *Context) BindYAML(obj interface{}) (err error) {
 // BindForm binds the query into the given struct.
 func (ctx *Context) BindForm(obj interface{}) error {
 	forms := ctx.Forms()
-	if ctx.debug.IsDebugMode() {
+	if ctx.Debug().IsDebugMode() {
 		ctx.Logger.Infof("[debug][ctx.BindForm]")
 		for k, v := range forms.ToMap() {
 			ctx.Logger.Infof("[debug][ctx.BindForm][detail] %s = %s", k, v)
@@ -590,7 +590,7 @@ func (ctx *Context) BindForm(obj interface{}) error {
 // BindParams binds the params into the given struct.
 func (ctx *Context) BindParams(obj interface{}) error {
 	params := ctx.Params()
-	if ctx.debug.IsDebugMode() {
+	if ctx.Debug().IsDebugMode() {
 		ctx.Logger.Infof("[debug][ctx.BindParams]")
 		for k, v := range params.ToMap() {
 			ctx.Logger.Infof("[debug][ctx.BindParams][detail] %s = %s", k, v)
@@ -603,7 +603,7 @@ func (ctx *Context) BindParams(obj interface{}) error {
 // BindHeader binds the header into the given struct.
 func (ctx *Context) BindHeader(obj interface{}) error {
 	headers := ctx.Headers()
-	if ctx.debug.IsDebugMode() {
+	if ctx.Debug().IsDebugMode() {
 		ctx.Logger.Infof("[debug][ctx.BindHeader]")
 		for k, v := range headers.ToMap() {
 			ctx.Logger.Infof("[debug][ctx.BindHeader][detail] %s = %s", k, v)
@@ -616,7 +616,7 @@ func (ctx *Context) BindHeader(obj interface{}) error {
 // BindQuery binds the query into the given struct.
 func (ctx *Context) BindQuery(obj interface{}) error {
 	queries := ctx.Queries()
-	if ctx.debug.IsDebugMode() {
+	if ctx.Debug().IsDebugMode() {
 		ctx.Logger.Infof("[debug][ctx.BindQuery]")
 		for k, v := range queries.ToMap() {
 			ctx.Logger.Infof("[debug][ctx.BindQuery][detail] %s = %s", k, v)
