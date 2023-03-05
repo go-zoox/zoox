@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/go-zoox/proxy"
+	"github.com/go-zoox/proxy/utils/rewriter"
 	"github.com/go-zoox/zoox/components/context/websocket"
 	gowebsocket "github.com/gorilla/websocket"
 )
@@ -117,7 +118,27 @@ func (g *RouterGroup) Any(path string, handler ...HandlerFunc) *RouterGroup {
 //	  },
 //	})
 func (g *RouterGroup) Proxy(path, target string, cfg *proxy.SingleTargetConfig) *RouterGroup {
-	return g.Any(path, WrapH(proxy.NewSingleTarget(target, cfg)))
+	// @TODO /api/v1/tasks => /
+	cfgX := &proxy.SingleTargetConfig{
+		Rewrites: rewriter.Rewriters{
+			{
+				From: ".*",
+				To:   "/",
+			},
+		},
+		Scheme:          cfg.Scheme,
+		Query:           cfg.Query,
+		RequestHeaders:  cfg.RequestHeaders,
+		ResponseHeaders: cfg.ResponseHeaders,
+		OnRequest:       cfg.OnRequest,
+		OnResponse:      cfg.OnResponse,
+		IsAnonymouse:    cfg.IsAnonymouse,
+		ChangeOrigin:    cfg.ChangeOrigin,
+	}
+	g.Any(path, WrapH(proxy.NewSingleTarget(target, cfgX)))
+
+	// /api/v1/tasks/(.*) => /$1
+	return g.Any(fmt.Sprintf("%s/*", path), WrapH(proxy.NewSingleTarget(target, cfg)))
 }
 
 // WebSocket defines the method to add websocket route
