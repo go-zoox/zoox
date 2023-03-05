@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"runtime"
+	"runtime/debug"
 	"strings"
 
 	"github.com/go-zoox/logger"
@@ -15,6 +16,9 @@ func Recovery() zoox.Middleware {
 	return func(ctx *zoox.Context) {
 		defer func() {
 			if err := recover(); err != nil {
+				// stackoverflow: https://stackoverflow.com/questions/52103182/how-to-get-the-stacktrace-of-a-panic-and-store-as-a-variable
+				fmt.Println("stacktrace from panic: \n" + string(debug.Stack()))
+
 				switch v := err.(type) {
 				case error:
 					logger.Errorf("[recovery][%s %s] %s", ctx.Method, ctx.Path, (fmt.Sprintf("%s", v)))
