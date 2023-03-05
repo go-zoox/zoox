@@ -118,7 +118,9 @@ func (g *RouterGroup) Any(path string, handler ...HandlerFunc) *RouterGroup {
 //	  },
 //	})
 func (g *RouterGroup) Proxy(path, target string, cfg *proxy.SingleTargetConfig) *RouterGroup {
-	// @TODO /api/v1/tasks => /
+	// @TODO root path
+	//		1. /api/v1/tasks => /
+	//  	2. /api/v1/tasks/ => /
 	cfgX := &proxy.SingleTargetConfig{
 		Rewrites: rewriter.Rewriters{
 			{
