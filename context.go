@@ -472,7 +472,7 @@ func (ctx *Context) Params() *safe.Map {
 func (ctx *Context) Bodies() map[string]any {
 	var bodies map[string]any
 
-	if bytes, err := io.ReadAll(ctx.Request.Body); err == nil {
+	if bytes, err := ctx.BodyBytes(); err == nil {
 		if err := json.Unmarshal(bytes, &bodies); err == nil {
 			return bodies
 		}
@@ -808,4 +808,14 @@ func (ctx *Context) CloneBody() (body io.ReadCloser, err error) {
 	}
 
 	return ioutil.NopCloser(bytes.NewBuffer(ctx.bodyBytes)), nil
+}
+
+// BodyBytes reads all bodies as string.
+func (ctx *Context) BodyBytes() ([]byte, error) {
+	bytes, err := io.ReadAll(ctx.Request.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes, nil
 }
