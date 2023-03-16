@@ -37,13 +37,11 @@ func AuthServer(cfg *AuthServerConfig) zoox.Middleware {
 
 		// 2. Basic Auth
 		if username, password, ok := ctx.Request.BasicAuth(); ok {
-			if status, code, message, err := handleAuthServerTypeBasicAuth(ctx, cfg.Server, username, password); err != nil {
+			if _, _, _, err := handleAuthServerTypeBasicAuth(ctx, cfg.Server, username, password); err != nil {
 				ctx.Logger.Errorf("[auth-server: bearer token] failed to authenticate with auth server: %s", err)
 
-				ctx.JSON(status, zoox.H{
-					"code":    code,
-					"message": message,
-				})
+				ctx.Set("WWW-Authenticate", `Basic realm="Go-Zoox"`)
+				ctx.Status(401)
 				return
 			}
 
