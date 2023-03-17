@@ -239,6 +239,51 @@ func (ctx *Context) Connection() string {
 	return ctx.Get(headers.Connection)
 }
 
+// UserAgent return the request user-agent header.
+func (ctx *Context) UserAgent() string {
+	return ctx.Get(headers.UserAgent)
+}
+
+// XForwardedFor return the request x-forwarded-for header.
+func (ctx *Context) XForwardedFor() string {
+	return ctx.Get(headers.XForwardedFor)
+}
+
+// XForwardedProto return the request x-forwarded-proto header.
+func (ctx *Context) XForwardedProto() string {
+	return ctx.Get(headers.XForwardedProto)
+}
+
+// XForwardedHost return the request x-forwarded-host header.
+func (ctx *Context) XForwardedHost() string {
+	return ctx.Get(headers.XForwardedHost)
+}
+
+// XForwardedPort return the request x-forwarded-port header.
+func (ctx *Context) XForwardedPort() string {
+	return ctx.Get(headers.XForwardedPort)
+}
+
+// XRealIP return the request x-real-ip header.
+func (ctx *Context) XRealIP() string {
+	return ctx.Get(headers.XRealIP)
+}
+
+// Upgrade return the request upgrade header.
+func (ctx *Context) Upgrade() string {
+	return ctx.Get(headers.Upgrade)
+}
+
+// Origin returns the origin of the request.
+func (ctx *Context) Origin() string {
+	return ctx.Get(headers.Origin)
+}
+
+// Referrer returns the referrer of the request.
+func (ctx *Context) Referrer() string {
+	return ctx.Get(headers.Referrer)
+}
+
 // IsConnectionUpgrade checks if the connection upgrade.
 func (ctx *Context) IsConnectionUpgrade() bool {
 	if !ctx.isUpgradeSet {
@@ -654,7 +699,7 @@ func (ctx *Context) SaveFile(key, path string) error {
 
 // AcceptJSON returns true if the request accepts json.
 func (ctx *Context) AcceptJSON() bool {
-	accept := ctx.Get("Accept")
+	accept := ctx.Get(headers.Accept)
 	// for curl
 	if accept == "*/*" {
 		return true
@@ -665,12 +710,7 @@ func (ctx *Context) AcceptJSON() bool {
 
 // AcceptHTML returns true if the request accepts html.
 func (ctx *Context) AcceptHTML() bool {
-	return strings.Contains(ctx.Get("Accept"), "text/html")
-}
-
-// Origin returns the origin of the request.
-func (ctx *Context) Origin() string {
-	return ctx.Get("Origin")
+	return strings.Contains(ctx.Get(headers.Accept), "text/html")
 }
 
 // Cache returns the cache of the application.
