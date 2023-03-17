@@ -15,6 +15,10 @@ func Defaults() *zoox.Application {
 		app.Use(middleware.RequestID())
 	})
 
+	zoox.DefaultMiddleware("realip", func(app *zoox.Application) {
+		app.Use(middleware.RealIP())
+	})
+
 	zoox.DefaultMiddleware("logger", func(app *zoox.Application) {
 		app.Use(middleware.Logger())
 	})
