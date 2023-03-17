@@ -15,7 +15,7 @@ require (
 	github.com/go-zoox/jwt v1.2.0
 	github.com/go-zoox/kv v1.5.0
 	github.com/go-zoox/logger v1.4.0
-	github.com/go-zoox/proxy v1.3.6
+	github.com/go-zoox/proxy v1.3.7
 	github.com/go-zoox/random v1.0.3
 	github.com/go-zoox/ratelimit v1.2.0
 	github.com/go-zoox/session v1.0.6
@@ -51,9 +51,9 @@ require (
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	golang.org/x/crypto v0.5.0 // indirect
-	golang.org/x/net v0.5.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
-	golang.org/x/text v0.6.0 // indirect
+	golang.org/x/net v0.8.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/text v0.8.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 )
 
