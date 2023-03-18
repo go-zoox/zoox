@@ -14,9 +14,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-zoox/cache"
 	"github.com/go-zoox/proxy"
 	"github.com/go-zoox/zoox/components/context/body"
-	"github.com/go-zoox/zoox/components/context/cache"
 	"github.com/go-zoox/zoox/components/context/cron"
 	"github.com/go-zoox/zoox/components/context/debug"
 	"github.com/go-zoox/zoox/components/context/env"

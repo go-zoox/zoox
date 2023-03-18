@@ -3,8 +3,9 @@ module github.com/go-zoox/zoox
 go 1.18
 
 require (
+	github.com/go-zoox/cache v1.0.1
 	github.com/go-zoox/cookie v1.0.2
-	github.com/go-zoox/core-utils v1.2.3
+	github.com/go-zoox/core-utils v1.2.7
 	github.com/go-zoox/counter v1.2.0
 	github.com/go-zoox/cron v1.1.2
 	github.com/go-zoox/debug v1.0.1
@@ -13,9 +14,8 @@ require (
 	github.com/go-zoox/headers v1.0.6
 	github.com/go-zoox/jobqueue v1.0.0
 	github.com/go-zoox/jwt v1.2.0
-	github.com/go-zoox/kv v1.5.0
-	github.com/go-zoox/logger v1.4.0
-	github.com/go-zoox/proxy v1.3.7
+	github.com/go-zoox/logger v1.4.4
+	github.com/go-zoox/proxy v1.4.0
 	github.com/go-zoox/random v1.0.3
 	github.com/go-zoox/ratelimit v1.2.0
 	github.com/go-zoox/session v1.0.6
@@ -38,7 +38,8 @@ require (
 	github.com/go-zoox/datetime v1.1.1 // indirect
 	github.com/go-zoox/encoding v1.2.1 // indirect
 	github.com/go-zoox/errors v1.0.2 // indirect
-	github.com/go-zoox/fs v1.3.7 // indirect
+	github.com/go-zoox/fs v1.3.9 // indirect
+	github.com/go-zoox/kv v1.5.0 // indirect
 	github.com/go-zoox/safe v1.0.1 // indirect
 	github.com/goccy/go-yaml v1.9.8 // indirect
 	github.com/google/uuid v1.3.0 // indirect
