@@ -9,7 +9,7 @@ require (
 	github.com/go-zoox/counter v1.2.0
 	github.com/go-zoox/cron v1.1.2
 	github.com/go-zoox/debug v1.0.1
-	github.com/go-zoox/fetch v1.7.4
+	github.com/go-zoox/fetch v1.7.6
 	github.com/go-zoox/gzip v1.0.0
 	github.com/go-zoox/headers v1.0.6
 	github.com/go-zoox/jobqueue v1.0.0
@@ -28,9 +28,7 @@ require (
 require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/fatih/color v1.14.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
-	github.com/go-playground/validator/v10 v10.11.0 // indirect
 	github.com/go-redis/redis/v8 v8.11.5 // indirect
 	github.com/go-zoox/chalk v1.0.2 // indirect
 	github.com/go-zoox/compress v1.0.1 // indirect
@@ -41,10 +39,7 @@ require (
 	github.com/go-zoox/fs v1.3.9 // indirect
 	github.com/go-zoox/kv v1.5.0 // indirect
 	github.com/go-zoox/safe v1.0.1 // indirect
-	github.com/goccy/go-yaml v1.9.8 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
