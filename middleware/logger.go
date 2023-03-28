@@ -13,12 +13,14 @@ func Logger() zoox.Middleware {
 		t := time.Now()
 		if ctx.IsConnectionUpgrade() {
 			logger.Info("[%s] %s %s %d +%dms (connection: Upgrade)", ctx.Request.RemoteAddr, ctx.Method, ctx.Path, ctx.StatusCode, time.Since(t)/time.Millisecond)
+		} else {
+			logger.Info("[%s][=>] %s %s", ctx.Request.RemoteAddr, ctx.Method, ctx.Path)
 		}
 
 		ctx.Next()
 
 		if !ctx.IsConnectionUpgrade() {
-			logger.Info("[%s] %s %s %d +%dms", ctx.Request.RemoteAddr, ctx.Method, ctx.Path, ctx.StatusCode, time.Since(t)/time.Millisecond)
+			logger.Info("[%s][<=] %s %s %d +%dms", ctx.Request.RemoteAddr, ctx.Method, ctx.Path, ctx.StatusCode, time.Since(t)/time.Millisecond)
 		}
 	}
 }
