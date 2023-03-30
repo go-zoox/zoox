@@ -2,9 +2,16 @@ package zoox
 
 import (
 	"bufio"
-	"io"
 	"net"
 	"net/http"
+
+	"github.com/go-zoox/logger"
+)
+
+const (
+	noWritten = -1
+	// io.Copy response write will not trigger writeHeader => default status should be 200
+	defaultStatus = http.StatusOK
 )
 
 // ResponseWriter ...
@@ -13,8 +20,6 @@ type ResponseWriter interface {
 	http.Hijacker
 	http.CloseNotifier
 	http.Flusher
-
-	setContext(ctx *Context)
 
 	// Status returns the HTTP response status code of the current request.
 	Status() int
@@ -29,32 +34,76 @@ type ResponseWriter interface {
 	// Written returns true if the response body was already written.
 	Written() bool
 
-	// WriteHeaderNow forces to write the http header (status code + headers).
-	WriteHeaderNow()
-
 	// Pusher get the http.Pusher for server push
 	Pusher() http.Pusher
+
+	// WriteHeaderNow forces to write the http header (status code + headers).
+	WriteHeaderNow()
 }
 
 type responseWriter struct {
 	http.ResponseWriter
+	//
+	//
 	size   int
 	status int
-	ctx    *Context
-	//
-	isStatusWritten bool
-	//
-	isEmpty bool
 }
 
 func newResponseWriter(origin http.ResponseWriter) ResponseWriter {
 	return &responseWriter{
 		ResponseWriter: origin,
-		size:           -1,
-		status:         404, // default status 404
-		isEmpty:        true,
+		size:           noWritten,
+		status:         defaultStatus, // default status 404
 	}
 }
+
+func (w *responseWriter) WriteHeader(code int) {
+	if code > 0 && w.status != code {
+		if w.Written() {
+			logger.Debugf("[WARNING] Headers were already written. Wanted to override status code %d with %d", w.status, code)
+			return
+		}
+
+		w.status = code
+	}
+}
+
+func (w *responseWriter) Write(b []byte) (n int, err error) {
+	// write status
+	w.WriteHeaderNow()
+
+	// write body
+	n, err = w.ResponseWriter.Write(b)
+
+	// record size
+	w.size += n
+	return
+}
+
+///////////////////////
+
+// WriteHeaderNow forces to write the http header (status code + headers).
+func (w *responseWriter) WriteHeaderNow() {
+	if !w.Written() {
+		w.size = 0
+		w.ResponseWriter.WriteHeader(w.status)
+	}
+}
+
+func (w *responseWriter) reset(writer http.ResponseWriter) {
+	w.ResponseWriter = writer
+	w.size = noWritten
+	w.status = defaultStatus
+}
+
+///////////////////////
+
+func (w *responseWriter) WriteString(s string) (n int, err error) {
+	w.Write([]byte(s))
+	return
+}
+
+///////////////////////
 
 func (w *responseWriter) Status() int {
 	return w.status
@@ -65,54 +114,7 @@ func (w *responseWriter) Size() int {
 }
 
 func (w *responseWriter) Written() bool {
-	return w.size != -1
-}
-
-func (w *responseWriter) WriteHeader(code int) {
-	if !w.isStatusWritten {
-		w.isStatusWritten = true
-	}
-
-	if code > 0 && w.status != code {
-		w.status = code
-
-		w.ctx.StatusCode = code
-	}
-}
-
-func (w *responseWriter) WriteHeaderNow() {
-	if !w.Written() {
-		// @TODO io.Copy response write will not trigger writeHeader
-		if !w.isEmpty && !w.isStatusWritten {
-			w.status = 200
-			w.ctx.StatusCode = 200
-		}
-
-		w.size = 0
-		w.ResponseWriter.WriteHeader(w.status)
-	}
-}
-
-func (w *responseWriter) Write(b []byte) (n int, err error) {
-	if w.isEmpty {
-		w.isEmpty = len(b) == 0
-	}
-
-	w.WriteHeaderNow()
-	n, err = w.ResponseWriter.Write(b)
-	w.size += n
-	return
-}
-
-func (w *responseWriter) WriteString(s string) (n int, err error) {
-	if w.isEmpty {
-		w.isEmpty = len(s) == 0
-	}
-
-	w.WriteHeaderNow()
-	n, err = io.WriteString(w.ResponseWriter, s)
-	w.size += n
-	return
+	return w.size != noWritten
 }
 
 // Hijack implements the http.Hijacker interface.
@@ -122,10 +124,6 @@ func (w *responseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 	}
 
 	return w.ResponseWriter.(http.Hijacker).Hijack()
-}
-
-func (w *responseWriter) setContext(ctx *Context) {
-	w.ctx = ctx
 }
 
 func (w *responseWriter) CloseNotify() <-chan bool {

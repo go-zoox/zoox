@@ -55,7 +55,7 @@ type Context struct {
 	body  body.Body
 
 	// response
-	StatusCode int
+
 	//
 	cookie  cookie.Cookie
 	session session.Session
@@ -98,13 +98,13 @@ func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Con
 	// }
 
 	ctx := &Context{
-		App:        app,
-		Writer:     newResponseWriter(w),
-		Request:    req,
-		Method:     req.Method,
-		Path:       path,
-		StatusCode: 404,
-		index:      -1,
+		App:     app,
+		Writer:  newResponseWriter(w),
+		Request: req,
+		Method:  req.Method,
+		Path:    path,
+		//
+		index: -1,
 	}
 
 	ctx.requestID = ctx.Get(utils.RequestIDHeader)
@@ -115,8 +115,6 @@ func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Con
 	ctx.Logger = logger.New(&logger.Options{
 		Level: app.LogLevel,
 	})
-
-	ctx.Writer.setContext(ctx)
 
 	return ctx
 }
@@ -175,8 +173,12 @@ func (ctx *Context) Body() body.Body {
 
 // Status sets the HTTP response status code.
 func (ctx *Context) Status(status int) {
-	ctx.StatusCode = status
 	ctx.Writer.WriteHeader(status)
+}
+
+// StatusCode returns the HTTP response status code.
+func (ctx *Context) StatusCode() int {
+	return ctx.Writer.Status()
 }
 
 // Get alias for ctx.Header.
