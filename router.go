@@ -4,19 +4,26 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/go-zoox/core-utils/safe"
 	"github.com/go-zoox/zoox/components/context/param"
 	route "github.com/go-zoox/zoox/components/router"
 )
 
 type router struct {
-	roots    map[string]*route.Node
-	handlers map[string][]HandlerFunc
+	// roots map[string]*route.Node
+	// handlers map[string][]HandlerFunc
+	roots    *safe.Map
+	handlers *safe.Map
 }
 
 func newRouter() *router {
 	return &router{
-		roots:    make(map[string]*route.Node),
-		handlers: make(map[string][]HandlerFunc),
+		// roots:    make(map[string]*route.Node),
+		// handlers: make(map[string][]HandlerFunc),
+		// roots:    &safe.Map{},
+		// handlers: &safe.Map{},
+		roots:    safe.NewMap(),
+		handlers: safe.NewMap(),
 	}
 }
 
@@ -43,23 +50,22 @@ func (r *router) addRoute(method string, path string, handler ...HandlerFunc) {
 	parts := parsePath(path)
 
 	key := fmt.Sprintf("%s %s", method, path)
-	if _, ok := r.roots[method]; !ok {
-		r.roots[method] = &route.Node{}
+	if ok := r.roots.Has(method); !ok {
+		r.roots.Set(method, &route.Node{})
 	}
 
-	r.roots[method].Insert(path, parts, 0)
-	r.handlers[key] = handler
+	r.roots.Get(method).(*route.Node).Insert(path, parts, 0)
+	r.handlers.Set(key, handler)
 }
 
 func (r *router) getRoute(method string, path string) (*route.Node, map[string]string) {
 	searchParts := parsePath(path)
 	params := make(map[string]string)
-	root, ok := r.roots[method]
-
-	if !ok {
+	if ok := r.roots.Has(method); !ok {
 		return nil, nil
 	}
 
+	root := r.roots.Get(method).(*route.Node)
 	if n := root.Search(searchParts, 0); n != nil {
 		parts := parsePath(n.Path)
 		for i, part := range parts {
@@ -83,8 +89,11 @@ func (r *router) handle(ctx *Context) {
 		ctx.param = param.New(params)
 
 		key := fmt.Sprintf("%s %s", ctx.Method, n.Path)
-		if handler, ok := r.handlers[key]; ok {
-			ctx.handlers = append(ctx.handlers, handler...)
+		if ok := r.handlers.Has(key); ok {
+			handler, ok := r.handlers.Get(key).([]HandlerFunc)
+			if ok {
+				ctx.handlers = append(ctx.handlers, handler...)
+			}
 		} else {
 			ctx.handlers = append(ctx.handlers, ctx.App.notfound)
 		}
