@@ -10,18 +10,12 @@ import (
 )
 
 type router struct {
-	// roots map[string]*route.Node
-	// handlers map[string][]HandlerFunc
 	roots    *safe.Map
 	handlers *safe.Map
 }
 
 func newRouter() *router {
 	return &router{
-		// roots:    make(map[string]*route.Node),
-		// handlers: make(map[string][]HandlerFunc),
-		// roots:    &safe.Map{},
-		// handlers: &safe.Map{},
 		roots:    safe.NewMap(),
 		handlers: safe.NewMap(),
 	}
@@ -93,6 +87,8 @@ func (r *router) handle(ctx *Context) {
 			handler, ok := r.handlers.Get(key).([]HandlerFunc)
 			if ok {
 				ctx.handlers = append(ctx.handlers, handler...)
+			} else {
+				ctx.handlers = append(ctx.handlers, ctx.App.notfound)
 			}
 		} else {
 			ctx.handlers = append(ctx.handlers, ctx.App.notfound)
