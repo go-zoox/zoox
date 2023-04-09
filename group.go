@@ -119,10 +119,10 @@ func (g *RouterGroup) Any(path string, handler ...HandlerFunc) *RouterGroup {
 //	})
 //
 //	app.Proxy("*", "https://httpbin.org")
-func (g *RouterGroup) Proxy(path, target string, cfg ...*proxy.SingleTargetConfig) *RouterGroup {
-	cfgX := &proxy.SingleTargetConfig{}
-	if len(cfg) > 0 && cfg[0] != nil {
-		cfgX = cfg[0]
+func (g *RouterGroup) Proxy(path, target string, options ...func(cfg *proxy.SingleTargetConfig)) *RouterGroup {
+	cfg := &proxy.SingleTargetConfig{}
+	for _, option := range options {
+		option(cfg)
 	}
 
 	// // /api/v1/tasks/(.*) => /$1
@@ -133,9 +133,11 @@ func (g *RouterGroup) Proxy(path, target string, cfg ...*proxy.SingleTargetConfi
 		panic(err)
 	}
 
+	handler := WrapH(proxy.NewSingleTarget(target, cfg))
+
 	g.Use(func(ctx *Context) {
 		if re.Match(ctx.Path) {
-			WrapH(proxy.NewSingleTarget(target, cfgX))(ctx)
+			handler(ctx)
 			return
 		}
 
