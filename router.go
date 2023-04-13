@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/go-zoox/core-utils/safe"
+	"github.com/go-zoox/logger"
 	"github.com/go-zoox/zoox/components/context/param"
 	route "github.com/go-zoox/zoox/components/router"
 )
@@ -39,7 +40,7 @@ func parsePath(path string) []string {
 }
 
 func (r *router) addRoute(method string, path string, handler ...HandlerFunc) {
-	// logger.Info("Route add: %4s %s", method, path)
+	logger.Info("[router] register: %8s %s", method, path)
 
 	parts := parsePath(path)
 
