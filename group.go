@@ -7,8 +7,8 @@ import (
 	"path"
 	"time"
 
+	"github.com/go-zoox/core-utils/regexp"
 	"github.com/go-zoox/proxy"
-	"github.com/go-zoox/proxy/utils/rewriter"
 	"github.com/go-zoox/zoox/components/context/websocket"
 	gowebsocket "github.com/gorilla/websocket"
 )
@@ -112,35 +112,39 @@ func (g *RouterGroup) Any(path string, handler ...HandlerFunc) *RouterGroup {
 //
 // Example:
 //
-//	app.Proxy("/api/v1/tasks", "http://zmicro.services.tasks:8080", &proxy.SingleTargetConfig{
+//	app.Proxy("/api/v1/tasks/(.*)", "http://zmicro.services.tasks:8080", &proxy.SingleTargetConfig{
 //		Rewrites: rewriter.Rewriters{
 //	    {From: "/api/v1/tasks/(.*)", To: "/$1"},
 //	  },
 //	})
-func (g *RouterGroup) Proxy(path, target string, cfg *proxy.SingleTargetConfig) *RouterGroup {
-	// @TODO root path
-	//		1. /api/v1/tasks => /
-	//  	2. /api/v1/tasks/ => /
-	cfgX := &proxy.SingleTargetConfig{
-		Rewrites: rewriter.Rewriters{
-			{
-				From: ".*",
-				To:   "/",
-			},
-		},
-		Scheme:          cfg.Scheme,
-		Query:           cfg.Query,
-		RequestHeaders:  cfg.RequestHeaders,
-		ResponseHeaders: cfg.ResponseHeaders,
-		OnRequest:       cfg.OnRequest,
-		OnResponse:      cfg.OnResponse,
-		IsAnonymouse:    cfg.IsAnonymouse,
-		ChangeOrigin:    cfg.ChangeOrigin,
+//
+//	app.Proxy("*", "https://httpbin.org")
+func (g *RouterGroup) Proxy(path, target string, options ...func(cfg *proxy.SingleTargetConfig)) *RouterGroup {
+	cfg := &proxy.SingleTargetConfig{}
+	for _, option := range options {
+		option(cfg)
 	}
-	g.Any(path, WrapH(proxy.NewSingleTarget(target, cfgX)))
 
-	// /api/v1/tasks/(.*) => /$1
-	return g.Any(fmt.Sprintf("%s/*", path), WrapH(proxy.NewSingleTarget(target, cfg)))
+	// // /api/v1/tasks/(.*) => /$1
+	// return g.Any(fmt.Sprintf("%s/*", path), WrapH(proxy.NewSingleTarget(target, cfgX)))
+
+	re, err := regexp.New(path)
+	if err != nil {
+		panic(err)
+	}
+
+	handler := WrapH(proxy.NewSingleTarget(target, cfg))
+
+	g.Use(func(ctx *Context) {
+		if re.Match(ctx.Path) {
+			handler(ctx)
+			return
+		}
+
+		ctx.Next()
+	})
+
+	return g
 }
 
 // WebSocket defines the method to add websocket route

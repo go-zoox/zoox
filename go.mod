@@ -3,7 +3,7 @@ module github.com/go-zoox/zoox
 go 1.18
 
 require (
-	github.com/go-zoox/cache v1.0.1
+	github.com/go-zoox/cache v1.0.2
 	github.com/go-zoox/cookie v1.0.2
 	github.com/go-zoox/core-utils v1.2.7
 	github.com/go-zoox/counter v1.2.0
@@ -39,7 +39,7 @@ require (
 	github.com/go-zoox/encoding v1.2.1 // indirect
 	github.com/go-zoox/errors v1.0.2 // indirect
 	github.com/go-zoox/fs v1.3.9 // indirect
-	github.com/go-zoox/kv v1.5.0 // indirect
+	github.com/go-zoox/kv v1.5.1 // indirect
 	github.com/go-zoox/safe v1.0.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
