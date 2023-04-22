@@ -210,11 +210,13 @@ func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup
 							// action => ignored.
 							// ctx.Logger.Warnf("read err: %s (type: %d)", err, mt)
 						default:
-							ctx.Logger.Errorf("read err: %s (type: %d)", err, mt)
+							ctx.Logger.Errorf("read err: %s (code: %d, type: %d)", err, e.Code, mt)
 						}
-					} else {
-						ctx.Logger.Errorf("read err: %s (type: %d)", err, mt)
 					}
+
+					// else {
+					// 	ctx.Logger.Errorf("read err: %s (type: %d)", err, mt)
+					// }
 				}
 
 				return
