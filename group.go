@@ -166,7 +166,7 @@ func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup
 
 		defer func() {
 			if client.OnDisconnect != nil {
-				client.OnDisconnect()
+				go client.OnDisconnect()
 			}
 
 			conn.Close()
@@ -174,7 +174,7 @@ func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup
 
 		// ctx.Logger.Info("ws connected")
 		if client.OnConnect != nil {
-			client.OnConnect()
+			go client.OnConnect()
 		}
 
 		for {
@@ -195,7 +195,7 @@ func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup
 
 			if err != nil {
 				if client.OnError != nil {
-					client.OnError(err)
+					go client.OnError(err)
 				} else {
 					if e, ok := err.(*gowebsocket.CloseError); ok {
 						switch e.Code {
@@ -219,18 +219,18 @@ func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup
 			switch mt {
 			case websocket.TextMessage:
 				if client.OnTextMessage != nil {
-					client.OnTextMessage(message)
+					go client.OnTextMessage(message)
 				}
 			case websocket.BinaryMessage:
 				if client.OnBinaryMessage != nil {
-					client.OnBinaryMessage(message)
+					go client.OnBinaryMessage(message)
 				}
 			default:
 				ctx.Logger.Warn("unknown message type: %d", mt)
 			}
 
 			if client.OnMessage != nil {
-				client.OnMessage(mt, message)
+				go client.OnMessage(mt, message)
 			}
 		}
 	})
