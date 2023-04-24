@@ -176,14 +176,14 @@ func (app *Application) Run(addr ...string) (err error) {
 
 	if addrX != "" {
 		// Pattern@1 => :8080
-		if regexp.Match("^:\\d+", addrX) {
+		if regexp.Match("^:\\d+$", addrX) {
 			app.Port = cast.ToInt(addrX[1:])
-		} else if regexp.Match("\\s+:\\d+", addrX) {
+		} else if regexp.Match("^[\\w\\.]+:\\d+$", addrX) {
 			// Pattern@2 => 127.0.0.1:8080
 			parts := strings.Split(addrX, ":")
 			app.Host = cast.ToString(parts[0])
 			app.Port = cast.ToInt(parts[1])
-		} else if regexp.Match("^http://\\s+:\\d+", addrX) {
+		} else if regexp.Match("^http://[\\w\\.]+:\\d+", addrX) {
 			// Pattern@3 => http://127.0.0.1:8080
 			u, err := url.Parse(addrX)
 			if err != nil {
@@ -191,9 +191,8 @@ func (app *Application) Run(addr ...string) (err error) {
 			}
 
 			app.Protocol = u.Scheme
-			parts := strings.Split(u.Host, ":")
-			app.Host = cast.ToString(parts[0])
-			app.Port = cast.ToInt(parts[1])
+			app.Host = u.Hostname()
+			app.Port = cast.ToInt(u.Port())
 		} else if regexp.Match("^unix://", addrX) {
 			// Pattern@4 => unix:///tmp/xxx.sock
 			app.Protocol = "unix"
