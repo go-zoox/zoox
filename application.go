@@ -9,6 +9,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"text/template"
 	"time"
@@ -172,6 +173,10 @@ func (app *Application) Run(addr ...string) (err error) {
 	var addrX string
 	if len(addr) > 0 && addr[0] != "" {
 		addrX = addr[0]
+	} else {
+		if os.Getenv("PORT") != "" {
+			addrX = ":" + os.Getenv("PORT")
+		}
 	}
 
 	if addrX != "" {
