@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/go-zoox/cache v1.0.2
 	github.com/go-zoox/cookie v1.0.2
-	github.com/go-zoox/core-utils v1.2.7
+	github.com/go-zoox/core-utils v1.2.9
 	github.com/go-zoox/counter v1.2.0
 	github.com/go-zoox/cron v1.1.2
 	github.com/go-zoox/debug v1.0.1
@@ -19,7 +19,7 @@ require (
 	github.com/go-zoox/random v1.0.3
 	github.com/go-zoox/ratelimit v1.2.0
 	github.com/go-zoox/session v1.0.6
-	github.com/go-zoox/tag v1.2.0
+	github.com/go-zoox/tag v1.2.2
 	github.com/go-zoox/uuid v0.0.1
 	github.com/gorilla/websocket v1.5.0
 	github.com/stretchr/testify v1.8.0
@@ -50,11 +50,8 @@ require (
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	golang.org/x/crypto v0.5.0 // indirect
-	golang.org/x/net v0.8.0 // indirect
-	golang.org/x/sys v0.6.0 // indirect
-	golang.org/x/text v0.8.0 // indirect
+	golang.org/x/net v0.9.0 // indirect
+	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 )
-
-// replace github.com/go-zoox/proxy => ../proxy
-// replace github.com/go-zoox/cron => ../cron
