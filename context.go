@@ -16,6 +16,7 @@ import (
 
 	"github.com/go-zoox/cache"
 	"github.com/go-zoox/proxy"
+	"github.com/go-zoox/tag/datasource"
 	"github.com/go-zoox/zoox/components/application/cron"
 	"github.com/go-zoox/zoox/components/application/debug"
 	"github.com/go-zoox/zoox/components/application/env"
@@ -673,10 +674,18 @@ func (ctx *Context) BindQuery(obj interface{}) error {
 	return tag.New("query", queries).Decode(obj)
 }
 
-// // BindBody binds the body into the given struct.
-// func (ctx *Context) BindBody(obj interface{}) error {
-// 	return tag.New("body", ctx.Bodies()).Decode(obj)
-// }
+// BindBody binds the body into the given struct.
+func (ctx *Context) BindBody(obj interface{}) error {
+	data := ctx.Bodies()
+	if ctx.Debug().IsDebugMode() {
+		ctx.Logger.Infof("[debug][ctx.BindBody]")
+		for k, v := range data {
+			ctx.Logger.Infof("[debug][ctx.BindBody][detail] %s = %v", k, v)
+		}
+	}
+
+	return tag.New("body", datasource.NewMapDataSource(data)).Decode(obj)
+}
 
 // SaveFile saves the file to the given path.
 func (ctx *Context) SaveFile(key, path string) error {
