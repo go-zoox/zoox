@@ -18,11 +18,11 @@ import (
 	"github.com/go-zoox/core-utils/cast"
 	"github.com/go-zoox/core-utils/regexp"
 	"github.com/go-zoox/logger"
-	"github.com/go-zoox/zoox/components/context/cron"
-	"github.com/go-zoox/zoox/components/context/debug"
-	"github.com/go-zoox/zoox/components/context/env"
-	"github.com/go-zoox/zoox/components/context/queue"
-	"github.com/go-zoox/zoox/components/context/websocket"
+	"github.com/go-zoox/zoox/components/application/cron"
+	"github.com/go-zoox/zoox/components/application/debug"
+	"github.com/go-zoox/zoox/components/application/env"
+	"github.com/go-zoox/zoox/components/application/jobqueue"
+	"github.com/go-zoox/zoox/components/application/websocket"
 	"github.com/go-zoox/zoox/rpc/jsonrpc"
 )
 
@@ -61,7 +61,7 @@ type Application struct {
 	cache       cache.Cache
 	//
 	cron  cron.Cron
-	queue queue.Queue
+	queue jobqueue.JobQueue
 	//
 	Env    env.Env
 	Logger *logger.Logger
@@ -367,10 +367,10 @@ func (app *Application) Cron() cron.Cron {
 	return app.cron
 }
 
-// Queue ...
-func (app *Application) Queue() queue.Queue {
+// JobQueue ...
+func (app *Application) JobQueue() jobqueue.JobQueue {
 	if app.queue == nil {
-		app.queue = queue.New()
+		app.queue = jobqueue.New()
 	}
 
 	return app.queue

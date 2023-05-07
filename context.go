@@ -16,14 +16,14 @@ import (
 
 	"github.com/go-zoox/cache"
 	"github.com/go-zoox/proxy"
+	"github.com/go-zoox/zoox/components/application/cron"
+	"github.com/go-zoox/zoox/components/application/debug"
+	"github.com/go-zoox/zoox/components/application/env"
+	"github.com/go-zoox/zoox/components/application/jobqueue"
 	"github.com/go-zoox/zoox/components/context/body"
-	"github.com/go-zoox/zoox/components/context/cron"
-	"github.com/go-zoox/zoox/components/context/debug"
-	"github.com/go-zoox/zoox/components/context/env"
 	"github.com/go-zoox/zoox/components/context/form"
 	"github.com/go-zoox/zoox/components/context/param"
 	"github.com/go-zoox/zoox/components/context/query"
-	"github.com/go-zoox/zoox/components/context/queue"
 	"github.com/go-zoox/zoox/components/context/state"
 	"github.com/go-zoox/zoox/components/context/user"
 	"github.com/go-zoox/zoox/utils"
@@ -63,7 +63,7 @@ type Context struct {
 	//
 	cache cache.Cache
 	cron  cron.Cron
-	queue queue.Queue
+	queue jobqueue.JobQueue
 	//
 	env   env.Env
 	debug debug.Debug
@@ -733,10 +733,10 @@ func (ctx *Context) Cron() cron.Cron {
 	return ctx.cron
 }
 
-// Queue returns the queue of the application.
-func (ctx *Context) Queue() queue.Queue {
+// JobQueue returns the queue of the application.
+func (ctx *Context) JobQueue() jobqueue.JobQueue {
 	if ctx.queue == nil {
-		ctx.queue = ctx.App.Queue()
+		ctx.queue = ctx.App.JobQueue()
 	}
 
 	return ctx.queue

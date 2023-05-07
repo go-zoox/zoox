@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-zoox/core-utils/regexp"
 	"github.com/go-zoox/proxy"
-	"github.com/go-zoox/zoox/components/context/websocket"
+	"github.com/go-zoox/zoox/components/application/websocket"
 	gowebsocket "github.com/gorilla/websocket"
 )
 
