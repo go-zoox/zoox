@@ -209,6 +209,10 @@ func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup
 							// we should not log as an error, it is very common.
 							// action => ignored.
 							// ctx.Logger.Warnf("read err: %s (type: %d)", err, mt)
+						case gowebsocket.CloseAbnormalClosure:
+							// @TODO
+							// user close conn, we should not log as an error, it is very common.
+							// action => ignored.
 						default:
 							ctx.Logger.Errorf("read err: %s (code: %d, type: %d)", err, e.Code, mt)
 						}
