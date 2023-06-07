@@ -25,6 +25,7 @@ import (
 	"github.com/go-zoox/zoox/components/context/form"
 	"github.com/go-zoox/zoox/components/context/param"
 	"github.com/go-zoox/zoox/components/context/query"
+	sse "github.com/go-zoox/zoox/components/context/see"
 	"github.com/go-zoox/zoox/components/context/state"
 	"github.com/go-zoox/zoox/components/context/user"
 	"github.com/go-zoox/zoox/utils"
@@ -56,6 +57,7 @@ type Context struct {
 	body  body.Body
 
 	// response
+	sse sse.SSE
 
 	//
 	cookie  cookie.Cookie
@@ -200,6 +202,15 @@ func (ctx *Context) SetHeader(key string, value string) {
 // AddHeader adds a header to the response.
 func (ctx *Context) AddHeader(key string, value string) {
 	ctx.Writer.Header().Add(key, value)
+}
+
+// SSE sets the response header for server-sent events.
+func (ctx *Context) SSE() sse.SSE {
+	if ctx.body == nil {
+		ctx.sse = sse.New(ctx.Writer)
+	}
+
+	return ctx.sse
 }
 
 // BasicAuth returns the user/password pair for Basic Authentication.
