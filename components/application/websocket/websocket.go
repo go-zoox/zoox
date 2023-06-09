@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/go-zoox/logger"
@@ -134,6 +135,8 @@ type WebSocketConn interface {
 
 // WebSocketClient ...
 type WebSocketClient struct {
+	sync.RWMutex
+
 	WebSocketConn
 
 	ID string
@@ -221,6 +224,9 @@ func (c *WebSocketClient) Disconnect() error {
 
 // Write ...
 func (c *WebSocketClient) Write(typ int, msg []byte) error {
+	c.Lock()
+	defer c.Unlock()
+
 	if c.WriteHandler != nil {
 		return c.WriteHandler(gowebsocket.BinaryMessage, msg)
 	}
