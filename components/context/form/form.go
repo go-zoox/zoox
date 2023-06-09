@@ -13,6 +13,7 @@ type form struct {
 	params map[string]string
 }
 
+// New creates a form.
 func New(request *http.Request) Form {
 	return &form{
 		request: request,

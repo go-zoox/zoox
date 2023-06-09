@@ -17,6 +17,7 @@ type CacheControlConfig struct {
 	Items []*CacheControlItem
 }
 
+// CacheControlItem ...
 type CacheControlItem struct {
 	Path   regexp.RegExp
 	MaxAge time.Duration

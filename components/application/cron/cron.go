@@ -25,7 +25,8 @@ type cron struct {
 	core      *gocron.Cron
 }
 
-func New() *cron {
+// New creates a cron.
+func New() Cron {
 	core, err := gocron.New()
 	if err != nil {
 		panic(err)

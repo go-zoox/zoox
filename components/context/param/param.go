@@ -12,6 +12,7 @@ type param struct {
 	params map[string]string
 }
 
+// New creates a param.
 func New(value map[string]string) Param {
 	return &param{
 		params: value,

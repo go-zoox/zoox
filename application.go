@@ -36,10 +36,10 @@ type GroupFunc func(group *RouterGroup)
 type Middleware = HandlerFunc
 
 // WsHandlerFunc defines the websocket handler used by zoox
-type WsHandlerFunc func(ctx *Context, client *websocket.WebSocketClient)
+type WsHandlerFunc func(ctx *Context, client *websocket.Client)
 
 // WsGorillaHandlerFunc defines the websocket handler used by zoox
-type WsGorillaHandlerFunc func(ctx *Context, client *websocket.Conn)
+type WsGorillaHandlerFunc func(ctx *Context, client *websocket.GorillaConn)
 
 // Application is the handler for all requests.
 type Application struct {
@@ -66,6 +66,7 @@ type Application struct {
 	Config ApplicationConfig
 }
 
+// ApplicationConfig defines the config of zoox.Application.
 type ApplicationConfig struct {
 	Protocol string
 	Host     string

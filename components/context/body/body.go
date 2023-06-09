@@ -14,6 +14,7 @@ type body struct {
 	data map[string]interface{}
 }
 
+// New creates a body.
 func New(getter func() map[string]any) Body {
 	return &body{
 		getter: getter,

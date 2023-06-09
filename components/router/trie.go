@@ -2,6 +2,7 @@ package router
 
 import "strings"
 
+// Node ...
 type Node struct {
 	Path     string
 	part     string
@@ -9,6 +10,7 @@ type Node struct {
 	isWild   bool
 }
 
+// MatchChild ...
 func (n *Node) MatchChild(part string) *Node {
 	for _, child := range n.children {
 		for child.part == part || child.isWild {
@@ -31,6 +33,7 @@ func (n *Node) matchChildren(part string) []*Node {
 	return nodes
 }
 
+// Insert ...
 func (n *Node) Insert(pattern string, parts []string, height int) {
 	if len(parts) == height {
 		n.Path = pattern
@@ -50,6 +53,7 @@ func (n *Node) Insert(pattern string, parts []string, height int) {
 	child.Insert(pattern, parts, height+1)
 }
 
+// Search ...
 func (n *Node) Search(parts []string, height int) *Node {
 	if len(parts) == height || strings.HasPrefix(n.part, "*") {
 		if n.Path == "" {

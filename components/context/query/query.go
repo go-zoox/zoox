@@ -15,7 +15,8 @@ type query struct {
 	request *http.Request
 }
 
-func New(request *http.Request) *query {
+// New creates a query.
+func New(request *http.Request) Query {
 	return &query{
 		request: request,
 	}

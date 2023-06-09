@@ -17,6 +17,7 @@ type jobqueue struct {
 	core      *jq.JobQueue
 }
 
+// New creates a job queue.
 func New() JobQueue {
 	core := jq.New(runtime.NumCPU())
 

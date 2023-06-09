@@ -10,6 +10,7 @@ import (
 
 var defaultSessionSecretKey = "go-zoox_" + random.String(24)
 
+// New creates a session.
 func New(cookie cookie.Cookie, secretKey string, maxAge time.Duration) gosession.Session {
 	if secretKey == "" {
 		secretKey = defaultSessionSecretKey

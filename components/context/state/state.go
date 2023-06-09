@@ -10,6 +10,7 @@ type state struct {
 	data map[string]interface{}
 }
 
+// New creates a state.
 func New() State {
 	return &state{
 		data: make(map[string]interface{}),

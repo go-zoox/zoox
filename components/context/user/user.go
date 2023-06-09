@@ -12,6 +12,7 @@ type user struct {
 	u interface{}
 }
 
+// New creates a user.
 func New() User {
 	return &user{}
 }

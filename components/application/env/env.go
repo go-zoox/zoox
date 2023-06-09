@@ -10,7 +10,8 @@ type Env interface {
 type env struct {
 }
 
-func New() *env {
+// New ...
+func New() Env {
 	return &env{}
 }
 

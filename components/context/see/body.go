@@ -20,6 +20,7 @@ type sse struct {
 	flusher http.Flusher
 }
 
+// New creates a SSE.
 func New(rw http.ResponseWriter) SSE {
 	rw.WriteHeader(200)
 	rw.Header().Set("Content-Type", "text/event-stream")

@@ -18,6 +18,7 @@ type debug struct {
 	core godebug.Debugger
 }
 
+// New creates a debug.
 func New(logger *logger.Logger) Debug {
 	core := godebug.New(DebugEnv, func(args ...interface{}) error {
 		logger.Debug(args[0].(string), args[1:]...)
