@@ -3,7 +3,7 @@ module github.com/go-zoox/zoox
 go 1.18
 
 require (
-	github.com/go-zoox/cache v1.0.2
+	github.com/go-zoox/cache v1.0.3
 	github.com/go-zoox/cookie v1.2.0
 	github.com/go-zoox/core-utils v1.2.9
 	github.com/go-zoox/counter v1.2.0
