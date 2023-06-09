@@ -12,12 +12,12 @@ import (
 	"os"
 	"strings"
 	"text/template"
-	"time"
 
 	"github.com/go-zoox/cache"
 	"github.com/go-zoox/core-utils/cast"
 	"github.com/go-zoox/core-utils/regexp"
 	"github.com/go-zoox/logger"
+	"github.com/go-zoox/session"
 	"github.com/go-zoox/zoox/components/application/cron"
 	"github.com/go-zoox/zoox/components/application/debug"
 	"github.com/go-zoox/zoox/components/application/env"
@@ -52,13 +52,7 @@ type Application struct {
 	//
 	notfound HandlerFunc
 	//
-	SecretKey string
-	//
-	SessionMaxAge time.Duration
-	LogLevel      string
-	//
-	CacheConfig *cache.Config
-	cache       cache.Cache
+	cache cache.Cache
 	//
 	cron  cron.Cron
 	queue jobqueue.JobQueue
@@ -68,6 +62,20 @@ type Application struct {
 	// Debug
 	debug debug.Debug
 
+	//
+	Config ApplicationConfig
+}
+
+type ApplicationConfig struct {
+	Protocol string
+	Host     string
+	Port     int
+
+	//
+	NetworkType      string
+	UnixDomainSocket string
+
+	// TLS
 	// TLS Certificate
 	TLSCertFile string
 	// TLS Private Key
@@ -76,12 +84,13 @@ type Application struct {
 	TLSCaCertFile string
 
 	//
-	Protocol string
-	Host     string
-	Port     int
+	LogLevel string `config:"log_level"`
 	//
-	NetworkType      string
-	UnixDomainSocket string
+	SecretKey string `config:"secret_key"`
+	//
+	Session session.Config `config:"session"`
+	//
+	Cache cache.Config `config:"cache"`
 }
 
 // New is the constructor of zoox.Application.
@@ -98,7 +107,7 @@ func New() *Application {
 	app.Env = env.New()
 
 	app.Logger = logger.New(&logger.Options{
-		Level: app.LogLevel,
+		Level: app.Config.LogLevel,
 	})
 
 	// global middlewares
@@ -129,28 +138,28 @@ func (app *Application) Fallback(h HandlerFunc) {
 
 // defaultConfig
 func (app *Application) applyDefaultConfig() error {
-	if app.SecretKey == "" {
-		app.SecretKey = DefaultSecretKey
+	if app.Config.SecretKey == "" {
+		app.Config.SecretKey = DefaultSecretKey
 	}
 
-	if app.Protocol == "" {
-		app.Protocol = "http"
+	if app.Config.Protocol == "" {
+		app.Config.Protocol = "http"
 	}
 
-	if app.Host == "" {
-		app.Host = "0.0.0.0"
+	if app.Config.Host == "" {
+		app.Config.Host = "0.0.0.0"
 	}
 
-	if app.Port == 0 {
-		app.Port = 8080
+	if app.Config.Port == 0 {
+		app.Config.Port = 8080
 	}
 
-	if app.NetworkType == "" {
-		app.NetworkType = "tcp"
+	if app.Config.NetworkType == "" {
+		app.Config.NetworkType = "tcp"
 	}
 
-	if app.SessionMaxAge == 0 {
-		app.SessionMaxAge = DefaultSessionMaxAge
+	if app.Config.Session.MaxAge == 0 {
+		app.Config.Session.MaxAge = DefaultSessionMaxAge
 	}
 
 	return nil
@@ -182,12 +191,12 @@ func (app *Application) Run(addr ...string) (err error) {
 	if addrX != "" {
 		// Pattern@1 => :8080
 		if regexp.Match("^:\\d+$", addrX) {
-			app.Port = cast.ToInt(addrX[1:])
+			app.Config.Port = cast.ToInt(addrX[1:])
 		} else if regexp.Match("^[\\w\\.]+:\\d+$", addrX) {
 			// Pattern@2 => 127.0.0.1:8080
 			parts := strings.Split(addrX, ":")
-			app.Host = cast.ToString(parts[0])
-			app.Port = cast.ToInt(parts[1])
+			app.Config.Host = cast.ToString(parts[0])
+			app.Config.Port = cast.ToInt(parts[1])
 		} else if regexp.Match("^http://[\\w\\.]+:\\d+", addrX) {
 			// Pattern@3 => http://127.0.0.1:8080
 			u, err := url.Parse(addrX)
@@ -195,19 +204,19 @@ func (app *Application) Run(addr ...string) (err error) {
 				return fmt.Errorf("failed to parse addr(%s): %v", addrX, err)
 			}
 
-			app.Protocol = u.Scheme
-			app.Host = u.Hostname()
-			app.Port = cast.ToInt(u.Port())
+			app.Config.Protocol = u.Scheme
+			app.Config.Host = u.Hostname()
+			app.Config.Port = cast.ToInt(u.Port())
 		} else if regexp.Match("^unix://", addrX) {
 			// Pattern@4 => unix:///tmp/xxx.sock
-			app.Protocol = "unix"
-			app.NetworkType = "unix"
-			app.UnixDomainSocket = addrX[7:]
+			app.Config.Protocol = "unix"
+			app.Config.NetworkType = "unix"
+			app.Config.UnixDomainSocket = addrX[7:]
 		} else if regexp.Match("^/", addrX) {
 			// Pattern@4 => /tmp/xxx.sock
-			app.Protocol = "unix"
-			app.NetworkType = "unix"
-			app.UnixDomainSocket = addrX
+			app.Config.Protocol = "unix"
+			app.Config.NetworkType = "unix"
+			app.Config.UnixDomainSocket = addrX
 		}
 	}
 
@@ -218,7 +227,7 @@ func (app *Application) Run(addr ...string) (err error) {
 
 	app.Debug().Info(app)
 
-	listener, err := net.Listen(app.NetworkType, app.Address())
+	listener, err := net.Listen(app.Config.NetworkType, app.Address())
 	if err != nil {
 		return err
 	}
@@ -230,9 +239,9 @@ func (app *Application) Run(addr ...string) (err error) {
 	}
 
 	// TLS Ca Certificate
-	if app.TLSCaCertFile != "" {
+	if app.Config.TLSCaCertFile != "" {
 		pool := x509.NewCertPool()
-		caCrt, err := ioutil.ReadFile(app.TLSCaCertFile)
+		caCrt, err := ioutil.ReadFile(app.Config.TLSCaCertFile)
 		if err != nil {
 			return fmt.Errorf("failed to read tls ca certificate")
 		}
@@ -247,29 +256,29 @@ func (app *Application) Run(addr ...string) (err error) {
 	}
 
 	// TLS Certificate and Private Key
-	if app.TLSCertFile != "" {
-		// if app.TLSCertFile != "" && app.TLSCert == nil {
-		// 	tlsCaCert, err := ioutil.ReadFile(app.TLSCertFile)
+	if app.Config.TLSCertFile != "" {
+		// if app.Config.TLSCertFile != "" && app.TLSCert == nil {
+		// 	tlsCaCert, err := ioutil.ReadFile(app.Config.TLSCertFile)
 		// 	if err != nil {
 		// 		return err
 		// 	}
 		// 	app.TLSCert = tlsCaCert
 		// }
 
-		if app.NetworkType == "unix" {
+		if app.Config.NetworkType == "unix" {
 			logger.Info("Server started at unixs://%s", app.AddressForLog())
 		} else {
 			logger.Info("Server started at https://%s", app.AddressForLog())
 		}
 
-		// if err := http.ServeTLS(listener, app, app.TLSCertFile, app.TLSKeyFile); err != nil {
+		// if err := http.ServeTLS(listener, app, app.Config.TLSCertFile, app.Config.TLSKeyFile); err != nil {
 		// 	return err
 		// }
 
-		return server.ServeTLS(listener, app.TLSCertFile, app.TLSKeyFile)
+		return server.ServeTLS(listener, app.Config.TLSCertFile, app.Config.TLSKeyFile)
 	}
 
-	if app.NetworkType == "unix" {
+	if app.Config.NetworkType == "unix" {
 		logger.Info("Server started at unix://%s", app.AddressForLog())
 	} else {
 		logger.Info("Server started at http://%s", app.AddressForLog())
@@ -352,7 +361,7 @@ func (app *Application) CreateJSONRPC(path string) jsonrpc.Server[*Context] {
 // Cache ...
 func (app *Application) Cache() cache.Cache {
 	if app.cache == nil {
-		app.cache = cache.New(app.CacheConfig)
+		app.cache = cache.New(&app.Config.Cache)
 	}
 
 	return app.cache
@@ -387,24 +396,24 @@ func (app *Application) Debug() debug.Debug {
 
 // Address ...
 func (app *Application) Address() string {
-	if app.NetworkType == "unix" {
-		return app.UnixDomainSocket
+	if app.Config.NetworkType == "unix" {
+		return app.Config.UnixDomainSocket
 	}
 
-	return fmt.Sprintf("%s:%d", app.Host, app.Port)
+	return fmt.Sprintf("%s:%d", app.Config.Host, app.Config.Port)
 }
 
 // AddressForLog ...
 func (app *Application) AddressForLog() string {
-	if app.NetworkType == "unix" {
-		return app.UnixDomainSocket
+	if app.Config.NetworkType == "unix" {
+		return app.Config.UnixDomainSocket
 	}
 
-	if app.Host == "0.0.0.0" {
-		return fmt.Sprintf("127.0.0.1:%d", app.Port)
+	if app.Config.Host == "0.0.0.0" {
+		return fmt.Sprintf("127.0.0.1:%d", app.Config.Port)
 	}
 
-	return fmt.Sprintf("%s:%d", app.Host, app.Port)
+	return fmt.Sprintf("%s:%d", app.Config.Host, app.Config.Port)
 }
 
 // H is a shortcut for map[string]interface{}

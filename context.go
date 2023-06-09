@@ -116,7 +116,7 @@ func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Con
 	}
 
 	ctx.Logger = logger.New(&logger.Options{
-		Level: app.LogLevel,
+		Level: app.Config.LogLevel,
 	})
 
 	return ctx
@@ -814,14 +814,12 @@ func (ctx *Context) Cookie() cookie.Cookie {
 func (ctx *Context) Session() session.Session {
 	if ctx.session == nil {
 
-		secretKey := ctx.App.SecretKey
+		secretKey := ctx.App.Config.SecretKey
 		if secretKey == "" {
 			secretKey = "go-zoox_" + random.String(24)
 		}
 
-		ctx.session = session.New(ctx.Cookie(), secretKey, &session.Config{
-			MaxAge: ctx.App.SessionMaxAge,
-		})
+		ctx.session = session.New(ctx.Cookie(), secretKey, &ctx.App.Config.Session)
 	}
 
 	return ctx.session
@@ -830,7 +828,7 @@ func (ctx *Context) Session() session.Session {
 // Jwt returns the jwt of the request.
 func (ctx *Context) Jwt() jwt.Jwt {
 	if ctx.jwt == nil {
-		secretKey := ctx.App.SecretKey
+		secretKey := ctx.App.Config.SecretKey
 		if secretKey == "" {
 			secretKey = "go-zoox_" + random.String(24)
 		}
