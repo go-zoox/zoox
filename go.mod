@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/go-zoox/cache v1.0.2
-	github.com/go-zoox/cookie v1.0.2
+	github.com/go-zoox/cookie v1.2.0
 	github.com/go-zoox/core-utils v1.2.9
 	github.com/go-zoox/counter v1.2.0
 	github.com/go-zoox/cron v1.1.2
@@ -18,7 +18,7 @@ require (
 	github.com/go-zoox/proxy v1.4.0
 	github.com/go-zoox/random v1.0.3
 	github.com/go-zoox/ratelimit v1.2.0
-	github.com/go-zoox/session v1.0.6
+	github.com/go-zoox/session v1.2.0
 	github.com/go-zoox/tag v1.2.2
 	github.com/go-zoox/uuid v0.0.1
 	github.com/gorilla/websocket v1.5.0
