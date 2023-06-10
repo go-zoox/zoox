@@ -22,6 +22,7 @@ import (
 	"github.com/go-zoox/zoox/components/application/debug"
 	"github.com/go-zoox/zoox/components/application/env"
 	"github.com/go-zoox/zoox/components/application/jobqueue"
+	"github.com/go-zoox/zoox/components/application/runtime"
 	"github.com/go-zoox/zoox/components/application/websocket"
 	"github.com/go-zoox/zoox/rpc/jsonrpc"
 )
@@ -61,6 +62,8 @@ type Application struct {
 	Logger *logger.Logger
 	// Debug
 	debug debug.Debug
+	// Runtime
+	runtime runtime.Runtime
 
 	//
 	Config ApplicationConfig
@@ -228,6 +231,8 @@ func (app *Application) Run(addr ...string) (err error) {
 
 	app.Debug().Info(app)
 
+	app.Runtime().Print()
+
 	listener, err := net.Listen(app.Config.NetworkType, app.Address())
 	if err != nil {
 		return err
@@ -393,6 +398,15 @@ func (app *Application) Debug() debug.Debug {
 	}
 
 	return app.debug
+}
+
+// Runtime ...
+func (app *Application) Runtime() runtime.Runtime {
+	if app.runtime == nil {
+		app.runtime = runtime.New(app.Logger)
+	}
+
+	return app.runtime
 }
 
 // Address ...
