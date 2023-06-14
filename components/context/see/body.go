@@ -44,7 +44,7 @@ func (s *sse) Event(name string, data string) {
 
 	s.writer.Write([]byte("event: " + name + "\n"))
 	s.writer.Write([]byte(fmt.Sprintf("id: %d\n", s.id)))
-	s.writer.Write([]byte("data: " + data + "\n\n"))
+	s.writer.Write([]byte(fmt.Sprintf("data: %s\n\n", data)))
 
 	s.flusher.Flush()
 }
