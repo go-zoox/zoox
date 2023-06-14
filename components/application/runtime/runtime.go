@@ -86,5 +86,5 @@ func (r *runtime) Print() {
 	r.logger.Infof("Memory: %d/%d MB (%.2f%%)", memAllocated, memTotal, float64(memAllocated)*100/float64(memTotal))
 
 	diskFree, diskTotal := r.Disk()
-	r.logger.Infof("Disk: %.2f/%.2f GB (%.2f%%)", diskTotal-diskFree, diskTotal, (diskFree-diskTotal)*100/diskTotal)
+	r.logger.Infof("Disk: %.2f/%.2f GB (%.2f%%)", diskTotal-diskFree, diskTotal, (diskTotal-diskFree)*100/diskTotal)
 }
