@@ -1,6 +1,7 @@
 package zoox
 
 import (
+	"errors"
 	"fmt"
 	"mime"
 	"net/http"
@@ -226,22 +227,45 @@ func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup
 				return
 			}
 
-			switch mt {
-			case websocket.TextMessage:
-				if client.OnTextMessage != nil {
-					go client.OnTextMessage(message)
-				}
-			case websocket.BinaryMessage:
-				if client.OnBinaryMessage != nil {
-					go client.OnBinaryMessage(message)
-				}
-			default:
-				ctx.Logger.Warn("unknown message type: %d", mt)
-			}
+			go func(mt int, message []byte) {
+				defer func() {
+					if err := recover(); err != nil {
+						switch v := err.(type) {
+						case error:
+							if client.OnError != nil {
+								go client.OnError(v)
+							} else {
+								ctx.Logger.Errorf("[onmessage] panic: %s", err)
+							}
+						case string:
+							if client.OnError != nil {
+								go client.OnError(errors.New(v))
+							} else {
+								ctx.Logger.Errorf("[onmessage] panic: %s", err)
+							}
+						default:
+							ctx.Logger.Errorf("[onmessage] panic: %v", err)
+						}
+					}
+				}()
 
-			if client.OnMessage != nil {
-				go client.OnMessage(mt, message)
-			}
+				switch mt {
+				case websocket.TextMessage:
+					if client.OnTextMessage != nil {
+						client.OnTextMessage(message)
+					}
+				case websocket.BinaryMessage:
+					if client.OnBinaryMessage != nil {
+						client.OnBinaryMessage(message)
+					}
+				default:
+					ctx.Logger.Warn("unknown message type: %d", mt)
+				}
+
+				if client.OnMessage != nil {
+					client.OnMessage(mt, message)
+				}
+			}(mt, message)
 		}
 	})
 
