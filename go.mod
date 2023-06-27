@@ -8,6 +8,7 @@ require (
 	github.com/go-zoox/core-utils v1.2.9
 	github.com/go-zoox/counter v1.2.0
 	github.com/go-zoox/cron v1.1.2
+	github.com/go-zoox/datetime v1.1.1
 	github.com/go-zoox/debug v1.0.1
 	github.com/go-zoox/fetch v1.7.6
 	github.com/go-zoox/gzip v1.0.0
@@ -35,7 +36,6 @@ require (
 	github.com/go-zoox/chalk v1.0.2 // indirect
 	github.com/go-zoox/compress v1.0.1 // indirect
 	github.com/go-zoox/crypto v1.1.8 // indirect
-	github.com/go-zoox/datetime v1.1.1 // indirect
 	github.com/go-zoox/encoding v1.2.1 // indirect
 	github.com/go-zoox/errors v1.0.2 // indirect
 	github.com/go-zoox/fs v1.3.9 // indirect

@@ -1,6 +1,7 @@
 package defaults
 
 import (
+	"github.com/go-zoox/debug"
 	"github.com/go-zoox/zoox"
 	"github.com/go-zoox/zoox/middleware"
 )
@@ -31,9 +32,11 @@ func Defaults() *zoox.Application {
 		app.Use(middleware.Runtime())
 	})
 
-	// zoox.DefaultMiddleware("pprof", func(app *zoox.Application) {
-	// 	app.Use(middleware.PProf())
-	// })
+	if debug.IsDebugMode() {
+		zoox.DefaultMiddleware("pprof", func(app *zoox.Application) {
+			app.Use(middleware.PProf())
+		})
+	}
 
 	// zoox.DefaultMiddleware("cors", func(app *zoox.Application) {
 	// 	app.Use(middleware.CORS())
