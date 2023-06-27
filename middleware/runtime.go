@@ -6,6 +6,7 @@ import (
 	"github.com/go-zoox/zoox"
 )
 
+// DefaultRuntimePath ...
 const DefaultRuntimePath = "/_/runtime"
 
 // Runtime ...

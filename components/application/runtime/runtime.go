@@ -18,11 +18,12 @@ type Runtime interface {
 	Disk() (free, total float64)
 	GoVersion() string
 	GoRoot() string
-	Info() *RuntimeInfo
+	Info() *Info
 	Print()
 }
 
-type RuntimeInfo struct {
+// Info ...
+type Info struct {
 	Version     string  `json:"version"`
 	GoVersion   string  `json:"go_version"`
 	OS          string  `json:"os"`
@@ -90,11 +91,11 @@ func (r *runtime) GoRoot() string {
 	return rt.GOROOT()
 }
 
-func (r *runtime) Info() *RuntimeInfo {
+func (r *runtime) Info() *Info {
 	memUsed, memTotal := r.Memory()
 	diskFree, diskTotal := r.Disk()
 
-	return &RuntimeInfo{
+	return &Info{
 		// Version:     zoox.Version,
 		GoVersion:   r.GoVersion(),
 		OS:          r.OS(),

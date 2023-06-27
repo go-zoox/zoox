@@ -7,6 +7,7 @@ import (
 	"github.com/go-zoox/zoox"
 )
 
+// DefaultPProfPath ...
 const DefaultPProfPath = "/_/pprof"
 
 // PProf ...
