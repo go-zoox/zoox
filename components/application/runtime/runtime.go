@@ -18,7 +18,21 @@ type Runtime interface {
 	Disk() (free, total float64)
 	GoVersion() string
 	GoRoot() string
+	Info() *RuntimeInfo
 	Print()
+}
+
+type RuntimeInfo struct {
+	Version     string  `json:"version"`
+	GoVersion   string  `json:"go_version"`
+	OS          string  `json:"os"`
+	Arch        string  `json:"arch"`
+	CPUCores    int     `json:"cpu_cores"`
+	MemoryUsed  uint64  `json:"memory_used"`
+	MemoryTotal uint64  `json:"memory_total"`
+	DiskUsed    float64 `json:"disk_used"`
+	DiskTotal   float64 `json:"disk_total"`
+	Timestamp   string  `json:"current_time"`
 }
 
 type runtime struct {
@@ -74,6 +88,24 @@ func (r *runtime) GoVersion() string {
 
 func (r *runtime) GoRoot() string {
 	return rt.GOROOT()
+}
+
+func (r *runtime) Info() *RuntimeInfo {
+	memUsed, memTotal := r.Memory()
+	diskFree, diskTotal := r.Disk()
+
+	return &RuntimeInfo{
+		// Version:     zoox.Version,
+		GoVersion:   r.GoVersion(),
+		OS:          r.OS(),
+		Arch:        r.Arch(),
+		CPUCores:    r.CPUCores(),
+		MemoryUsed:  memUsed,
+		MemoryTotal: memTotal,
+		DiskUsed:    diskTotal - diskFree,
+		DiskTotal:   diskTotal,
+		Timestamp:   r.CurrentTime().Format("YYYY-MM-DD HH:mm:ss"),
+	}
 }
 
 func (r *runtime) Print() {

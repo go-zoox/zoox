@@ -27,6 +27,14 @@ func Defaults() *zoox.Application {
 		app.Use(middleware.HealthCheck())
 	})
 
+	zoox.DefaultMiddleware("runtime", func(app *zoox.Application) {
+		app.Use(middleware.Runtime())
+	})
+
+	// zoox.DefaultMiddleware("pprof", func(app *zoox.Application) {
+	// 	app.Use(middleware.PProf())
+	// })
+
 	// zoox.DefaultMiddleware("cors", func(app *zoox.Application) {
 	// 	app.Use(middleware.CORS())
 	// })
