@@ -109,6 +109,16 @@ func (g *RouterGroup) Any(path string, handler ...HandlerFunc) *RouterGroup {
 	return g
 }
 
+// ProxyConfig defines the proxy config
+type ProxyConfig struct {
+	// internal proxy config
+	proxy.SingleTargetConfig
+
+	// context proxy config
+	OnRequestWithContext  func(ctx *Context) error
+	OnResponseWithContext func(ctx *Context) error
+}
+
 // Proxy defines the method to proxy the request to the backend service.
 //
 // Example:
@@ -120,8 +130,8 @@ func (g *RouterGroup) Any(path string, handler ...HandlerFunc) *RouterGroup {
 //	})
 //
 //	app.Proxy("*", "https://httpbin.org")
-func (g *RouterGroup) Proxy(path, target string, options ...func(cfg *proxy.SingleTargetConfig)) *RouterGroup {
-	cfg := &proxy.SingleTargetConfig{}
+func (g *RouterGroup) Proxy(path, target string, options ...func(cfg *ProxyConfig)) *RouterGroup {
+	cfg := &ProxyConfig{}
 	for _, option := range options {
 		option(cfg)
 	}
@@ -134,11 +144,27 @@ func (g *RouterGroup) Proxy(path, target string, options ...func(cfg *proxy.Sing
 		panic(err)
 	}
 
-	handler := WrapH(proxy.NewSingleTarget(target, cfg))
+	handler := WrapH(proxy.NewSingleTarget(target, &cfg.SingleTargetConfig))
 
 	g.Use(func(ctx *Context) {
 		if re.Match(ctx.Path) {
+			if cfg.OnRequestWithContext != nil {
+				if err := cfg.OnRequestWithContext(ctx); err != nil {
+					ctx.Logger.Errorf("proxy error: %s", err)
+					ctx.Fail(err, 500, "proxy on request with context error")
+					return
+				}
+			}
+
 			handler(ctx)
+
+			if cfg.OnResponseWithContext != nil {
+				if err := cfg.OnResponseWithContext(ctx); err != nil {
+					ctx.Logger.Errorf("proxy error: %s", err)
+					ctx.Fail(err, 500, "proxy on response with context error")
+					return
+				}
+			}
 			return
 		}
 
