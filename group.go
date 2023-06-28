@@ -8,7 +8,7 @@ import (
 	"path"
 	"time"
 
-	"github.com/go-zoox/core-utils/regexp"
+	"github.com/go-zoox/core-utils/strings"
 	"github.com/go-zoox/proxy"
 	"github.com/go-zoox/zoox/components/application/websocket"
 	gowebsocket "github.com/gorilla/websocket"
@@ -123,31 +123,25 @@ type ProxyConfig struct {
 //
 // Example:
 //
-//	app.Proxy("/api/v1/tasks/(.*)", "http://zmicro.services.tasks:8080", &proxy.SingleTargetConfig{
-//		Rewrites: rewriter.Rewriters{
-//	    {From: "/api/v1/tasks/(.*)", To: "/$1"},
-//	  },
-//	})
+//	// default no rewrites
+//	app.Proxy("/httpbin", "https://httpbin.org")
 //
-//	app.Proxy("*", "https://httpbin.org")
+//	// custom rewrites
+//	app.Proxy("/api/v1/tasks", "http://zmicro.services.tasks:8080", func (cfg *ProxyConfig) {
+//		cfg.Rewrites = rewriter.Rewriters{
+//	    {From: "/api/v1/tasks/(.*)", To: "/$1"},
+//	  }
+//	}))
 func (g *RouterGroup) Proxy(path, target string, options ...func(cfg *ProxyConfig)) *RouterGroup {
 	cfg := &ProxyConfig{}
 	for _, option := range options {
 		option(cfg)
 	}
 
-	// // /api/v1/tasks/(.*) => /$1
-	// return g.Any(fmt.Sprintf("%s/*", path), WrapH(proxy.NewSingleTarget(target, cfgX)))
-
-	re, err := regexp.New(path)
-	if err != nil {
-		panic(err)
-	}
-
 	handler := WrapH(proxy.NewSingleTarget(target, &cfg.SingleTargetConfig))
 
 	g.Use(func(ctx *Context) {
-		if re.Match(ctx.Path) {
+		if strings.StartsWith(ctx.Path, path) {
 			if cfg.OnRequestWithContext != nil {
 				if err := cfg.OnRequestWithContext(ctx); err != nil {
 					ctx.Logger.Errorf("proxy error: %s", err)
