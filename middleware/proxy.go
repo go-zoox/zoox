@@ -8,8 +8,38 @@ import (
 	"github.com/go-zoox/zoox"
 )
 
-// ProxyConfig is the config of proxy middlewares
+// ProxyConfig defines the proxy config
 type ProxyConfig struct {
+	// internal proxy config
+	proxy.SingleTargetConfig
+
+	// target url
+	Target string
+}
+
+// Proxy is a middleware that proxies the request.
+func Proxy(fn func(cfg *ProxyConfig, ctx *zoox.Context) (next bool, err error)) zoox.Middleware {
+	return func(ctx *zoox.Context) {
+		proxyCfg := &ProxyConfig{}
+		next, err := fn(proxyCfg, ctx)
+		if err != nil {
+			ctx.Fail(err, 500, "proxy error")
+			return
+		}
+
+		if next {
+			ctx.Next()
+			return
+		}
+
+		zoox.WrapH(proxy.NewSingleTarget(proxyCfg.Target, &proxyCfg.SingleTargetConfig))(ctx)
+	}
+}
+
+// DEPRECIATED
+
+// ProxyGroupsConfig is the config of proxy middlewares
+type ProxyGroupsConfig struct {
 	// Rewrites map[string]ProxyRewrite
 	Rewrites ProxyGroupRewrites `yaml:"rewrites" json:"rewrites"`
 }
@@ -33,22 +63,36 @@ type ProxyRewrite struct {
 // ProxyRewriteRules ...
 type ProxyRewriteRules = rewriter.Rewriters
 
-// Proxy is a middleware that authenticates via Basic Auth.
-func Proxy(cfg *ProxyConfig) zoox.Middleware {
-	return func(ctx *zoox.Context) {
-		for _, group := range cfg.Rewrites {
-			if matched, err := regexp.MatchString(group.RegExp, ctx.Path); err == nil && matched {
-				// @BUG: this is not working
-				p := proxy.NewSingleTarget(group.Rewrite.Target, &proxy.SingleTargetConfig{
-					Rewrites: group.Rewrite.Rewrites,
-					// ChangeOrigin: true,
-				})
+// ProxyGroups is a middleware that proxies the request to the backend service.
+func ProxyGroups(cfg *ProxyGroupsConfig) zoox.Middleware {
+	// return func(ctx *zoox.Context) {
+	// 	for _, group := range cfg.Rewrites {
+	// 		if matched, err := regexp.MatchString(group.RegExp, ctx.Path); err == nil && matched {
+	// 			// @BUG: this is not working
+	// 			p := proxy.NewSingleTarget(group.Rewrite.Target, &proxy.SingleTargetConfig{
+	// 				Rewrites: group.Rewrite.Rewrites,
+	// 				// ChangeOrigin: true,
+	// 			})
 
-				p.ServeHTTP(ctx.Writer, ctx.Request)
-				return
+	// 			p.ServeHTTP(ctx.Writer, ctx.Request)
+	// 			return
+	// 		}
+	// 	}
+
+	// 	ctx.Next()
+	// }
+
+	return Proxy(func(proxyCfg *ProxyConfig, ctx *zoox.Context) (next bool, err error) {
+		for _, group := range cfg.Rewrites {
+			if matched, err := regexp.MatchString(group.RegExp, ctx.Path); err != nil {
+				return false, err
+			} else if matched {
+				proxyCfg.Target = group.Rewrite.Target
+				proxyCfg.Rewrites = group.Rewrite.Rewrites
+				return false, nil
 			}
 		}
 
-		ctx.Next()
-	}
+		return true, nil
+	})
 }
