@@ -46,27 +46,6 @@ func Proxy(cfg *ProxyConfig) zoox.Middleware {
 
 				p.ServeHTTP(ctx.Writer, ctx.Request)
 				return
-
-				// rewriters := rewriter.Rewriters{}
-				// for k, v := range value.Rewrites {
-				// 	rewriters = append(rewriters, &rewriter.Rewriter{
-				// 		From: k,
-				// 		To:   v,
-				// 	})
-				// }
-
-				// ctx.Request.URL.Path = rewriters.Rewrite(ctx.Path)
-				// ctx.Path = ctx.Request.URL.Path
-
-				// u, err := url.Parse(value.Target)
-				// if err != nil {
-				// 	panic(fmt.Errorf("invalid proxy target: %s", value.Target))
-				// }
-
-				// p := httputil.NewSingleHostReverseProxy(u)
-
-				// p.ServeHTTP(ctx.Writer, ctx.Request)
-				// return
 			}
 		}
 
