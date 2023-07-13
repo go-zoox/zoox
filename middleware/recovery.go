@@ -17,7 +17,9 @@ func Recovery() zoox.Middleware {
 		defer func() {
 			if err := recover(); err != nil {
 				// stackoverflow: https://stackoverflow.com/questions/52103182/how-to-get-the-stacktrace-of-a-panic-and-store-as-a-variable
-				fmt.Println("stacktrace from panic: \n" + string(debug.Stack()))
+				if ctx.Debug().IsDebugMode() {
+					fmt.Println("stacktrace from panic: \n" + string(debug.Stack()))
+				}
 
 				switch v := err.(type) {
 				case error:
