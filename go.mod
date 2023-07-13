@@ -12,7 +12,7 @@ require (
 	github.com/go-zoox/debug v1.0.1
 	github.com/go-zoox/fetch v1.7.7
 	github.com/go-zoox/gzip v1.0.0
-	github.com/go-zoox/headers v1.0.6
+	github.com/go-zoox/headers v1.0.8
 	github.com/go-zoox/jobqueue v1.0.0
 	github.com/go-zoox/jwt v1.3.0
 	github.com/go-zoox/logger v1.4.4
