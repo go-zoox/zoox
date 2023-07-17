@@ -319,3 +319,39 @@ func (c *Client) Pong(message string) error {
 
 	return err
 }
+
+func (c *Client) ReadWriter() io.ReadWriteCloser {
+	return newRW(c)
+}
+
+type rw struct {
+	c   *Client
+	buf chan []byte
+}
+
+func newRW(c *Client) io.ReadWriteCloser {
+	rwx := &rw{
+		c,
+		make(chan []byte),
+	}
+
+	c.OnMessage = func(typ int, msg []byte) {
+		rwx.buf <- msg
+	}
+
+	return rwx
+}
+
+func (w *rw) Write(p []byte) (n int, err error) {
+	return len(p), w.c.WriteBinary(p)
+}
+
+func (r *rw) Read(p []byte) (n int, err error) {
+	n = copy(p, <-r.buf)
+	return
+}
+
+func (r *rw) Close() error {
+	close(r.buf)
+	return nil
+}
