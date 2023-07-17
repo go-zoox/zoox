@@ -1,5 +1,6 @@
-// inspired by https://github.com/gofiber/fiber helmet
 package middleware
+
+// inspired by https://github.com/gofiber/fiber helmet
 
 import (
 	"fmt"
