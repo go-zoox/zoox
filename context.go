@@ -2,6 +2,7 @@ package zoox
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -120,6 +121,11 @@ func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Con
 	})
 
 	return ctx
+}
+
+// Context returns the context
+func (ctx *Context) Context() context.Context {
+	return ctx.Request.Context()
 }
 
 // Next runs the next handler in the middleware stack
