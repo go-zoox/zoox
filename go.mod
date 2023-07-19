@@ -20,7 +20,7 @@ require (
 	github.com/go-zoox/random v1.0.4
 	github.com/go-zoox/ratelimit v1.2.0
 	github.com/go-zoox/session v1.2.0
-	github.com/go-zoox/tag v1.2.2
+	github.com/go-zoox/tag v1.2.3
 	github.com/go-zoox/uuid v0.0.1
 	github.com/gorilla/websocket v1.5.0
 	github.com/stretchr/testify v1.8.0
