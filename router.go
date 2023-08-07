@@ -65,8 +65,13 @@ func (r *router) getRoute(method string, path string) (*route.Node, map[string]s
 		parts := parsePath(n.Path)
 		for i, part := range parts {
 			if part[0] == ':' {
+				// pattern: /user/:name
 				params[part[1:]] = searchParts[i]
+			} else if part[0] == '{' && part[len(part)-1] == '}' {
+				// pattern: /user/{name}
+				params[part[1:len(part)-1]] = searchParts[i]
 			} else if part[0] == '*' && len(part) > 1 {
+				// pattern: /file/*
 				params[part[1:]] = strings.Join(searchParts[i:], "/")
 				break
 			}
