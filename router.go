@@ -62,27 +62,27 @@ func (r *router) getRoute(method string, path string) (*route.Node, map[string]s
 	root := r.roots.Get(method).(*route.Node)
 	if n := root.Search(searchParts, 0); n != nil {
 		params := make(map[string]string)
-		// parts := parsePath(n.Path)
-		// for i, part := range parts {
-		// 	if part[0] == ':' {
-		// 		// pattern: /user/:name
-		// 		params[part[1:]] = searchParts[i]
-		// 	} else if part[0] == '{' && part[len(part)-1] == '}' {
-		// 		// pattern: /user/{name}
-		// 		params[part[1:len(part)-1]] = searchParts[i]
-		// 	} else if part[0] == '*' && len(part) > 1 {
-		// 		// pattern: /file/*
-		// 		params[part[1:]] = strings.Join(searchParts[i:], "/")
-		// 		break
-		// 	}
-		// }
-
-		pmap := n.ParamsMap()
-		keys := pmap.Keys()
-		for _, k := range keys {
-			i := pmap.Get(k).(int)
-			params[k] = searchParts[i]
+		parts := parsePath(n.Path)
+		for i, part := range parts {
+			if part[0] == ':' {
+				// pattern: /user/:name
+				params[part[1:]] = searchParts[i]
+			} else if part[0] == '{' && part[len(part)-1] == '}' {
+				// pattern: /user/{name}
+				params[part[1:len(part)-1]] = searchParts[i]
+			} else if part[0] == '*' && len(part) > 1 {
+				// pattern: /file/*filepath
+				params[part[1:]] = strings.Join(searchParts[i:], "/")
+				break
+			}
 		}
+
+		// pmap := n.ParamsMap()
+		// keys := pmap.Keys()
+		// for _, k := range keys {
+		// 	i := pmap.Get(k).(int)
+		// 	params[k] = searchParts[i]
+		// }
 
 		return n, params
 	}
