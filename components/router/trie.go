@@ -2,8 +2,6 @@ package router
 
 import (
 	"strings"
-
-	"github.com/go-zoox/core-utils/safe"
 )
 
 // Node ...
@@ -12,8 +10,6 @@ type Node struct {
 	part     string
 	children []*Node
 	isWild   bool
-	//
-	paramsKeyIndexMap *safe.Map
 }
 
 // MatchChild ...
@@ -46,21 +42,6 @@ func (n *Node) Insert(pattern string, parts []string, height int) {
 		return
 	}
 
-	paramsKeyIndexMap := safe.NewMap()
-	for i, part := range parts {
-		if part[0] == ':' {
-			// pattern: /user/:name
-			paramsKeyIndexMap.Set(part[1:], i)
-		} else if part[0] == '{' && part[len(part)-1] == '}' {
-			// pattern: /user/{name}
-			paramsKeyIndexMap.Set(part[1:len(part)-1], i)
-		} else if part[0] == '*' && len(part) > 1 {
-			// pattern: /file/*
-			paramsKeyIndexMap.Set(part[1:], i)
-			break
-		}
-	}
-
 	part := parts[height]
 	child := n.MatchChild(part)
 	if child == nil {
@@ -74,9 +55,8 @@ func (n *Node) Insert(pattern string, parts []string, height int) {
 		}
 
 		child = &Node{
-			part:              part,
-			isWild:            isWild,
-			paramsKeyIndexMap: paramsKeyIndexMap,
+			part:   part,
+			isWild: isWild,
 		}
 		n.children = append(n.children, child)
 	}
@@ -109,8 +89,4 @@ func (n *Node) Search(parts []string, height int) *Node {
 
 func (n *Node) IsWild() bool {
 	return n.isWild
-}
-
-func (n *Node) ParamsMap() *safe.Map {
-	return n.paramsKeyIndexMap
 }

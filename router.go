@@ -77,13 +77,6 @@ func (r *router) getRoute(method string, path string) (*route.Node, map[string]s
 			}
 		}
 
-		// pmap := n.ParamsMap()
-		// keys := pmap.Keys()
-		// for _, k := range keys {
-		// 	i := pmap.Get(k).(int)
-		// 	params[k] = searchParts[i]
-		// }
-
 		return n, params
 	}
 
