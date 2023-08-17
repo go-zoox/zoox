@@ -30,6 +30,7 @@ import (
 	"github.com/go-zoox/zoox/components/context/state"
 	"github.com/go-zoox/zoox/components/context/user"
 	"github.com/go-zoox/zoox/utils"
+	"gocloud.dev/pubsub"
 
 	"github.com/go-zoox/cookie"
 	"github.com/go-zoox/core-utils/safe"
@@ -884,4 +885,14 @@ func (ctx *Context) BodyBytes() ([]byte, error) {
 	}
 
 	return bytes, nil
+}
+
+// Publish publishes the message to the pubsub.
+func (ctx *Context) Publish(msg *pubsub.Message) error {
+	return ctx.App.PubSub().Publish(ctx.Context(), msg)
+}
+
+// Subscribe subscribes the topic with the handler.
+func (ctx *Context) Subscribe(topic string, handler pubsub.Handler) error {
+	return ctx.App.PubSub().Subscribe(ctx.Context(), topic, handler)
 }

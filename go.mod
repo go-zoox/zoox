@@ -18,6 +18,7 @@ require (
 	github.com/go-zoox/jwt v1.3.0
 	github.com/go-zoox/logger v1.4.4
 	github.com/go-zoox/proxy v1.4.1
+	github.com/go-zoox/pubsub v1.2.2
 	github.com/go-zoox/random v1.0.4
 	github.com/go-zoox/ratelimit v1.2.0
 	github.com/go-zoox/session v1.2.0
@@ -45,6 +46,7 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/redis/go-redis/v9 v9.0.5 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/tidwall/gjson v1.15.0 // indirect

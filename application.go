@@ -25,6 +25,8 @@ import (
 	"github.com/go-zoox/zoox/components/application/jobqueue"
 	"github.com/go-zoox/zoox/components/application/runtime"
 	"github.com/go-zoox/zoox/components/application/websocket"
+
+	"github.com/go-zoox/pubsub"
 )
 
 // HandlerFunc defines the request handler used by zoox
@@ -66,6 +68,11 @@ type Application struct {
 	runtime runtime.Runtime
 
 	//
+	jsonrpc jsonrpcServer.Server
+	//
+	pubsub pubsub.PubSub
+
+	//
 	Config ApplicationConfig
 }
 
@@ -95,6 +102,16 @@ type ApplicationConfig struct {
 	Session session.Config `config:"session"`
 	//
 	Cache cache.Config `config:"cache"`
+	//
+	Redis Redis `config:"redis"`
+}
+
+type Redis struct {
+	Host     string `config:"host"`
+	Port     int    `config:"port"`
+	DB       int    `config:"db"`
+	Username string `config:"username"`
+	Password string `config:"password"`
 }
 
 // New is the constructor of zoox.Application.
@@ -339,9 +356,13 @@ func (app *Application) IsProd() bool {
 	return app.Env.Get("MODE") == "production"
 }
 
-// CreateJSONRPC creates a new CreateJSONRPC handler.
-func (app *Application) CreateJSONRPC(path string) jsonrpcServer.Server {
-	rpc := jsonrpcServer.New()
+// JSONRPC get a new JSONRPC handler.
+func (app *Application) JSONRPC(path string) jsonrpcServer.Server {
+	if app.jsonrpc != nil {
+		return app.jsonrpc
+	}
+
+	app.jsonrpc = jsonrpcServer.New()
 
 	app.Post(path, func(ctx *Context) {
 		request, err := io.ReadAll(ctx.Request.Body)
@@ -351,7 +372,7 @@ func (app *Application) CreateJSONRPC(path string) jsonrpcServer.Server {
 		}
 		defer ctx.Request.Body.Close()
 
-		response, err := rpc.Invoke(ctx.Context(), request)
+		response, err := app.jsonrpc.Invoke(ctx.Context(), request)
 		if err != nil {
 			ctx.Error(http.StatusInternalServerError, err.Error())
 			return
@@ -361,7 +382,26 @@ func (app *Application) CreateJSONRPC(path string) jsonrpcServer.Server {
 		ctx.Write(response)
 	})
 
-	return rpc
+	return app.jsonrpc
+}
+
+// PubSub get a new PubSub handler.
+func (app *Application) PubSub() pubsub.PubSub {
+	if app.Config.Redis.Host == "" {
+		panic("redis config is required for pubsub in application")
+	}
+
+	if app.pubsub == nil {
+		app.pubsub = pubsub.New(&pubsub.Config{
+			RedisHost:     app.Config.Redis.Host,
+			RedisPort:     app.Config.Redis.Port,
+			RedisDB:       app.Config.Redis.DB,
+			RedisUsername: app.Config.Redis.Username,
+			RedisPassword: app.Config.Redis.Password,
+		})
+	}
+
+	return app.pubsub
 }
 
 // Cache ...
