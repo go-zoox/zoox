@@ -103,11 +103,11 @@ type ApplicationConfig struct {
 	//
 	Cache cache.Config `config:"cache"`
 	//
-	Redis Redis `config:"redis"`
+	Redis ApplicationConfigRedis `config:"redis"`
 }
 
-// Redis defines the config of redis.
-type Redis struct {
+// ApplicationConfigRedis defines the config of redis.
+type ApplicationConfigRedis struct {
 	Host     string `config:"host"`
 	Port     int    `config:"port"`
 	DB       int    `config:"db"`
