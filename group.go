@@ -3,6 +3,7 @@ package zoox
 import (
 	"errors"
 	"fmt"
+	"io"
 	"mime"
 	"net/http"
 	"path"
@@ -311,6 +312,31 @@ func (g *RouterGroup) WebSocketGorilla(path string, handler WsGorillaHandlerFunc
 		defer conn.Close()
 
 		handler(ctx, conn)
+	})
+
+	return g
+}
+
+// JSONRPC defines the method to add jsonrpc route
+func (g *RouterGroup) JSONRPC(path string, handler JSONRPCHandlerFunc) *RouterGroup {
+	handler(g.app.JSONRPC())
+
+	g.addRoute(http.MethodPost, path, func(ctx *Context) {
+		request, err := io.ReadAll(ctx.Request.Body)
+		if err != nil {
+			ctx.Error(http.StatusInternalServerError, err.Error())
+			return
+		}
+		defer ctx.Request.Body.Close()
+
+		response, err := ctx.App.JSONRPC().Invoke(ctx.Context(), request)
+		if err != nil {
+			ctx.Error(http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		ctx.Status(http.StatusOK)
+		ctx.Write(response)
 	})
 
 	return g

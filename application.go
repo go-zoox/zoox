@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -43,6 +42,9 @@ type WsHandlerFunc func(ctx *Context, client *websocket.Client)
 
 // WsGorillaHandlerFunc defines the websocket handler used by zoox
 type WsGorillaHandlerFunc func(ctx *Context, client *websocket.GorillaConn)
+
+// JSONRPCHandlerFunc defines the jsonrpc handler used by zoox
+type JSONRPCHandlerFunc func(registry jsonrpcServer.Server)
 
 // Application is the handler for all requests.
 type Application struct {
@@ -358,30 +360,10 @@ func (app *Application) IsProd() bool {
 }
 
 // JSONRPC get a new JSONRPC handler.
-func (app *Application) JSONRPC(path string) jsonrpcServer.Server {
-	if app.jsonrpc != nil {
-		return app.jsonrpc
+func (app *Application) JSONRPC() jsonrpcServer.Server {
+	if app.jsonrpc == nil {
+		app.jsonrpc = jsonrpcServer.New()
 	}
-
-	app.jsonrpc = jsonrpcServer.New()
-
-	app.Post(path, func(ctx *Context) {
-		request, err := io.ReadAll(ctx.Request.Body)
-		if err != nil {
-			ctx.Error(http.StatusInternalServerError, err.Error())
-			return
-		}
-		defer ctx.Request.Body.Close()
-
-		response, err := app.jsonrpc.Invoke(ctx.Context(), request)
-		if err != nil {
-			ctx.Error(http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		ctx.Status(http.StatusOK)
-		ctx.Write(response)
-	})
 
 	return app.jsonrpc
 }

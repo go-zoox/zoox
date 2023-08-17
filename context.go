@@ -17,6 +17,7 @@ import (
 
 	"github.com/go-zoox/cache"
 	"github.com/go-zoox/proxy"
+	"github.com/go-zoox/pubsub"
 	"github.com/go-zoox/tag/datasource"
 	"github.com/go-zoox/zoox/components/application/cron"
 	"github.com/go-zoox/zoox/components/application/debug"
@@ -30,7 +31,6 @@ import (
 	"github.com/go-zoox/zoox/components/context/state"
 	"github.com/go-zoox/zoox/components/context/user"
 	"github.com/go-zoox/zoox/utils"
-	"gocloud.dev/pubsub"
 
 	"github.com/go-zoox/cookie"
 	"github.com/go-zoox/core-utils/safe"
