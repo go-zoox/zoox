@@ -106,6 +106,7 @@ type ApplicationConfig struct {
 	Redis Redis `config:"redis"`
 }
 
+// Redis defines the config of redis.
 type Redis struct {
 	Host     string `config:"host"`
 	Port     int    `config:"port"`
