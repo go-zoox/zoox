@@ -70,7 +70,7 @@ type Application struct {
 	runtime runtime.Runtime
 
 	//
-	jsonrpc jsonrpcServer.Server
+	jsonrpcRegistry jsonrpcServer.Server
 	//
 	pubsub pubsub.PubSub
 
@@ -359,13 +359,13 @@ func (app *Application) IsProd() bool {
 	return app.Env.Get("MODE") == "production"
 }
 
-// JSONRPC get a new JSONRPC handler.
-func (app *Application) JSONRPC() jsonrpcServer.Server {
-	if app.jsonrpc == nil {
-		app.jsonrpc = jsonrpcServer.New()
+// JSONRPCRegistry get a new JSONRPCRegistry handler.
+func (app *Application) JSONRPCRegistry() jsonrpcServer.Server {
+	if app.jsonrpcRegistry == nil {
+		app.jsonrpcRegistry = jsonrpcServer.New()
 	}
 
-	return app.jsonrpc
+	return app.jsonrpcRegistry
 }
 
 // PubSub get a new PubSub handler.

@@ -319,7 +319,7 @@ func (g *RouterGroup) WebSocketGorilla(path string, handler WsGorillaHandlerFunc
 
 // JSONRPC defines the method to add jsonrpc route
 func (g *RouterGroup) JSONRPC(path string, handler JSONRPCHandlerFunc) *RouterGroup {
-	handler(g.app.JSONRPC())
+	handler(g.app.JSONRPCRegistry())
 
 	g.addRoute(http.MethodPost, path, func(ctx *Context) {
 		request, err := io.ReadAll(ctx.Request.Body)
@@ -329,7 +329,7 @@ func (g *RouterGroup) JSONRPC(path string, handler JSONRPCHandlerFunc) *RouterGr
 		}
 		defer ctx.Request.Body.Close()
 
-		response, err := ctx.App.JSONRPC().Invoke(ctx.Context(), request)
+		response, err := ctx.App.JSONRPCRegistry().Invoke(ctx.Context(), request)
 		if err != nil {
 			ctx.Error(http.StatusInternalServerError, err.Error())
 			return
