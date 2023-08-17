@@ -66,6 +66,9 @@ type Application struct {
 	runtime runtime.Runtime
 
 	//
+	jsonrpc jsonrpcServer.Server
+
+	//
 	Config ApplicationConfig
 }
 
@@ -339,9 +342,13 @@ func (app *Application) IsProd() bool {
 	return app.Env.Get("MODE") == "production"
 }
 
-// CreateJSONRPC creates a new CreateJSONRPC handler.
-func (app *Application) CreateJSONRPC(path string) jsonrpcServer.Server {
-	rpc := jsonrpcServer.New()
+// JSONRPC get a new JSONRPC handler.
+func (app *Application) JSONRPC(path string) jsonrpcServer.Server {
+	if app.jsonrpc != nil {
+		return app.jsonrpc
+	}
+
+	app.jsonrpc = jsonrpcServer.New()
 
 	app.Post(path, func(ctx *Context) {
 		request, err := io.ReadAll(ctx.Request.Body)
@@ -351,7 +358,7 @@ func (app *Application) CreateJSONRPC(path string) jsonrpcServer.Server {
 		}
 		defer ctx.Request.Body.Close()
 
-		response, err := rpc.Invoke(ctx.Context(), request)
+		response, err := app.jsonrpc.Invoke(ctx.Context(), request)
 		if err != nil {
 			ctx.Error(http.StatusInternalServerError, err.Error())
 			return
@@ -361,7 +368,7 @@ func (app *Application) CreateJSONRPC(path string) jsonrpcServer.Server {
 		ctx.Write(response)
 	})
 
-	return rpc
+	return app.jsonrpc
 }
 
 // Cache ...
