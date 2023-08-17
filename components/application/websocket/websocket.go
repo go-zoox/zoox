@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,9 +9,9 @@ import (
 	"sync"
 	"time"
 
+	jsonrpcServer "github.com/go-zoox/jsonrpc/server"
 	"github.com/go-zoox/logger"
 	"github.com/go-zoox/uuid"
-	"github.com/go-zoox/zoox/rpc/jsonrpc"
 	gowebsocket "github.com/gorilla/websocket"
 )
 
@@ -263,8 +264,8 @@ func (c *Client) WriteJSON(msg interface{}) error {
 }
 
 // CreateJSONRPC ...
-func (c *Client) CreateJSONRPC() jsonrpc.Server[any] {
-	rpc := jsonrpc.NewServer[any]()
+func (c *Client) CreateJSONRPC() jsonrpcServer.Server {
+	rpc := jsonrpcServer.New()
 
 	onTextMessage := []func([]byte){}
 	if c.OnTextMessage != nil {
@@ -272,7 +273,7 @@ func (c *Client) CreateJSONRPC() jsonrpc.Server[any] {
 	}
 
 	onTextMessage = append(onTextMessage, func(msg []byte) {
-		resp, err := rpc.Invoke(c, msg)
+		resp, err := rpc.Invoke(context.Background(), msg)
 		if err != nil {
 			if c.OnError != nil {
 				c.OnError(err)

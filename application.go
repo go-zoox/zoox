@@ -16,6 +16,7 @@ import (
 	"github.com/go-zoox/cache"
 	"github.com/go-zoox/core-utils/cast"
 	"github.com/go-zoox/core-utils/regexp"
+	jsonrpcServer "github.com/go-zoox/jsonrpc/server"
 	"github.com/go-zoox/logger"
 	"github.com/go-zoox/session"
 	"github.com/go-zoox/zoox/components/application/cron"
@@ -24,7 +25,6 @@ import (
 	"github.com/go-zoox/zoox/components/application/jobqueue"
 	"github.com/go-zoox/zoox/components/application/runtime"
 	"github.com/go-zoox/zoox/components/application/websocket"
-	"github.com/go-zoox/zoox/rpc/jsonrpc"
 )
 
 // HandlerFunc defines the request handler used by zoox
@@ -340,8 +340,8 @@ func (app *Application) IsProd() bool {
 }
 
 // CreateJSONRPC creates a new CreateJSONRPC handler.
-func (app *Application) CreateJSONRPC(path string) jsonrpc.Server[*Context] {
-	rpc := jsonrpc.NewServer[*Context]()
+func (app *Application) CreateJSONRPC(path string) jsonrpcServer.Server {
+	rpc := jsonrpcServer.New()
 
 	app.Post(path, func(ctx *Context) {
 		request, err := io.ReadAll(ctx.Request.Body)
@@ -351,7 +351,7 @@ func (app *Application) CreateJSONRPC(path string) jsonrpc.Server[*Context] {
 		}
 		defer ctx.Request.Body.Close()
 
-		response, err := rpc.Invoke(ctx, request)
+		response, err := rpc.Invoke(ctx.Context(), request)
 		if err != nil {
 			ctx.Error(http.StatusInternalServerError, err.Error())
 			return

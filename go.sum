@@ -79,6 +79,8 @@ github.com/go-zoox/headers v1.0.8/go.mod h1:WEgEbewswEw4n4qS1iG68Kn/vOQVCAKGwwuZ
 github.com/go-zoox/ini v1.0.4/go.mod h1:SisQneNLb1EBeZ5bA5GnrJd8FNg372hQrPh+gb3IzV4=
 github.com/go-zoox/jobqueue v1.0.0 h1:pVv/eGI0CLLHUP3rDVyn0ALzsobtaxTOnkWw/JhW9Vg=
 github.com/go-zoox/jobqueue v1.0.0/go.mod h1:jUCZxrQcM28orhac67eNLU7SBiVNXehxSelj7j4MM88=
+github.com/go-zoox/jsonrpc v1.2.1 h1:sUzBH44rUqcixfUZXWpfkdq0kSb4CvXiUchHuztKOpM=
+github.com/go-zoox/jsonrpc v1.2.1/go.mod h1:HdxJW/T0hkVHlfm+ULRnNEqvTtvZ7o4qxdQGQW76khM=
 github.com/go-zoox/jwt v1.0.0/go.mod h1:a6ANQHmSs+b9GJv5aad2cQLl8opFmP3hMOxZtgXRmis=
 github.com/go-zoox/jwt v1.3.0 h1:beyPOdiiNrNK8dqFijt5kdtaeh1dZKtM7/kaCMGbV0U=
 github.com/go-zoox/jwt v1.3.0/go.mod h1:Cfc+t0XhNCgDjXLR5sK6ao7qz1GSIq896gZ1usNb7t8=
