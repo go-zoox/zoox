@@ -87,6 +87,7 @@ func (n *Node) Search(parts []string, height int) *Node {
 	return nil
 }
 
+// IsWild ...
 func (n *Node) IsWild() bool {
 	return n.isWild
 }
