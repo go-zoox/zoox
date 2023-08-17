@@ -6,24 +6,27 @@ import (
 	"github.com/go-zoox/logger"
 )
 
+// HandlerFunc is a handler function.
+type HandlerFunc[C any] func(ctx C, params Params) (Result, error)
+
 // Server is a JSON-RPC server.
 type Server[C any] interface {
-	Register(method string, handler func(ctx C, params interface{}) (interface{}, error))
+	Register(method string, handler HandlerFunc[C])
 	Invoke(ctx C, body []byte) ([]byte, error)
 }
 
 type server[C any] struct {
-	methods map[string]func(ctx C, params interface{}) (interface{}, error)
+	methods map[string]HandlerFunc[C]
 }
 
 // NewServer creates a new JSON-RPC server.
 func NewServer[C any]() Server[C] {
 	return &server[C]{
-		methods: make(map[string]func(ctx C, params interface{}) (interface{}, error)),
+		methods: make(map[string]HandlerFunc[C]),
 	}
 }
 
-func (s *server[C]) Register(method string, handler func(ctx C, params interface{}) (interface{}, error)) {
+func (s *server[C]) Register(method string, handler HandlerFunc[C]) {
 	s.methods[method] = handler
 }
 
@@ -72,6 +75,8 @@ func (s *server[C]) Invoke(ctx C, body []byte) ([]byte, error) {
 	// fmt.Println("request.ID", request.ID)
 	// fmt.Println("request.Method", request.Method)
 	// fmt.Println("request.Params", request.Params)
+
+	logger.Infof("[jsonrpc][id: %s][method: %s]", request.ID, request.Method)
 
 	response.ID = request.ID
 

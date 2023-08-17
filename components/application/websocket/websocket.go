@@ -320,6 +320,7 @@ func (c *Client) Pong(message string) error {
 	return err
 }
 
+// ReadWriter ...
 func (c *Client) ReadWriter() io.ReadWriteCloser {
 	return newRW(c)
 }
@@ -342,16 +343,19 @@ func newRW(c *Client) io.ReadWriteCloser {
 	return rwx
 }
 
-func (w *rw) Write(p []byte) (n int, err error) {
-	return len(p), w.c.WriteBinary(p)
+// Write ...
+func (rw *rw) Write(p []byte) (n int, err error) {
+	return len(p), rw.c.WriteBinary(p)
 }
 
-func (r *rw) Read(p []byte) (n int, err error) {
-	n = copy(p, <-r.buf)
+// Read ...
+func (rw *rw) Read(p []byte) (n int, err error) {
+	n = copy(p, <-rw.buf)
 	return
 }
 
-func (r *rw) Close() error {
-	close(r.buf)
+// Close ...
+func (rw *rw) Close() error {
+	close(rw.buf)
 	return nil
 }
