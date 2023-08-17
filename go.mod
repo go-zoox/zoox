@@ -10,7 +10,7 @@ require (
 	github.com/go-zoox/cron v1.1.2
 	github.com/go-zoox/datetime v1.1.1
 	github.com/go-zoox/debug v1.0.1
-	github.com/go-zoox/fetch v1.7.12
+	github.com/go-zoox/fetch v1.7.13
 	github.com/go-zoox/gzip v1.0.0
 	github.com/go-zoox/headers v1.0.8
 	github.com/go-zoox/jobqueue v1.0.0
