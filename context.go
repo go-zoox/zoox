@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/go-zoox/cache"
@@ -54,9 +55,12 @@ type Context struct {
 	Path   string
 	//
 	param param.Param
+
 	query query.Query
-	form  form.Form
-	body  body.Body
+
+	form form.Form
+
+	body body.Body
 
 	// response
 	sse sse.SSE
@@ -92,6 +96,29 @@ type Context struct {
 
 	// bodyBytes is used to copy body
 	bodyBytes []byte
+
+	// once
+	once struct {
+		debug sync.Once
+		//
+		cache sync.Once
+		queue sync.Once
+		env   sync.Once
+		//
+		cron sync.Once
+		jwt  sync.Once
+		sse  sync.Once
+		//
+		cookie  sync.Once
+		session sync.Once
+		//
+		query sync.Once
+		form  sync.Once
+		body  sync.Once
+		//
+		state sync.Once
+		user  sync.Once
+	}
 }
 
 func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Context {
@@ -146,9 +173,9 @@ func (ctx *Context) Next() {
 
 // Query returns the query string parameter with the given name.
 func (ctx *Context) Query() query.Query {
-	if ctx.query == nil {
+	ctx.once.query.Do(func() {
 		ctx.query = query.New(ctx.Request)
-	}
+	})
 
 	return ctx.query
 }
@@ -165,18 +192,18 @@ func (ctx *Context) Header() http.Header {
 
 // Form returns the form data from POST or PUT request body.
 func (ctx *Context) Form() form.Form {
-	if ctx.form == nil {
+	ctx.once.form.Do(func() {
 		ctx.form = form.New(ctx.Request)
-	}
+	})
 
 	return ctx.form
 }
 
 // Body returns the request body.
 func (ctx *Context) Body() body.Body {
-	if ctx.body == nil {
+	ctx.once.body.Do(func() {
 		ctx.body = body.New(ctx.Bodies)
-	}
+	})
 
 	return ctx.body
 }
@@ -213,9 +240,9 @@ func (ctx *Context) AddHeader(key string, value string) {
 
 // SSE sets the response header for server-sent events.
 func (ctx *Context) SSE() sse.SSE {
-	if ctx.sse == nil {
+	ctx.once.sse.Do(func() {
 		ctx.sse = sse.New(ctx.Writer)
-	}
+	})
 
 	return ctx.sse
 }
@@ -744,104 +771,103 @@ func (ctx *Context) AcceptHTML() bool {
 
 // Cache returns the cache of the application.
 func (ctx *Context) Cache() cache.Cache {
-	if ctx.cache == nil {
+	ctx.once.cache.Do(func() {
 		ctx.cache = ctx.App.Cache()
-	}
+	})
 
 	return ctx.cache
 }
 
 // Cron returns the cache of the application.
 func (ctx *Context) Cron() cron.Cron {
-	if ctx.cron == nil {
+	ctx.once.cron.Do(func() {
 		ctx.cron = ctx.App.Cron()
-	}
+	})
 
 	return ctx.cron
 }
 
 // JobQueue returns the queue of the application.
 func (ctx *Context) JobQueue() jobqueue.JobQueue {
-	if ctx.queue == nil {
+	ctx.once.queue.Do(func() {
 		ctx.queue = ctx.App.JobQueue()
-	}
+	})
 
 	return ctx.queue
 }
 
 // Debug returns the debug of the app.
 func (ctx *Context) Debug() debug.Debug {
-	if ctx.debug == nil {
+	ctx.once.debug.Do(func() {
 		ctx.debug = ctx.App.Debug()
-	}
+	})
 
 	return ctx.debug
 }
 
 // Env returns the env of the
 func (ctx *Context) Env() env.Env {
-	if ctx.env == nil {
+	ctx.once.env.Do(func() {
 		ctx.env = ctx.App.Env
-	}
+	})
 
 	return ctx.env
 }
 
 // State returns the state of the
 func (ctx *Context) State() state.State {
-	if ctx.state == nil {
+	ctx.once.state.Do(func() {
 		ctx.state = state.New()
-	}
+	})
 
 	return ctx.state
 }
 
 // User returns the user of the
 func (ctx *Context) User() user.User {
-	if ctx.user == nil {
+	ctx.once.user.Do(func() {
 		ctx.user = user.New()
-	}
+	})
 
 	return ctx.user
 }
 
 // Cookie returns the cookie of the request.
 func (ctx *Context) Cookie() cookie.Cookie {
-	if ctx.cookie == nil {
+	ctx.once.cookie.Do(func() {
 		ctx.cookie = cookie.New(
 			ctx.Writer,
 			ctx.Request,
 		)
-	}
+	})
 
 	return ctx.cookie
 }
 
 // Session returns the session of the request.
 func (ctx *Context) Session() session.Session {
-	if ctx.session == nil {
-
+	ctx.once.session.Do(func() {
 		secretKey := ctx.App.Config.SecretKey
 		if secretKey == "" {
 			secretKey = "go-zoox_" + random.String(24)
 		}
 
 		ctx.session = session.New(ctx.Cookie(), secretKey, &ctx.App.Config.Session)
-	}
+	})
 
 	return ctx.session
 }
 
 // Jwt returns the jwt of the request.
 func (ctx *Context) Jwt() jwt.Jwt {
-	if ctx.jwt == nil {
+	ctx.once.jwt.Do(func() {
 		secretKey := ctx.App.Config.SecretKey
 		if secretKey == "" {
 			secretKey = "go-zoox_" + random.String(24)
 		}
 
 		ctx.jwt = jwt.New(secretKey)
-	}
+	})
 
 	return ctx.jwt
 }
