@@ -213,7 +213,7 @@ func (ctx *Context) AddHeader(key string, value string) {
 
 // SSE sets the response header for server-sent events.
 func (ctx *Context) SSE() sse.SSE {
-	if ctx.body == nil {
+	if ctx.sse == nil {
 		ctx.sse = sse.New(ctx.Writer)
 	}
 
