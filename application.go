@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"sync"
 	"text/template"
 
 	"github.com/go-zoox/cache"
@@ -76,6 +77,20 @@ type Application struct {
 
 	//
 	Config ApplicationConfig
+
+	// once
+	once struct {
+		//
+		debug   sync.Once
+		runtime sync.Once
+		//
+		cache sync.Once
+		cron  sync.Once
+		queue sync.Once
+		//
+		jsonrpcRegistry sync.Once
+		pubsub          sync.Once
+	}
 }
 
 // ApplicationConfig defines the config of zoox.Application.
@@ -361,9 +376,9 @@ func (app *Application) IsProd() bool {
 
 // JSONRPCRegistry get a new JSONRPCRegistry handler.
 func (app *Application) JSONRPCRegistry() jsonrpcServer.Server {
-	if app.jsonrpcRegistry == nil {
+	app.once.jsonrpcRegistry.Do(func() {
 		app.jsonrpcRegistry = jsonrpcServer.New()
-	}
+	})
 
 	return app.jsonrpcRegistry
 }
@@ -374,7 +389,7 @@ func (app *Application) PubSub() pubsub.PubSub {
 		panic("redis config is required for pubsub in application")
 	}
 
-	if app.pubsub == nil {
+	app.once.pubsub.Do(func() {
 		app.pubsub = pubsub.New(&pubsub.Config{
 			RedisHost:     app.Config.Redis.Host,
 			RedisPort:     app.Config.Redis.Port,
@@ -382,52 +397,52 @@ func (app *Application) PubSub() pubsub.PubSub {
 			RedisUsername: app.Config.Redis.Username,
 			RedisPassword: app.Config.Redis.Password,
 		})
-	}
+	})
 
 	return app.pubsub
 }
 
 // Cache ...
 func (app *Application) Cache() cache.Cache {
-	if app.cache == nil {
+	app.once.cache.Do(func() {
 		app.cache = cache.New(&app.Config.Cache)
-	}
+	})
 
 	return app.cache
 }
 
 // Cron ...
 func (app *Application) Cron() cron.Cron {
-	if app.cron == nil {
+	app.once.cron.Do(func() {
 		app.cron = cron.New()
-	}
+	})
 
 	return app.cron
 }
 
 // JobQueue ...
 func (app *Application) JobQueue() jobqueue.JobQueue {
-	if app.queue == nil {
+	app.once.queue.Do(func() {
 		app.queue = jobqueue.New()
-	}
+	})
 
 	return app.queue
 }
 
 // Debug ...
 func (app *Application) Debug() debug.Debug {
-	if app.cache == nil {
+	app.once.debug.Do(func() {
 		app.debug = debug.New(app.Logger)
-	}
+	})
 
 	return app.debug
 }
 
 // Runtime ...
 func (app *Application) Runtime() runtime.Runtime {
-	if app.runtime == nil {
+	app.once.runtime.Do(func() {
 		app.runtime = runtime.New(app.Logger)
-	}
+	})
 
 	return app.runtime
 }
