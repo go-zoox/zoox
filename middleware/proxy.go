@@ -11,7 +11,7 @@ import (
 // ProxyConfig defines the proxy config
 type ProxyConfig struct {
 	// internal proxy config
-	proxy.SingleTargetConfig
+	proxy.SingleHostConfig
 
 	// target url
 	Target string
@@ -32,7 +32,7 @@ func Proxy(fn func(cfg *ProxyConfig, ctx *zoox.Context) (next bool, err error)) 
 			return
 		}
 
-		zoox.WrapH(proxy.NewSingleTarget(proxyCfg.Target, &proxyCfg.SingleTargetConfig))(ctx)
+		zoox.WrapH(proxy.NewSingleHost(proxyCfg.Target, &proxyCfg.SingleHostConfig))(ctx)
 	}
 }
 
