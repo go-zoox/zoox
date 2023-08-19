@@ -1,6 +1,6 @@
 module github.com/go-zoox/zoox
 
-go 1.18
+go 1.20
 
 require (
 	github.com/go-zoox/cache v1.0.3
