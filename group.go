@@ -113,7 +113,7 @@ func (g *RouterGroup) Any(path string, handler ...HandlerFunc) *RouterGroup {
 // ProxyConfig defines the proxy config
 type ProxyConfig struct {
 	// internal proxy config
-	proxy.SingleTargetConfig
+	proxy.SingleHostConfig
 
 	// context proxy config
 	OnRequestWithContext  func(ctx *Context) error
@@ -139,7 +139,7 @@ func (g *RouterGroup) Proxy(path, target string, options ...func(cfg *ProxyConfi
 		option(cfg)
 	}
 
-	handler := WrapH(proxy.NewSingleTarget(target, &cfg.SingleTargetConfig))
+	handler := WrapH(proxy.NewSingleHost(target, &cfg.SingleHostConfig))
 
 	g.Use(func(ctx *Context) {
 		if strings.StartsWith(ctx.Path, path) {
