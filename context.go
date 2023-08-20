@@ -34,6 +34,7 @@ import (
 	"github.com/go-zoox/zoox/components/context/user"
 	"github.com/go-zoox/zoox/utils"
 
+	"github.com/go-zoox/concurrency"
 	"github.com/go-zoox/cookie"
 	"github.com/go-zoox/core-utils/safe"
 	"github.com/go-zoox/fetch"
@@ -935,4 +936,9 @@ func (ctx *Context) Publish(msg *pubsub.Message) error {
 // Subscribe subscribes the topic with the handler.
 func (ctx *Context) Subscribe(topic string, handler pubsub.Handler) error {
 	return ctx.App.PubSub().Subscribe(ctx.Context(), topic, handler)
+}
+
+// Concurrency creates a concurrency.
+func (ctx *Context) Concurrency(limit int) *concurrency.Concurrency {
+	return concurrency.New(limit)
 }

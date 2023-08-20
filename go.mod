@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/go-zoox/cache v1.0.3
+	github.com/go-zoox/concurrency v1.2.0
 	github.com/go-zoox/cookie v1.2.0
 	github.com/go-zoox/core-utils v1.2.14
 	github.com/go-zoox/counter v1.2.0
