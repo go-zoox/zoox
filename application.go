@@ -16,6 +16,7 @@ import (
 	"github.com/go-zoox/cache"
 	"github.com/go-zoox/core-utils/cast"
 	"github.com/go-zoox/core-utils/regexp"
+	"github.com/go-zoox/i18n"
 	jsonrpcServer "github.com/go-zoox/jsonrpc/server"
 	"github.com/go-zoox/logger"
 	"github.com/go-zoox/session"
@@ -62,6 +63,8 @@ type Application struct {
 	//
 	cron  cron.Cron
 	queue jobqueue.JobQueue
+	// i18n
+	i18n i18n.I18n
 	//
 	Env    env.Env
 	Logger *logger.Logger
@@ -87,6 +90,8 @@ type Application struct {
 		cache sync.Once
 		cron  sync.Once
 		queue sync.Once
+		//
+		i18n sync.Once
 		//
 		jsonrpcRegistry sync.Once
 		pubsub          sync.Once
@@ -427,6 +432,15 @@ func (app *Application) JobQueue() jobqueue.JobQueue {
 	})
 
 	return app.queue
+}
+
+// I18n ...
+func (app *Application) I18n() i18n.I18n {
+	app.once.queue.Do(func() {
+		app.i18n = i18n.New()
+	})
+
+	return app.i18n
 }
 
 // Debug ...

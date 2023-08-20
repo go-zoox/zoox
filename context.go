@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/go-zoox/cache"
+	"github.com/go-zoox/i18n"
 	"github.com/go-zoox/proxy"
 	"github.com/go-zoox/pubsub"
 	"github.com/go-zoox/tag/datasource"
@@ -74,6 +75,8 @@ type Context struct {
 	cron  cron.Cron
 	queue jobqueue.JobQueue
 	//
+	i18n i18n.I18n
+	//
 	env   env.Env
 	debug debug.Debug
 	// middleware
@@ -104,6 +107,8 @@ type Context struct {
 		cache sync.Once
 		queue sync.Once
 		env   sync.Once
+		//
+		i18n sync.Once
 		//
 		cron sync.Once
 		jwt  sync.Once
@@ -794,6 +799,15 @@ func (ctx *Context) JobQueue() jobqueue.JobQueue {
 	})
 
 	return ctx.queue
+}
+
+// I18n returns the i18n of the application.
+func (ctx *Context) I18n() i18n.I18n {
+	ctx.once.i18n.Do(func() {
+		ctx.i18n = ctx.App.I18n()
+	})
+
+	return ctx.i18n
 }
 
 // Debug returns the debug of the app.
