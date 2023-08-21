@@ -12,11 +12,14 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"runtime"
 	"strings"
 	"sync"
+
 	"time"
 
 	"github.com/go-zoox/cache"
+	"github.com/go-zoox/fs"
 	"github.com/go-zoox/i18n"
 	"github.com/go-zoox/proxy"
 	"github.com/go-zoox/pubsub"
@@ -435,8 +438,19 @@ func (ctx *Context) Fail(err error, code int, message string, status ...int) {
 		statusX = status[0]
 	}
 
-	// ctx.Logger.Error("[Fail] %s", err)
-	fmt.Println("[Fail]", err)
+	funcName := "unknown"
+	// get panic error occurred file and line
+	pc, filepath, line, ok := runtime.Caller(2)
+	if ok {
+		filepath = filepath[len(fs.CurrentDir())+1:]
+		funcName = runtime.FuncForPC(pc).Name()
+		funcNameParts := strings.Split(runtime.FuncForPC(pc).Name(), ".")
+		if len(funcNameParts) > 0 {
+			funcName = funcNameParts[len(funcNameParts)-1]
+		}
+	}
+
+	ctx.Logger.Errorf("[fail][%s:%d,%s][%s %s] %s", filepath, line, funcName, ctx.Method, ctx.Path, err)
 
 	ctx.JSON(statusX, map[string]any{
 		"code":    code,
