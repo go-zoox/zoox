@@ -18,7 +18,7 @@ require (
 	github.com/go-zoox/jobqueue v1.0.0
 	github.com/go-zoox/jsonrpc v1.2.1
 	github.com/go-zoox/jwt v1.3.0
-	github.com/go-zoox/logger v1.4.4
+	github.com/go-zoox/logger v1.4.5
 	github.com/go-zoox/proxy v1.5.1
 	github.com/go-zoox/pubsub v1.2.2
 	github.com/go-zoox/random v1.0.4
