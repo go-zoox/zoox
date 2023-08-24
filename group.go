@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/go-zoox/core-utils/strings"
+	"github.com/go-zoox/fs"
+	"github.com/go-zoox/headers"
 	"github.com/go-zoox/proxy"
 	"github.com/go-zoox/zoox/components/application/websocket"
 	gowebsocket "github.com/gorilla/websocket"
@@ -374,16 +376,21 @@ func (g *RouterGroup) createStaticHandler(relativePath string, fs http.FileSyste
 
 	return func(ctx *Context) {
 		file := ctx.Param().Get("filepath")
-		// Check if file exists and/or is not a directory
-		f, err := fs.Open(file.String())
-		if err != nil {
-			// ctx.Status(http.StatusNotFound)
-			ctx.handlers = append(ctx.handlers, ctx.App.notfound)
+		key := fmt.Sprintf("static_fs:%s", file)
+		if !ctx.Cache().Has(key) {
+			// Check if file exists and/or is not a directory
+			f, err := fs.Open(file.String())
+			if err != nil {
+				// ctx.Status(http.StatusNotFound)
+				ctx.handlers = append(ctx.handlers, ctx.App.notfound)
 
-			ctx.Next()
-			return
+				ctx.Next()
+				return
+			}
+			f.Close()
+
+			ctx.Cache().Set(key, true, 24*time.Hour)
 		}
-		f.Close()
 
 		fileServer.ServeHTTP(ctx.Writer, ctx.Request)
 	}
@@ -401,11 +408,44 @@ type StaticOptions struct {
 
 // Static defines the method to serve static files
 func (g *RouterGroup) Static(relativePath string, root string, options ...*StaticOptions) {
+	if !strings.StartsWith(relativePath, "/") {
+		root = fs.JoinCurrentDir("./public")
+	}
+
 	handler := g.createStaticHandler(relativePath, http.Dir(root))
 	pathX := path.Join(relativePath, "/*filepath")
 
+	var opts *StaticOptions
+	if len(options) > 0 {
+		opts = options[0]
+	}
+
+	if opts != nil && opts.Index {
+		g.Get("/", func(ctx *Context) {
+			html, err := fs.ReadFileAsString(fs.JoinPath(root, "/index.html"))
+			if err != nil {
+				ctx.Error(http.StatusInternalServerError, fmt.Errorf("failed to read index.html: %s", err).Error())
+				return
+			}
+
+			ctx.HTML(http.StatusOK, html)
+		})
+	}
+
 	//
-	g.Get(pathX, handler)
+	g.Get(pathX, func(ctx *Context) {
+		if opts != nil {
+			if opts.Suffix != "" {
+				ctx.Request.URL.Path = ctx.Request.URL.Path + opts.Suffix
+			}
+
+			if opts.MaxAge > 0 {
+				ctx.Set(headers.CacheControl, fmt.Sprintf("max-age=%d", int(opts.MaxAge.Seconds())))
+			}
+		}
+
+		handler(ctx)
+	})
 }
 
 // StaticFS defines the method to serve static files
