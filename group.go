@@ -400,7 +400,7 @@ type StaticOptions struct {
 }
 
 // Static defines the method to serve static files
-func (g *RouterGroup) Static(relativePath string, root string, options ...StaticOptions) {
+func (g *RouterGroup) Static(relativePath string, root string, options ...*StaticOptions) {
 	handler := g.createStaticHandler(relativePath, http.Dir(root))
 	pathX := path.Join(relativePath, "/*filepath")
 
