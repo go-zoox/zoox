@@ -377,7 +377,7 @@ func (g *RouterGroup) createStaticHandler(relativePath string, fs http.FileSyste
 	return func(ctx *Context) {
 		file := ctx.Param().Get("filepath")
 		key := fmt.Sprintf("static_fs:%s", file)
-		if !ctx.Cache().Has(key) {
+		if ok := ctx.Cache().Has(key); !ok {
 			// Check if file exists and/or is not a directory
 			f, err := fs.Open(file.String())
 			if err != nil {
@@ -408,35 +408,24 @@ type StaticOptions struct {
 
 // Static defines the method to serve static files
 func (g *RouterGroup) Static(relativePath string, root string, options ...*StaticOptions) {
-	if !strings.StartsWith(relativePath, "/") {
-		root = fs.JoinCurrentDir("./public")
-	}
-
-	handler := g.createStaticHandler(relativePath, http.Dir(root))
-	pathX := path.Join(relativePath, "/*filepath")
-
 	var opts *StaticOptions
 	if len(options) > 0 {
 		opts = options[0]
 	}
 
-	if opts != nil && opts.Index {
-		g.Get("/", func(ctx *Context) {
-			html, err := fs.ReadFileAsString(fs.JoinPath(root, "/index.html"))
-			if err != nil {
-				ctx.Error(http.StatusInternalServerError, fmt.Errorf("failed to read index.html: %s", err).Error())
-				return
-			}
-
-			ctx.HTML(http.StatusOK, html)
-		})
+	if !strings.StartsWith(relativePath, "/") {
+		root = fs.JoinCurrentDir(relativePath)
 	}
+
+	handler := g.createStaticHandler(relativePath, http.Dir(root))
+	pathX := path.Join(relativePath, "/*filepath")
 
 	//
 	g.Get(pathX, func(ctx *Context) {
 		if opts != nil {
 			if opts.Suffix != "" {
 				ctx.Request.URL.Path = ctx.Request.URL.Path + opts.Suffix
+				ctx.Request.URL.RawPath = ctx.Request.URL.RawPath + opts.Suffix
 			}
 
 			if opts.MaxAge > 0 {
@@ -446,6 +435,15 @@ func (g *RouterGroup) Static(relativePath string, root string, options ...*Stati
 
 		handler(ctx)
 	})
+
+	//
+	if opts != nil {
+		if opts.Index {
+			g.Get("/", func(ctx *Context) {
+				ctx.RenderIndexHTML(root)
+			})
+		}
+	}
 }
 
 // StaticFS defines the method to serve static files
