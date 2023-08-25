@@ -1,4 +1,4 @@
 package zoox
 
 // Version is the current version of the package.
-var Version = "1.11.7"
+var Version = "1.11.8"
