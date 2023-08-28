@@ -1,9 +1,8 @@
 package commands
 
 import (
-	"strings"
-
 	"github.com/go-zoox/cli"
+	"github.com/go-zoox/core-utils/fmt"
 	"github.com/go-zoox/fs"
 	"github.com/go-zoox/logger"
 	"github.com/go-zoox/watch"
@@ -33,15 +32,9 @@ func Dev(app *cli.MultipleProgram) {
 		},
 		Action: func(ctx *cli.Context) error {
 			context := ctx.String("context")
-			command := []string{
-				"go run",
-			}
+			tmpBin := fs.TmpFilePath()
+			cmdText := fmt.Sprintf("go build -o %s %s && %s", tmpBin, ctx.String("entry"), tmpBin)
 
-			if ctx.String("entry") != "" {
-				command = append(command, ctx.String("entry"))
-			}
-
-			cmdText := strings.Join(command, " ")
 			logger.Debugf("Running command: %s", cmdText)
 
 			if err := install(context); err != nil {

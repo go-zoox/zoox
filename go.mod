@@ -29,7 +29,7 @@ require (
 	github.com/go-zoox/session v1.2.0
 	github.com/go-zoox/tag v1.2.3
 	github.com/go-zoox/uuid v0.0.1
-	github.com/go-zoox/watch v1.2.3
+	github.com/go-zoox/watch v1.2.4
 	github.com/gorilla/websocket v1.5.0
 	github.com/stretchr/testify v1.8.1
 	gopkg.in/yaml.v3 v3.0.1
