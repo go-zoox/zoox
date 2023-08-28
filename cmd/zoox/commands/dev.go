@@ -32,6 +32,7 @@ func Dev(app *cli.MultipleProgram) {
 			},
 		},
 		Action: func(ctx *cli.Context) error {
+			context := ctx.String("context")
 			command := []string{
 				"go run",
 			}
@@ -43,8 +44,12 @@ func Dev(app *cli.MultipleProgram) {
 			cmdText := strings.Join(command, " ")
 			logger.Debugf("Running command: %s", cmdText)
 
+			if err := install(context); err != nil {
+				return err
+			}
+
 			watcher := watch.New(&watch.Config{
-				Context:  ctx.String("context"),
+				Context:  context,
 				Commands: []string{cmdText},
 				Ignores:  ctx.StringSlice("ignore"),
 			})

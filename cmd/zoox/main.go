@@ -13,6 +13,7 @@ func main() {
 		Version: zoox.Version,
 	})
 
+	commands.Install(app)
 	commands.Dev(app)
 	commands.Build(app)
 

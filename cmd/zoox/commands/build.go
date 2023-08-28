@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-zoox/chalk"
 	"github.com/go-zoox/cli"
+	"github.com/go-zoox/fs"
 	"github.com/go-zoox/logger"
 )
 
@@ -29,10 +30,14 @@ func Build(app *cli.MultipleProgram) {
 				EnvVars: []string{"ZOOX_OUTPUT"},
 				Value:   "./bin/app",
 			},
+			&cli.StringFlag{
+				Name:  "context",
+				Usage: "the command context",
+				Value: fs.CurrentDir(),
+			},
 		},
 		Action: func(ctx *cli.Context) error {
-			logger.Infof("start to build ...")
-
+			context := ctx.String("context")
 			command := []string{
 				"go build",
 			}
@@ -48,12 +53,17 @@ func Build(app *cli.MultipleProgram) {
 			cmdText := strings.Join(command, " ")
 			logger.Debugf("Running command: %s", cmdText)
 
+			if err := install(context); err != nil {
+				return err
+			}
+
+			logger.Infof("start to build ...")
 			cmd := exec.Command("sh", "-c", cmdText)
 			if err := cmd.Run(); err != nil {
 				return fmt.Errorf("failed to build: %s", err.Error())
 			}
 
-			logger.Infof("build successfully, output: %s", chalk.Green(ctx.String("output")))
+			logger.Infof("succeed to build, output: %s", chalk.Green(ctx.String("output")))
 			return nil
 		},
 	})
