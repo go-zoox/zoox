@@ -12,11 +12,13 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"strings"
+	"runtime"
 	"sync"
+
 	"time"
 
 	"github.com/go-zoox/cache"
+	"github.com/go-zoox/fs"
 	"github.com/go-zoox/i18n"
 	"github.com/go-zoox/proxy"
 	"github.com/go-zoox/pubsub"
@@ -37,6 +39,7 @@ import (
 	"github.com/go-zoox/concurrency"
 	"github.com/go-zoox/cookie"
 	"github.com/go-zoox/core-utils/safe"
+	"github.com/go-zoox/core-utils/strings"
 	"github.com/go-zoox/fetch"
 	"github.com/go-zoox/headers"
 	"github.com/go-zoox/jwt"
@@ -385,6 +388,11 @@ func (ctx *Context) HTML(status int, html string) {
 
 // Template renders the given template with the given data and writes the result
 func (ctx *Context) Template(status int, name string, data interface{}) {
+	if ctx.App.templates == nil {
+		ctx.Error(http.StatusInternalServerError, "templates is not initialized, please use app.SetTemplates() to initialize")
+		return
+	}
+
 	ctx.Status(status)
 	ctx.SetHeader(headers.ContentType, "text/html")
 	if err := ctx.App.templates.ExecuteTemplate(ctx.Writer, name, data); err != nil {
@@ -395,6 +403,41 @@ func (ctx *Context) Template(status int, name string, data interface{}) {
 // Render renders a template with data and writes the result to the response.
 func (ctx *Context) Render(status int, name string, data interface{}) {
 	ctx.Template(status, name, data)
+}
+
+// RenderHTML renders a template with data and writes the result to the response.
+func (ctx *Context) RenderHTML(filepath string) {
+	if !strings.StartsWith(filepath, "/") {
+		filepath = fs.JoinCurrentDir(filepath)
+	}
+
+	cacheKey := fmt.Sprintf("static_fs:%s", filepath)
+	html := ""
+	err := ctx.Cache().Get(cacheKey, &html)
+	if err != nil {
+		html, err = fs.ReadFileAsString(filepath)
+		if err != nil {
+			ctx.Error(http.StatusInternalServerError, fmt.Errorf("failed to read index.html: %s", err).Error())
+			return
+		}
+
+		ctx.Cache().Set(cacheKey, &html, 60*time.Second)
+	}
+
+	ctx.HTML(http.StatusOK, html)
+}
+
+// RenderIndexHTML renders the index.html file from the static directory.
+func (ctx *Context) RenderIndexHTML(dir string) {
+	ctx.RenderHTML(fs.JoinPath(dir, "index.html"))
+}
+
+// RenderStatic renders the static file from the static directory.
+func (ctx *Context) RenderStatic(prefix, dir string) {
+	hf := http.Dir(dir)
+	hfs := http.StripPrefix(prefix, http.FileServer(hf))
+
+	hfs.ServeHTTP(ctx.Writer, ctx.Request)
 }
 
 // Error writes the given error to the response.
@@ -435,8 +478,19 @@ func (ctx *Context) Fail(err error, code int, message string, status ...int) {
 		statusX = status[0]
 	}
 
-	// ctx.Logger.Error("[Fail] %s", err)
-	fmt.Println("[Fail]", err)
+	funcName := "unknown"
+	// get panic error occurred file and line
+	pc, filepath, line, ok := runtime.Caller(2)
+	if ok {
+		filepath = filepath[len(fs.CurrentDir())+1:]
+		funcName = runtime.FuncForPC(pc).Name()
+		funcNameParts := strings.Split(runtime.FuncForPC(pc).Name(), ".")
+		if len(funcNameParts) > 0 {
+			funcName = funcNameParts[len(funcNameParts)-1]
+		}
+	}
+
+	ctx.Logger.Errorf("[fail][%s:%d,%s][%s %s] %s", filepath, line, funcName, ctx.Method, ctx.Path, err)
 
 	ctx.JSON(statusX, map[string]any{
 		"code":    code,

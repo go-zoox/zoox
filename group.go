@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/go-zoox/core-utils/strings"
+	"github.com/go-zoox/fs"
+	"github.com/go-zoox/headers"
 	"github.com/go-zoox/proxy"
 	"github.com/go-zoox/zoox/components/application/websocket"
 	gowebsocket "github.com/gorilla/websocket"
@@ -347,23 +349,87 @@ func (g *RouterGroup) Use(middlewares ...HandlerFunc) {
 	g.middlewares = append(g.middlewares, middlewares...)
 }
 
-func (g *RouterGroup) createStaticHandler(relativePath string, fs http.FileSystem) HandlerFunc {
-	absolutePath := path.Join(g.prefix, relativePath)
+func (g *RouterGroup) createStaticHandler(absolutePath string, fs http.FileSystem) HandlerFunc {
 	fileServer := http.StripPrefix(absolutePath, http.FileServer(fs))
 
 	// fix mime types
 	var builtinMimeTypesLower = map[string]string{
-		".css":  "text/css; charset=utf-8",
-		".gif":  "image/gif",
-		".htm":  "text/html; charset=utf-8",
 		".html": "text/html; charset=utf-8",
-		".jpg":  "image/jpeg",
+		".css":  "text/css; charset=utf-8",
 		".js":   "application/javascript",
-		".wasm": "application/wasm",
-		".pdf":  "application/pdf",
-		".png":  "image/png",
-		".svg":  "image/svg+xml",
-		".xml":  "text/xml; charset=utf-8",
+		// ".ts":    "application/typescript",
+		".woff":  "font/woff",
+		".woff2": "font/woff2",
+		".json":  "application/json; charset=utf-8",
+		".txt":   "text/plain; charset=utf-8",
+		".csv":   "text/csv; charset=utf-8",
+		".htm":   "text/html; charset=utf-8",
+		".jpg":   "image/jpeg",
+		".png":   "image/png",
+		".svg":   "image/svg+xml",
+		".gif":   "image/gif",
+		".ico":   "image/x-icon",
+		".webp":  "image/webp",
+		".avif":  "image/avif",
+		".bmp":   "image/x-ms-bmp",
+		".wasm":  "application/wasm",
+		".pdf":   "application/pdf",
+		".xml":   "text/xml; charset=utf-8",
+		".tar":   "application/x-tar",
+		".gz":    "application/gzip",
+		".zip":   "application/zip",
+		".7z":    "application/x-7z-compressed",
+		".rar":   "application/vnd.rar",
+		".bz2":   "application/x-bzip2",
+		".xz":    "application/x-xz",
+		".exe":   "application/octet-stream",
+		".deb":   "application/octet-stream",
+		".apk":   "application/vnd.android.package-archive",
+		".dmg":   "application/octet-stream",
+		".iso":   "application/octet-stream",
+		".img":   "application/octet-stream",
+		".msi":   "application/octet-stream",
+		".jar":   "application/java-archive",
+		".war":   "application/java-archive",
+		".ear":   "application/java-archive",
+		".doc":   "application/msword",
+		".ps":    "application/postscript",
+		".ai":    "application/postscript",
+		".eps":   "application/postscript",
+		".xls":   "application/vnd.ms-excel",
+		".ppt":   "application/vnd.ms-powerpoint",
+		".rtf":   "application/rtf",
+		".m3u8":  "application/vnd.apple.mpegurl",
+		".kml":   "application/vnd.google-earth.kml+xml",
+		".kmz":   "application/vnd.google-earth.kmz",
+		".odg":   "application/vnd.oasis.opendocument.graphics",
+		".odp":   "application/vnd.oasis.opendocument.presentation",
+		".ods":   "application/vnd.oasis.opendocument.spreadsheet",
+		".odt":   "application/vnd.oasis.opendocument.text",
+		".pptx":  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+		".xlsx":  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+		".docx":  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+		// audio
+		".mp3": "audio/mpeg",
+		".ogg": "audio/ogg",
+		".m4a": "audio/x-m4a",
+		".ra":  "audio/x-realaudio",
+		// video
+		".mp4":  "video/mp4",
+		".mpeg": "video/mpeg",
+		".mpg":  "video/mpeg",
+		".mov":  "video/quicktime",
+		".webm": "video/webm",
+		".flv":  "video/x-flv",
+		".m4v":  "video/x-m4v",
+		".mng":  "video/x-mng",
+		".asx":  "video/x-ms-asf",
+		".asf":  "video/x-ms-asf",
+		".wmv":  "video/x-ms-wmv",
+		".avi":  "video/x-msvideo",
+		// ".ts":   "video/mp2t",
+		".3gpp": "video/3gpp",
+		".3gp":  "video/3gpp",
 	}
 
 	for k, v := range builtinMimeTypesLower {
@@ -373,17 +439,22 @@ func (g *RouterGroup) createStaticHandler(relativePath string, fs http.FileSyste
 	}
 
 	return func(ctx *Context) {
-		file := ctx.Param().Get("filepath")
-		// Check if file exists and/or is not a directory
-		f, err := fs.Open(file.String())
-		if err != nil {
-			// ctx.Status(http.StatusNotFound)
-			ctx.handlers = append(ctx.handlers, ctx.App.notfound)
+		// file := ctx.Param().Get("filepath")
+		// key := fmt.Sprintf("static_fs:%s", file)
+		// if ok := ctx.Cache().Has(key); !ok {
+		// 	// Check if file exists and/or is not a directory
+		// 	f, err := fs.Open(file.String())
+		// 	if err != nil {
+		// 		// ctx.Status(http.StatusNotFound)
+		// 		ctx.handlers = append(ctx.handlers, ctx.App.notfound)
 
-			ctx.Next()
-			return
-		}
-		f.Close()
+		// 		ctx.Next()
+		// 		return
+		// 	}
+		// 	f.Close()
+
+		// 	ctx.Cache().Set(key, true, 24*time.Hour)
+		// }
 
 		fileServer.ServeHTTP(ctx.Writer, ctx.Request)
 	}
@@ -400,12 +471,42 @@ type StaticOptions struct {
 }
 
 // Static defines the method to serve static files
-func (g *RouterGroup) Static(relativePath string, root string, options ...StaticOptions) {
-	handler := g.createStaticHandler(relativePath, http.Dir(root))
-	pathX := path.Join(relativePath, "/*filepath")
+func (g *RouterGroup) Static(relativePath string, root string, options ...*StaticOptions) {
+	var opts *StaticOptions
+	if len(options) > 0 {
+		opts = options[0]
+	}
 
-	//
-	g.Get(pathX, handler)
+	if !strings.StartsWith(relativePath, "/") {
+		root = fs.JoinCurrentDir(relativePath)
+	}
+	absolutePath := path.Join(g.prefix, relativePath)
+	handler := g.createStaticHandler(absolutePath, http.Dir(root))
+
+	g.Use(func(ctx *Context) {
+		if ctx.Method != http.MethodGet && ctx.Method != http.MethodHead {
+			ctx.Next()
+			return
+		}
+
+		if !strings.StartsWith(ctx.Path, absolutePath) {
+			ctx.Next()
+			return
+		}
+
+		if opts != nil {
+			if opts.Suffix != "" {
+				ctx.Request.URL.Path = ctx.Request.URL.Path + opts.Suffix
+				ctx.Request.URL.RawPath = ctx.Request.URL.RawPath + opts.Suffix
+			}
+
+			if opts.MaxAge > 0 {
+				ctx.Set(headers.CacheControl, fmt.Sprintf("max-age=%d", int64(opts.MaxAge.Seconds())))
+			}
+		}
+
+		handler(ctx)
+	})
 }
 
 // StaticFS defines the method to serve static files

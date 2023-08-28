@@ -7,7 +7,7 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/go-zoox/logger"
+	"github.com/go-zoox/fs"
 	"github.com/go-zoox/zoox"
 )
 
@@ -21,16 +21,28 @@ func Recovery() zoox.Middleware {
 					fmt.Println("stacktrace from panic: \n" + string(debug.Stack()))
 				}
 
+				funcName := "unknown"
+				// get panic error occurred file and line
+				pc, filepath, line, ok := runtime.Caller(2)
+				if ok {
+					filepath = filepath[len(fs.CurrentDir())+1:]
+					funcName = runtime.FuncForPC(pc).Name()
+					funcNameParts := strings.Split(runtime.FuncForPC(pc).Name(), ".")
+					if len(funcNameParts) > 0 {
+						funcName = funcNameParts[len(funcNameParts)-1]
+					}
+				}
+
 				switch v := err.(type) {
 				case error:
-					logger.Errorf("[recovery][%s %s] %s", ctx.Method, ctx.Path, (fmt.Sprintf("%s", v)))
+					ctx.Logger.Errorf("[recovery][%s:%d,%s][%s %s] %s", filepath, line, funcName, ctx.Method, ctx.Path, (fmt.Sprintf("%s", v)))
 
 					ctx.Error(http.StatusInternalServerError, "Internal Server Error")
 				case string:
-					logger.Errorf("[recovery][%s %s] %s", ctx.Method, ctx.Path, v)
+					ctx.Logger.Errorf("[recovery][%s:%d,%s][%s %s] %s", filepath, line, funcName, ctx.Method, ctx.Path, v)
 					ctx.Error(http.StatusInternalServerError, "Internal Server Error")
 				default:
-					logger.Errorf("[recovery][%s %s] unknown error: %#v (stack: %s)", ctx.Method, ctx.Path, v, string(debug.Stack()))
+					ctx.Logger.Errorf("[recovery][%s:%d,%s][%s %s] unknown error: %#v (stack: %s)", filepath, line, funcName, ctx.Method, ctx.Path, v, string(debug.Stack()))
 					ctx.Error(http.StatusInternalServerError, "Internal Server Error")
 				}
 			}
