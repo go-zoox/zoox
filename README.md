@@ -32,5 +32,24 @@ func main() {
 }
 ```
 
+## DevTools
+
+```bash
+# install
+go install github.com/go-zoox/zoox/cmd/zoox@latest
+```
+
+```bash
+# dev
+zoox dev
+```
+
+```bash
+# build
+zoox build
+```
+
+```bash
+
 ## License
 GoZoox is released under the [MIT License](./LICENSE).
