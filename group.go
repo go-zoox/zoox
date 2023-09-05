@@ -172,14 +172,15 @@ func (g *RouterGroup) Proxy(path, target string, options ...func(cfg *ProxyConfi
 }
 
 // WebSocket defines the method to add websocket route
-func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup {
+// WebSocket defines the method to add websocket route
+func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc, middlewares ...HandlerFunc) *RouterGroup {
 	upgrader := &websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},
 	}
 
-	g.addRoute(http.MethodGet, path, func(ctx *Context) {
+	handleFunc := append(middlewares, func(ctx *Context) {
 		ctx.Status(200)
 
 		conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
@@ -291,6 +292,8 @@ func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc) *RouterGroup
 			}(mt, message)
 		}
 	})
+
+	g.addRoute(http.MethodGet, path, handleFunc...)
 
 	return g
 }
