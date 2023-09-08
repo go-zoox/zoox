@@ -22,7 +22,7 @@ require (
 	github.com/go-zoox/jsonrpc v1.2.2
 	github.com/go-zoox/jwt v1.3.0
 	github.com/go-zoox/logger v1.4.5
-	github.com/go-zoox/proxy v1.5.2
+	github.com/go-zoox/proxy v1.5.3
 	github.com/go-zoox/pubsub v1.2.2
 	github.com/go-zoox/random v1.0.4
 	github.com/go-zoox/ratelimit v1.2.0

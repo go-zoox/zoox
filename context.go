@@ -952,8 +952,8 @@ func (ctx *Context) Fetch() *fetch.Fetch {
 }
 
 // Proxy customize the request to proxy the backend services.
-func (ctx *Context) Proxy(target string, cfg *proxy.SingleHostConfig) {
-	WrapH(proxy.NewSingleHost(target, cfg))(ctx)
+func (ctx *Context) Proxy(target string, cfg ...*proxy.SingleHostConfig) {
+	WrapH(proxy.NewSingleHost(target, cfg...))(ctx)
 }
 
 // CloneBody clones the body of the request, should be used carefully.
