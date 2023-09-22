@@ -6,7 +6,7 @@ import (
 )
 
 // DebugEnv is the environment variable name for debug.
-const DebugEnv = "GO_ZOOX_DEBUG"
+const DebugEnv = "LOG_LEVEL"
 
 // Debug ...
 type Debug interface {
@@ -37,5 +37,8 @@ func (c *debug) Info(args ...interface{}) {
 
 // Info logs debug info.
 func (c *debug) IsDebugMode() bool {
-	return c.core.IsDebugMode()
+	// return os.Getenv("LOG_LEVEL") == "debug"
+	return c.core.IsDebugMode(func(envValue string) bool {
+		return envValue == "debug"
+	})
 }

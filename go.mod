@@ -12,7 +12,7 @@ require (
 	github.com/go-zoox/counter v1.2.0
 	github.com/go-zoox/cron v1.1.2
 	github.com/go-zoox/datetime v1.2.2
-	github.com/go-zoox/debug v1.0.1
+	github.com/go-zoox/debug v1.0.2
 	github.com/go-zoox/fetch v1.7.16
 	github.com/go-zoox/fs v1.3.13
 	github.com/go-zoox/gzip v1.0.0
