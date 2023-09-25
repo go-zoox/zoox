@@ -23,7 +23,11 @@ func Proxy(fn func(cfg *ProxyConfig, ctx *zoox.Context) (next bool, err error)) 
 		proxyCfg := &ProxyConfig{}
 		next, err := fn(proxyCfg, ctx)
 		if err != nil {
-			ctx.Fail(err, 500, "proxy error")
+			if v, ok := err.(*proxy.HTTPError); ok {
+				ctx.Fail(err, v.Status(), v.Error())
+			} else {
+				ctx.Fail(err, 500, "proxy error")
+			}
 			return
 		}
 
