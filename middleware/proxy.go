@@ -8,8 +8,32 @@ import (
 	"github.com/go-zoox/zoox"
 )
 
-// ProxyConfig defines the proxy config
-type ProxyConfig struct {
+type ProxyConfig = proxy.Config
+
+func Proxy(fn func(ctx *zoox.Context, cfg *ProxyConfig) (next bool, err error)) zoox.Middleware {
+	return func(ctx *zoox.Context) {
+		cfg := &ProxyConfig{}
+		next, err := fn(ctx, cfg)
+		if err != nil {
+			if v, ok := err.(*proxy.HTTPError); ok {
+				ctx.Fail(err, v.Status(), v.Error())
+			} else {
+				ctx.Fail(err, 500, "proxy error")
+			}
+			return
+		}
+
+		if next {
+			ctx.Next()
+			return
+		}
+
+		zoox.WrapH(proxy.New(cfg))(ctx)
+	}
+}
+
+// ProxySingleTargetConfig defines the proxy config
+type ProxySingleTargetConfig struct {
 	// internal proxy config
 	proxy.SingleHostConfig
 
@@ -17,11 +41,11 @@ type ProxyConfig struct {
 	Target string
 }
 
-// Proxy is a middleware that proxies the request.
-func Proxy(fn func(cfg *ProxyConfig, ctx *zoox.Context) (next bool, err error)) zoox.Middleware {
+// ProxySingleTarget is a middleware that proxies the request.
+func ProxySingleTarget(fn func(ctx *zoox.Context, cfg *ProxySingleTargetConfig) (next bool, err error)) zoox.Middleware {
 	return func(ctx *zoox.Context) {
-		proxyCfg := &ProxyConfig{}
-		next, err := fn(proxyCfg, ctx)
+		proxyCfg := &ProxySingleTargetConfig{}
+		next, err := fn(ctx, proxyCfg)
 		if err != nil {
 			if v, ok := err.(*proxy.HTTPError); ok {
 				ctx.Fail(err, v.Status(), v.Error())
@@ -86,7 +110,7 @@ func ProxyGroups(cfg *ProxyGroupsConfig) zoox.Middleware {
 	// 	ctx.Next()
 	// }
 
-	return Proxy(func(proxyCfg *ProxyConfig, ctx *zoox.Context) (next bool, err error) {
+	return ProxySingleTarget(func(ctx *zoox.Context, proxyCfg *ProxySingleTargetConfig) (next bool, err error) {
 		for _, group := range cfg.Rewrites {
 			if matched, err := regexp.MatchString(group.RegExp, ctx.Path); err != nil {
 				return false, err
