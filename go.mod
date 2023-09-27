@@ -3,7 +3,7 @@ module github.com/go-zoox/zoox
 go 1.20
 
 require (
-	github.com/go-zoox/cache v1.0.4
+	github.com/go-zoox/cache v1.0.6
 	github.com/go-zoox/chalk v1.0.2
 	github.com/go-zoox/cli v1.3.2
 	github.com/go-zoox/concurrency v1.2.0
@@ -50,7 +50,7 @@ require (
 	github.com/go-zoox/encoding v1.2.1 // indirect
 	github.com/go-zoox/errors v1.0.2 // indirect
 	github.com/go-zoox/ini v1.0.4 // indirect
-	github.com/go-zoox/kv v1.5.2 // indirect
+	github.com/go-zoox/kv v1.5.9 // indirect
 	github.com/go-zoox/safe v1.0.1 // indirect
 	github.com/goccy/go-yaml v1.11.0 // indirect
 	github.com/google/uuid v1.3.1 // indirect
