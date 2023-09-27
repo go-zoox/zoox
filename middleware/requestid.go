@@ -9,7 +9,13 @@ import (
 func RequestID() zoox.Middleware {
 	return func(ctx *zoox.Context) {
 		if ctx.Get(utils.RequestIDHeader) == "" {
-			ctx.Set(utils.RequestIDHeader, ctx.RequestID())
+			requestID := ctx.RequestID()
+
+			// update request to next
+			ctx.Request.Header.Set(utils.RequestIDHeader, requestID)
+
+			// set to response
+			ctx.Set(utils.RequestIDHeader, requestID)
 		}
 
 		ctx.Next()
