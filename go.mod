@@ -9,7 +9,7 @@ require (
 	github.com/go-zoox/concurrency v1.2.0
 	github.com/go-zoox/cookie v1.2.0
 	github.com/go-zoox/core-utils v1.2.14
-	github.com/go-zoox/counter v1.2.0
+	github.com/go-zoox/counter v1.2.1
 	github.com/go-zoox/cron v1.1.2
 	github.com/go-zoox/datetime v1.2.2
 	github.com/go-zoox/debug v1.0.2
@@ -25,7 +25,7 @@ require (
 	github.com/go-zoox/proxy v1.5.4
 	github.com/go-zoox/pubsub v1.2.2
 	github.com/go-zoox/random v1.0.4
-	github.com/go-zoox/ratelimit v1.2.0
+	github.com/go-zoox/ratelimit v1.2.1
 	github.com/go-zoox/session v1.2.0
 	github.com/go-zoox/tag v1.2.3
 	github.com/go-zoox/uuid v0.0.1

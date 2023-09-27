@@ -58,8 +58,8 @@ github.com/go-zoox/core-utils v1.0.13/go.mod h1:EknM3KLL6/kagL95wZbWE7mRRcYCG/fH
 github.com/go-zoox/core-utils v1.2.14 h1:Z6x9QTgfBfhbSOOPEDLqLs9UGBWkXgBpVPlJ4pI68yk=
 github.com/go-zoox/core-utils v1.2.14/go.mod h1:raOOwr2l2sJQyjR0Dg33sg0ry4U1/L2eNTuLFRpUXWs=
 github.com/go-zoox/counter v1.0.1/go.mod h1:PICilZTrnO4dFstDPlXpjc6sdWYBG7hm/XDmjAcHaX0=
-github.com/go-zoox/counter v1.2.0 h1:a1sMgYmnOza4UgjDD/fLs+HqTPG2Kh54v2IH41uIi7Q=
-github.com/go-zoox/counter v1.2.0/go.mod h1:dCAErDaaxnnqQrfPNkJYklqSQrZ9SKzH3iiciJa3BH4=
+github.com/go-zoox/counter v1.2.1 h1:MPShpjJWQ/qt3pYQxuyBL/Ci6X4mtihTC3cwDr1VOI8=
+github.com/go-zoox/counter v1.2.1/go.mod h1:gOA/Bk2iWt9K4vm2Std2ciEgHwQqWSzvcyUI+jFVduY=
 github.com/go-zoox/cron v1.1.2 h1:4iEIXIYu8MFRWBZccPaQ7wkpmvBs/N6a0FzWYiup9AU=
 github.com/go-zoox/cron v1.1.2/go.mod h1:7aOIpwGDyyg+NqX+041NO+9f8FhAngWiLqBPBN6kZ9k=
 github.com/go-zoox/crypto v1.0.3/go.mod h1:HaWRg4tHZamqNyOnNoaK+Rw5eto+su66i8bMMP8UCBU=
@@ -120,8 +120,8 @@ github.com/go-zoox/random v1.0.0/go.mod h1:W+PTQiInxaCngiXpSvycucAKvu1tE/tKlZ9ka
 github.com/go-zoox/random v1.0.4 h1:icckpkCowQ0eGiiMkHFOJz9Qc9noOcinP+ggqWUIBH4=
 github.com/go-zoox/random v1.0.4/go.mod h1:W+PTQiInxaCngiXpSvycucAKvu1tE/tKlZ9kaMp2/Ys=
 github.com/go-zoox/ratelimit v1.0.1/go.mod h1:5MtLMrfQRbZHI+tKC4eyHZorrZX005Sy/Dldnk8qYOU=
-github.com/go-zoox/ratelimit v1.2.0 h1:BWytTr0HG5xBZvelEDNIqiXT4yavFH+QwpMgSjLt3+M=
-github.com/go-zoox/ratelimit v1.2.0/go.mod h1:gbnJYgl6heLTs3aRM5C8FC9ehSIO3cmEFWzbDe/m8yo=
+github.com/go-zoox/ratelimit v1.2.1 h1:iFuD6Md2jDERFXF2oiAzyt+px+SIOu+ICHIoB7v2KgY=
+github.com/go-zoox/ratelimit v1.2.1/go.mod h1:CyFcL4Cpm7O8jvry9O+AlxyrgJGgvl4ebo4j0D3CGHA=
 github.com/go-zoox/safe v1.0.1 h1:JwWK7xCyv7eyzBbwzQvhK/Ajm8gG2Q9Cvd/KXpdF2zI=
 github.com/go-zoox/safe v1.0.1/go.mod h1:lT0iEBmpoia7xfh2bWzdurzdv++4QRUAfeEzIhCnpoA=
 github.com/go-zoox/session v1.2.0 h1:hzjcZYV3+cVmocnC6MazhtELONMtRlIuEezCYvbxY9Q=
