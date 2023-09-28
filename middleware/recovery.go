@@ -25,7 +25,10 @@ func Recovery() zoox.Middleware {
 				// get panic error occurred file and line
 				pc, filepath, line, ok := runtime.Caller(2)
 				if ok {
-					filepath = filepath[len(fs.CurrentDir())+1:]
+					if len(filepath) > len(fs.CurrentDir())+1 {
+						filepath = filepath[len(fs.CurrentDir())+1:]
+					}
+
 					funcName = runtime.FuncForPC(pc).Name()
 					funcNameParts := strings.Split(runtime.FuncForPC(pc).Name(), ".")
 					if len(funcNameParts) > 0 {
