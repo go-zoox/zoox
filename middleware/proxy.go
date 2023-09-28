@@ -16,7 +16,7 @@ func Proxy(fn func(ctx *zoox.Context, cfg *ProxyConfig) (next bool, err error)) 
 		next, err := fn(ctx, cfg)
 		if err != nil {
 			if v, ok := err.(*proxy.HTTPError); ok {
-				ctx.Fail(err, v.Status(), v.Error())
+				ctx.Fail(err, v.Status(), v.Error(), v.Status())
 			} else {
 				ctx.Fail(err, 500, "proxy error")
 			}
@@ -48,7 +48,7 @@ func ProxySingleTarget(fn func(ctx *zoox.Context, cfg *ProxySingleTargetConfig) 
 		next, err := fn(ctx, proxyCfg)
 		if err != nil {
 			if v, ok := err.(*proxy.HTTPError); ok {
-				ctx.Fail(err, v.Status(), v.Error())
+				ctx.Fail(err, v.Status(), v.Error(), v.Status())
 			} else {
 				ctx.Fail(err, 500, "proxy error")
 			}
