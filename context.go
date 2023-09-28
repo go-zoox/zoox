@@ -450,7 +450,7 @@ func (ctx *Context) Error(status int, message string) {
 
 	if ctx.AcceptJSON() {
 		ctx.JSON(status, H{
-			"code":      400,
+			"code":      status,
 			"message":   message,
 			"method":    ctx.Method,
 			"path":      ctx.Path,
