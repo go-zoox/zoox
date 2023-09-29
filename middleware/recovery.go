@@ -3,11 +3,12 @@ package middleware
 import (
 	"fmt"
 	"net/http"
+	"net/http/httputil"
 	"runtime"
 	"runtime/debug"
 	"strings"
 
-	"github.com/go-zoox/fs"
+	"github.com/go-errors/errors"
 	"github.com/go-zoox/zoox"
 )
 
@@ -21,31 +22,17 @@ func Recovery() zoox.Middleware {
 					fmt.Println("stacktrace from panic: \n" + string(debug.Stack()))
 				}
 
-				funcName := "unknown"
-				// get panic error occurred file and line
-				pc, filepath, line, ok := runtime.Caller(2)
-				if ok {
-					if len(filepath) > len(fs.CurrentDir())+1 {
-						filepath = filepath[len(fs.CurrentDir())+1:]
-					}
+				httprequest, _ := httputil.DumpRequest(ctx.Request, false)
+				goErr := errors.Wrap(err, 3)
+				reset := string([]byte{27, 91, 48, 109})
+				ctx.Logger.Errorf("[Nice Recovery] panic recovered:\n\n%s%s\n\n%s%s", httprequest, goErr.Error(), goErr.Stack(), reset)
 
-					funcName = runtime.FuncForPC(pc).Name()
-					funcNameParts := strings.Split(runtime.FuncForPC(pc).Name(), ".")
-					if len(funcNameParts) > 0 {
-						funcName = funcNameParts[len(funcNameParts)-1]
-					}
-				}
-
-				switch v := err.(type) {
+				switch err.(type) {
 				case error:
-					ctx.Logger.Errorf("[recovery][%s:%d,%s][%s %s] %s", filepath, line, funcName, ctx.Method, ctx.Path, (fmt.Sprintf("%s", v)))
-
 					ctx.Error(http.StatusInternalServerError, "Internal Server Error")
 				case string:
-					ctx.Logger.Errorf("[recovery][%s:%d,%s][%s %s] %s", filepath, line, funcName, ctx.Method, ctx.Path, v)
 					ctx.Error(http.StatusInternalServerError, "Internal Server Error")
 				default:
-					ctx.Logger.Errorf("[recovery][%s:%d,%s][%s %s] unknown error: %#v (stack: %s)", filepath, line, funcName, ctx.Method, ctx.Path, v, string(debug.Stack()))
 					ctx.Error(http.StatusInternalServerError, "Internal Server Error")
 				}
 			}

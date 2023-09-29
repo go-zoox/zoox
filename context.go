@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -12,8 +11,9 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"runtime"
 	"sync"
+
+	"github.com/go-errors/errors"
 
 	"time"
 
@@ -478,19 +478,12 @@ func (ctx *Context) Fail(err error, code int, message string, status ...int) {
 		statusX = status[0]
 	}
 
-	funcName := "unknown"
-	// get panic error occurred file and line
-	pc, filepath, line, ok := runtime.Caller(2)
-	if ok {
-		filepath = filepath[len(fs.CurrentDir())+1:]
-		funcName = runtime.FuncForPC(pc).Name()
-		funcNameParts := strings.Split(runtime.FuncForPC(pc).Name(), ".")
-		if len(funcNameParts) > 0 {
-			funcName = funcNameParts[len(funcNameParts)-1]
-		}
-	}
+	// httprequest, _ := httputil.DumpRequest(ctx.Request, false)
+	// goErr := errors.Wrap(err, 3)
+	// reset := string([]byte{27, 91, 48, 109})
+	// ctx.Logger.Errorf("[Nice ctx.Fail] error:\n\n%s%s\n\n%s%s", httprequest, goErr.Error(), goErr.Stack(), reset)
 
-	ctx.Logger.Errorf("[fail][%s:%d,%s][%s %s] %s", filepath, line, funcName, ctx.Method, ctx.Path, err)
+	ctx.Logger.Infof("[ctx.Fail] error: %s (raw: %#v)", err, err)
 
 	ctx.JSON(statusX, map[string]any{
 		"code":    code,
