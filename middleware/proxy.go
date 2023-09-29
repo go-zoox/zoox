@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"net/http"
 	"regexp"
 
 	"github.com/go-zoox/proxy"
@@ -8,17 +9,61 @@ import (
 	"github.com/go-zoox/zoox"
 )
 
-type ProxyConfig = proxy.Config
+type ProxyConfig struct {
+	proxy.Config
+
+	ErrorPages ProxyErrorPages
+}
+
+type ProxyErrorPages struct {
+	NotFound             string
+	InternalServiceError string
+	BadGateway           string
+	ServiceUnavailable   string
+	GatewayTimeout       string
+}
 
 func Proxy(fn func(ctx *zoox.Context, cfg *ProxyConfig) (next bool, err error)) zoox.Middleware {
 	return func(ctx *zoox.Context) {
 		cfg := &ProxyConfig{}
 		next, err := fn(ctx, cfg)
 		if err != nil {
+			ctx.Logger.Errorf("[middleware.proxy] proxy error: %#v", err)
 			if v, ok := err.(*proxy.HTTPError); ok {
-				ctx.Fail(err, v.Status(), v.Error(), v.Status())
+				html := v.Error()
+				switch v.Status() {
+				case http.StatusNotFound:
+					if cfg.ErrorPages.NotFound != "" {
+						html = cfg.ErrorPages.NotFound
+					}
+				case http.StatusBadGateway:
+					if cfg.ErrorPages.BadGateway != "" {
+						html = cfg.ErrorPages.BadGateway
+					} else if cfg.ErrorPages.InternalServiceError != "" {
+						html = cfg.ErrorPages.InternalServiceError
+					}
+				case http.StatusServiceUnavailable:
+					if cfg.ErrorPages.ServiceUnavailable != "" {
+						html = cfg.ErrorPages.ServiceUnavailable
+					} else if cfg.ErrorPages.InternalServiceError != "" {
+						html = cfg.ErrorPages.InternalServiceError
+					}
+				case http.StatusGatewayTimeout:
+					if cfg.ErrorPages.GatewayTimeout != "" {
+						html = cfg.ErrorPages.GatewayTimeout
+					} else if cfg.ErrorPages.InternalServiceError != "" {
+						html = cfg.ErrorPages.InternalServiceError
+					}
+				}
+
+				ctx.HTML(v.Status(), html)
 			} else {
-				ctx.Fail(err, 500, "proxy error")
+				html := v.Error()
+				if cfg.ErrorPages.InternalServiceError != "" {
+					html = cfg.ErrorPages.InternalServiceError
+				}
+
+				ctx.HTML(http.StatusInternalServerError, html)
 			}
 			return
 		}
@@ -28,7 +73,7 @@ func Proxy(fn func(ctx *zoox.Context, cfg *ProxyConfig) (next bool, err error)) 
 			return
 		}
 
-		zoox.WrapH(proxy.New(cfg))(ctx)
+		zoox.WrapH(proxy.New(&cfg.Config))(ctx)
 	}
 }
 
