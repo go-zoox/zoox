@@ -301,6 +301,11 @@ func (ctx *Context) UserAgent() string {
 	return ctx.Get(headers.UserAgent)
 }
 
+// ContentType return the request content-type header.
+func (ctx *Context) ContentType() string {
+	return ctx.Get(headers.ContentType)
+}
+
 // XForwardedFor return the request x-forwarded-for header.
 func (ctx *Context) XForwardedFor() string {
 	return ctx.Get(headers.XForwardedFor)
@@ -498,7 +503,7 @@ func (ctx *Context) FailWithError(err HTTPError) {
 
 // Redirect redirects the request to the given URL.
 func (ctx *Context) Redirect(url string, status ...int) {
-	ctx.SetHeader("location", url)
+	ctx.SetLocation(url)
 
 	code := http.StatusFound
 	if len(status) == 1 && status[0] != 0 {
@@ -506,6 +511,31 @@ func (ctx *Context) Redirect(url string, status ...int) {
 	}
 
 	ctx.Status(code)
+}
+
+// RedirectTemporary redirects the request temporarily to the given URL.
+func (ctx *Context) RedirectTemporary(url string) {
+	ctx.Redirect(url, http.StatusFound)
+}
+
+// RedirectPermanent redirects the request permanently to the given URL.
+func (ctx *Context) RedirectPermanent(url string) {
+	ctx.Redirect(url, http.StatusMovedPermanently)
+}
+
+// RedirectSeeOther redirects the request to the given URL.
+func (ctx *Context) RedirectSeeOther(url string) {
+	ctx.Redirect(url, http.StatusSeeOther)
+}
+
+// RedirectTemporaryWithOriginMethodAndBody redirects the request temporarily to the given URL with the origin method.
+func (ctx *Context) RedirectTemporaryWithOriginMethodAndBody(url string) {
+	ctx.Redirect(url, http.StatusTemporaryRedirect)
+}
+
+// RedirectPermanentWithOriginMethodAndBody redirects the request permanently to the given URL with the origin method.
+func (ctx *Context) RedirectPermanentWithOriginMethodAndBody(url string) {
+	ctx.Redirect(url, http.StatusPermanentRedirect)
 }
 
 // Protocol returns the protocol, usally http or https
