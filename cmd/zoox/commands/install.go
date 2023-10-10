@@ -9,6 +9,7 @@ import (
 	"github.com/go-zoox/logger"
 )
 
+// Install is the install command
 func Install(app *cli.MultipleProgram) {
 	app.Register("install", &cli.Command{
 		Name:  "install",

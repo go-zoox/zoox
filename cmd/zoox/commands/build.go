@@ -11,6 +11,7 @@ import (
 	"github.com/go-zoox/logger"
 )
 
+// Build is the build command
 func Build(app *cli.MultipleProgram) {
 	app.Register("build", &cli.Command{
 		Name:  "build",

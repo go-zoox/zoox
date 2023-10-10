@@ -9,12 +9,14 @@ import (
 	"github.com/go-zoox/zoox"
 )
 
+// ProxyConfig defines the proxy config
 type ProxyConfig struct {
 	proxy.Config
 
 	ErrorPages ProxyErrorPages
 }
 
+// ProxyErrorPages defines the error pages
 type ProxyErrorPages struct {
 	NotFound             string
 	InternalServiceError string
@@ -23,6 +25,7 @@ type ProxyErrorPages struct {
 	GatewayTimeout       string
 }
 
+// Proxy is a middleware that proxies the request.
 func Proxy(fn func(ctx *zoox.Context, cfg *ProxyConfig) (next bool, err error)) zoox.Middleware {
 	return func(ctx *zoox.Context) {
 		cfg := &ProxyConfig{}

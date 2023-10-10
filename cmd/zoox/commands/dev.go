@@ -8,6 +8,7 @@ import (
 	"github.com/go-zoox/watch"
 )
 
+// Dev is the dev command
 func Dev(app *cli.MultipleProgram) {
 	app.Register("dev", &cli.Command{
 		Name:  "dev",
