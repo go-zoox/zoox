@@ -23,6 +23,7 @@ import (
 	"github.com/go-zoox/proxy"
 	"github.com/go-zoox/pubsub"
 	"github.com/go-zoox/tag/datasource"
+	"github.com/go-zoox/zoox/components/application/cmd"
 	"github.com/go-zoox/zoox/components/application/cron"
 	"github.com/go-zoox/zoox/components/application/debug"
 	"github.com/go-zoox/zoox/components/application/env"
@@ -94,6 +95,8 @@ type Context struct {
 	//
 	state state.State
 	user  user.User
+	//
+	cmd cmd.Cmd
 	// request id
 	requestID string
 
@@ -127,6 +130,8 @@ type Context struct {
 		//
 		state sync.Once
 		user  sync.Once
+		//
+		cmd sync.Once
 	}
 }
 
@@ -922,6 +927,15 @@ func (ctx *Context) User() user.User {
 	})
 
 	return ctx.user
+}
+
+// Cmd returns the cmd of the request.
+func (ctx *Context) Cmd() cmd.Cmd {
+	ctx.once.cmd.Do(func() {
+		ctx.cmd = cmd.New(ctx.Context())
+	})
+
+	return ctx.cmd
 }
 
 // Cookie returns the cookie of the request.
