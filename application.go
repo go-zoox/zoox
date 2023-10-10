@@ -1,6 +1,7 @@
 package zoox
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
@@ -20,6 +21,7 @@ import (
 	jsonrpcServer "github.com/go-zoox/jsonrpc/server"
 	"github.com/go-zoox/logger"
 	"github.com/go-zoox/session"
+	"github.com/go-zoox/zoox/components/application/cmd"
 	"github.com/go-zoox/zoox/components/application/cron"
 	"github.com/go-zoox/zoox/components/application/debug"
 	"github.com/go-zoox/zoox/components/application/env"
@@ -63,6 +65,8 @@ type Application struct {
 	//
 	cron  cron.Cron
 	queue jobqueue.JobQueue
+	//
+	cmd cmd.Cmd
 	// i18n
 	i18n i18n.I18n
 	//
@@ -95,6 +99,8 @@ type Application struct {
 		//
 		jsonrpcRegistry sync.Once
 		pubsub          sync.Once
+		//
+		cmd sync.Once
 	}
 }
 
@@ -432,6 +438,15 @@ func (app *Application) JobQueue() jobqueue.JobQueue {
 	})
 
 	return app.queue
+}
+
+// Cmd ...
+func (app *Application) Cmd() cmd.Cmd {
+	app.once.cmd.Do(func() {
+		app.cmd = cmd.New(context.Background())
+	})
+
+	return app.cmd
 }
 
 // I18n ...
