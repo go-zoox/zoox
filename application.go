@@ -19,6 +19,7 @@ import (
 	"github.com/go-zoox/core-utils/regexp"
 	"github.com/go-zoox/i18n"
 	jsonrpcServer "github.com/go-zoox/jsonrpc/server"
+	"github.com/go-zoox/kv"
 	"github.com/go-zoox/logger"
 	"github.com/go-zoox/session"
 	"github.com/go-zoox/zoox/components/application/cmd"
@@ -30,6 +31,8 @@ import (
 	"github.com/go-zoox/zoox/components/application/websocket"
 
 	"github.com/go-zoox/pubsub"
+
+	"github.com/go-zoox/kv/redis"
 )
 
 // HandlerFunc defines the request handler used by zoox
@@ -210,6 +213,21 @@ func (app *Application) applyDefaultConfig() error {
 
 	if app.Config.Session.MaxAge == 0 {
 		app.Config.Session.MaxAge = DefaultSessionMaxAge
+	}
+
+	if app.Config.Cache.Config == nil {
+		if app.Config.Redis.Host != "" {
+			app.Config.Cache = kv.Config{
+				Engine: "redis",
+				Config: &redis.Config{
+					Host:     app.Config.Redis.Host,
+					Port:     app.Config.Redis.Port,
+					Password: app.Config.Redis.Password,
+					DB:       app.Config.Redis.DB,
+					Prefix:   "eunomia",
+				},
+			}
+		}
 	}
 
 	return nil

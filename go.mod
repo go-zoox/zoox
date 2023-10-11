@@ -23,6 +23,7 @@ require (
 	github.com/go-zoox/jobqueue v1.0.0
 	github.com/go-zoox/jsonrpc v1.2.2
 	github.com/go-zoox/jwt v1.3.0
+	github.com/go-zoox/kv v1.5.9
 	github.com/go-zoox/logger v1.4.6
 	github.com/go-zoox/proxy v1.5.5
 	github.com/go-zoox/pubsub v1.2.2
@@ -62,7 +63,6 @@ require (
 	github.com/go-zoox/encoding v1.2.1 // indirect
 	github.com/go-zoox/errors v1.0.2 // indirect
 	github.com/go-zoox/ini v1.0.4 // indirect
-	github.com/go-zoox/kv v1.5.9 // indirect
 	github.com/go-zoox/safe v1.0.1 // indirect
 	github.com/goccy/go-yaml v1.11.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
