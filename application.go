@@ -191,6 +191,10 @@ func (app *Application) Fallback(h HandlerFunc) {
 
 // defaultConfig
 func (app *Application) applyDefaultConfig() error {
+	if err := app.applyDefaultConfigFromEnv(); err != nil {
+		return err
+	}
+
 	if app.Config.SecretKey == "" {
 		app.Config.SecretKey = DefaultSecretKey
 	}
@@ -228,6 +232,46 @@ func (app *Application) applyDefaultConfig() error {
 				},
 			}
 		}
+	}
+
+	return nil
+}
+
+func (app *Application) applyDefaultConfigFromEnv() error {
+	if app.Config.Port == 0 && os.Getenv(BuiltInEnvPort) != "" {
+		app.Config.Port = cast.ToInt(os.Getenv(BuiltInEnvPort))
+	}
+
+	if app.Config.LogLevel == "" && os.Getenv(BuiltInEnvLogLevel) != "" {
+		app.Config.LogLevel = os.Getenv(BuiltInEnvLogLevel)
+	}
+
+	if app.Config.SecretKey == "" && os.Getenv(BuiltInEnvSecretKey) != "" {
+		app.Config.SecretKey = os.Getenv(BuiltInEnvSecretKey)
+	}
+
+	if app.Config.Session.MaxAge == 0 && os.Getenv(BuiltInEnvSessionMaxAge) != "" {
+		app.Config.Session.MaxAge = cast.ToDuration(os.Getenv(BuiltInEnvSessionMaxAge))
+	}
+
+	if app.Config.Redis.Host == "" && os.Getenv(BuiltInEnvRedisHost) != "" {
+		app.Config.Redis.Host = os.Getenv(BuiltInEnvRedisHost)
+	}
+
+	if app.Config.Redis.Port == 0 && os.Getenv(BuiltInEnvRedisPort) != "" {
+		app.Config.Redis.Port = cast.ToInt(os.Getenv(BuiltInEnvRedisPort))
+	}
+
+	if app.Config.Redis.Username == "" && os.Getenv(BuiltInEnvRedisUser) != "" {
+		app.Config.Redis.Username = os.Getenv(BuiltInEnvRedisUser)
+	}
+
+	if app.Config.Redis.Password == "" && os.Getenv(BuiltInEnvRedisPass) != "" {
+		app.Config.Redis.Password = os.Getenv(BuiltInEnvRedisPass)
+	}
+
+	if app.Config.Redis.DB == 0 && os.Getenv(BuiltInEnvRedisDB) != "" {
+		app.Config.Redis.DB = cast.ToInt(os.Getenv(BuiltInEnvRedisDB))
 	}
 
 	return nil

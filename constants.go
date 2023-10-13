@@ -34,3 +34,21 @@ var DefaultSecretKey = random.String(16)
 
 // DefaultSessionMaxAge is the default session max age.
 var DefaultSessionMaxAge = 1 * 24 * time.Hour
+
+// BuiltInEnv is the built-in environment variable.
+var (
+	BuiltInEnvPort = "PORT"
+	BuiltInEnvMode = "MODE"
+
+	BuiltInEnvLogLevel = "LOG_LEVEL"
+
+	BuiltInEnvSecretKey = "SECRET_KEY"
+
+	BuiltInEnvSessionMaxAge = "SESSION_MAX_AGE"
+
+	BuiltInEnvRedisHost = "REDIS_HOST"
+	BuiltInEnvRedisPort = "REDIS_PORT"
+	BuiltInEnvRedisUser = "REDIS_USER"
+	BuiltInEnvRedisPass = "REDIS_PASS"
+	BuiltInEnvRedisDB   = "REDIS_DB"
+)
