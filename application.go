@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -15,6 +16,7 @@ import (
 	"text/template"
 
 	"github.com/go-zoox/cache"
+	"github.com/go-zoox/chalk"
 	"github.com/go-zoox/core-utils/cast"
 	"github.com/go-zoox/core-utils/regexp"
 	"github.com/go-zoox/i18n"
@@ -148,6 +150,9 @@ type ApplicationConfigRedis struct {
 
 // New is the constructor of zoox.Application.
 func New() *Application {
+	// banner
+	log.Printf(banner, chalk.Green("v"+Version), chalk.Blue(website))
+
 	app := &Application{
 		router:        newRouter(),
 		templateFuncs: template.FuncMap{},
