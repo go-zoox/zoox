@@ -21,7 +21,6 @@ import (
 	"github.com/go-zoox/fs"
 	"github.com/go-zoox/i18n"
 	"github.com/go-zoox/proxy"
-	"github.com/go-zoox/pubsub"
 	"github.com/go-zoox/tag/datasource"
 	"github.com/go-zoox/zoox/components/application/cmd"
 	"github.com/go-zoox/zoox/components/application/cron"
@@ -30,7 +29,9 @@ import (
 	"github.com/go-zoox/zoox/components/application/jobqueue"
 	"github.com/go-zoox/zoox/components/context/body"
 	"github.com/go-zoox/zoox/components/context/form"
+	"github.com/go-zoox/zoox/components/context/mq"
 	"github.com/go-zoox/zoox/components/context/param"
+	"github.com/go-zoox/zoox/components/context/pubsub"
 	"github.com/go-zoox/zoox/components/context/query"
 	"github.com/go-zoox/zoox/components/context/sse"
 	"github.com/go-zoox/zoox/components/context/state"
@@ -82,6 +83,9 @@ type Context struct {
 	//
 	i18n i18n.I18n
 	//
+	pubsub pubsub.PubSub
+	mq     mq.MQ
+	//
 	env   env.Env
 	debug debug.Debug
 	// middleware
@@ -116,6 +120,9 @@ type Context struct {
 		env   sync.Once
 		//
 		i18n sync.Once
+		//
+		pubsub sync.Once
+		mq     sync.Once
 		//
 		cron sync.Once
 		jwt  sync.Once
@@ -1019,14 +1026,22 @@ func (ctx *Context) BodyBytes() ([]byte, error) {
 	return bytes, nil
 }
 
-// Publish publishes the message to the pubsub.
-func (ctx *Context) Publish(msg *pubsub.Message) error {
-	return ctx.App.PubSub().Publish(ctx.Context(), msg)
+// PubSub is the pubsub.
+func (ctx *Context) PubSub() pubsub.PubSub {
+	ctx.once.pubsub.Do(func() {
+		ctx.pubsub = pubsub.New(ctx.Context(), ctx.App.PubSub())
+	})
+
+	return ctx.pubsub
 }
 
-// Subscribe subscribes the topic with the handler.
-func (ctx *Context) Subscribe(topic string, handler pubsub.Handler) error {
-	return ctx.App.PubSub().Subscribe(ctx.Context(), topic, handler)
+// MQ is the mq.
+func (ctx *Context) MQ() mq.MQ {
+	ctx.once.mq.Do(func() {
+		ctx.mq = mq.New(ctx.Context(), ctx.App.MQ())
+	})
+
+	return ctx.mq
 }
 
 // Concurrency creates a concurrency.

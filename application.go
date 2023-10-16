@@ -32,6 +32,7 @@ import (
 	"github.com/go-zoox/zoox/components/application/runtime"
 	"github.com/go-zoox/zoox/components/application/websocket"
 
+	"github.com/go-zoox/mq"
 	"github.com/go-zoox/pubsub"
 
 	"github.com/go-zoox/kv/redis"
@@ -86,6 +87,7 @@ type Application struct {
 	jsonrpcRegistry jsonrpcServer.Server
 	//
 	pubsub pubsub.PubSub
+	mq     mq.MQ
 
 	//
 	Config ApplicationConfig
@@ -103,7 +105,9 @@ type Application struct {
 		i18n sync.Once
 		//
 		jsonrpcRegistry sync.Once
-		pubsub          sync.Once
+		//
+		pubsub sync.Once
+		mq     sync.Once
 		//
 		cmd sync.Once
 	}
@@ -478,6 +482,25 @@ func (app *Application) PubSub() pubsub.PubSub {
 	})
 
 	return app.pubsub
+}
+
+// MQ get a new MQ handler.
+func (app *Application) MQ() mq.MQ {
+	if app.Config.Redis.Host == "" {
+		panic("redis config is required for mq in application")
+	}
+
+	app.once.mq.Do(func() {
+		app.mq = mq.New(&mq.Config{
+			RedisHost:     app.Config.Redis.Host,
+			RedisPort:     app.Config.Redis.Port,
+			RedisDB:       app.Config.Redis.DB,
+			RedisUsername: app.Config.Redis.Username,
+			RedisPassword: app.Config.Redis.Password,
+		})
+	})
+
+	return app.mq
 }
 
 // Cache ...
