@@ -8,8 +8,8 @@ import (
 
 // MQ ...
 type MQ interface {
-	Send(topic string, message *gomq.Msg) error
-	Consume(topic string, handler gomq.Handler) error
+	Send(topic string, message *gomq.Message) error
+	Consume(ctx context.Context, topic string, group string, consumer string, start string, batchSize int, h gomq.Handler) error
 }
 
 type mq struct {
@@ -25,10 +25,10 @@ func New(ctx context.Context, ps gomq.MQ) MQ {
 	}
 }
 
-func (p *mq) Send(topic string, message *gomq.Msg) error {
+func (p *mq) Send(topic string, message *gomq.Message) error {
 	return p.ps.Send(p.ctx, message)
 }
 
-func (p *mq) Consume(topic string, handler gomq.Handler) error {
-	return p.ps.Consume(p.ctx, topic, handler)
+func (p *mq) Consume(ctx context.Context, topic string, group string, consumer string, start string, batchSize int, h gomq.Handler) error {
+	return p.ps.Consume(p.ctx, topic, group, consumer, start, batchSize, h)
 }
