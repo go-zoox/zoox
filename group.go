@@ -52,7 +52,7 @@ func (g *RouterGroup) Group(prefix string, cb ...GroupFunc) *RouterGroup {
 }
 
 func (g *RouterGroup) addRoute(method string, path string, handler ...HandlerFunc) {
-	pathX := g.prefix + path
+	pathX := fs.JoinPath(g.prefix, path)
 	g.app.router.addRoute(method, pathX, handler...)
 }
 
