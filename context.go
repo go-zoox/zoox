@@ -385,7 +385,10 @@ func (ctx *Context) JSON(status int, obj interface{}) {
 	ctx.SetHeader(headers.ContentType, "application/json")
 	encoder := json.NewEncoder(ctx.Writer)
 	if err := encoder.Encode(obj); err != nil {
-		ctx.Error(http.StatusInternalServerError, err.Error())
+		// ctx.Error(http.StatusInternalServerError, err.Error())
+
+		ctx.Logger.Errorf("[ctx.JSON] encode error: %s", err)
+		ctx.String(http.StatusInternalServerError, err.Error())
 	}
 }
 
