@@ -1,7 +1,6 @@
 package zoox
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"mime"
@@ -13,8 +12,6 @@ import (
 	"github.com/go-zoox/fs"
 	"github.com/go-zoox/headers"
 	"github.com/go-zoox/proxy"
-	"github.com/go-zoox/zoox/components/application/websocket"
-	gowebsocket "github.com/gorilla/websocket"
 )
 
 var anyMethods = []string{
@@ -166,157 +163,6 @@ func (g *RouterGroup) Proxy(path, target string, options ...func(cfg *ProxyConfi
 		}
 
 		ctx.Next()
-	})
-
-	return g
-}
-
-// WebSocket defines the method to add websocket route
-// WebSocket defines the method to add websocket route
-func (g *RouterGroup) WebSocket(path string, handler WsHandlerFunc, middlewares ...HandlerFunc) *RouterGroup {
-	upgrader := &websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool {
-			return true
-		},
-	}
-
-	handleFunc := append(middlewares, func(ctx *Context) {
-		ctx.Status(200)
-
-		conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
-		if err != nil {
-			ctx.Logger.Errorf("ws error: %s", err)
-			return
-		}
-		defer conn.Close()
-
-		client := websocket.New(conn)
-		handler(ctx, client)
-
-		defer func() {
-			if client.OnDisconnect != nil {
-				go client.OnDisconnect()
-			}
-
-			conn.Close()
-		}()
-
-		// ctx.Logger.Info("ws connected")
-		if client.OnConnect != nil {
-			go client.OnConnect()
-		}
-
-		for {
-			mt, message, err := conn.ReadMessage()
-			// if mt == -1 {
-			// 	ctx.Logger.Info("xxx disconnected: %s", message)
-			// 	if client.OnDisconnect != nil {
-			// 		client.OnDisconnect()
-			// 	}
-			// } else if err != nil {
-			// 	// ctx.Logger.Info("read err: %s %d", err, mt)
-
-			// 	if client.OnError != nil {
-			// 		client.OnError(err)
-			// 	}
-			// 	return
-			// }
-
-			if err != nil {
-				if client.OnError != nil {
-					go client.OnError(err)
-				} else {
-					if e, ok := err.(*gowebsocket.CloseError); ok {
-						switch e.Code {
-						case gowebsocket.CloseGoingAway:
-							// @TODO
-							// user auto leave, for example, close browser or go other page
-							// we should not log as an error, it is very common.
-							// action => ignored.
-							// ctx.Logger.Warnf("read err: %s (type: %d)", err, mt)
-						case gowebsocket.CloseAbnormalClosure:
-							// @TODO
-							// user close conn, we should not log as an error, it is very common.
-							// action => ignored.
-						default:
-							ctx.Logger.Errorf("read err: %s (code: %d, type: %d)", err, e.Code, mt)
-						}
-					}
-
-					// else {
-					// 	ctx.Logger.Errorf("read err: %s (type: %d)", err, mt)
-					// }
-				}
-
-				return
-			}
-
-			go func(mt int, message []byte) {
-				defer func() {
-					if err := recover(); err != nil {
-						switch v := err.(type) {
-						case error:
-							if client.OnError != nil {
-								go client.OnError(v)
-							} else {
-								ctx.Logger.Errorf("[onmessage] panic: %s", err)
-							}
-						case string:
-							if client.OnError != nil {
-								go client.OnError(errors.New(v))
-							} else {
-								ctx.Logger.Errorf("[onmessage] panic: %s", err)
-							}
-						default:
-							ctx.Logger.Errorf("[onmessage] panic: %v", err)
-						}
-					}
-				}()
-
-				switch mt {
-				case websocket.TextMessage:
-					if client.OnTextMessage != nil {
-						client.OnTextMessage(message)
-					}
-				case websocket.BinaryMessage:
-					if client.OnBinaryMessage != nil {
-						client.OnBinaryMessage(message)
-					}
-				default:
-					ctx.Logger.Warn("unknown message type: %d", mt)
-				}
-
-				if client.OnMessage != nil {
-					client.OnMessage(mt, message)
-				}
-			}(mt, message)
-		}
-	})
-
-	g.addRoute(http.MethodGet, path, handleFunc...)
-
-	return g
-}
-
-// WebSocketGorilla defines the method to add websocket route
-func (g *RouterGroup) WebSocketGorilla(path string, handler WsGorillaHandlerFunc) *RouterGroup {
-	upgrader := &websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool {
-			return true
-		},
-	}
-
-	g.addRoute(http.MethodGet, path, func(ctx *Context) {
-		ctx.Status(200)
-
-		conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
-		if err != nil {
-			ctx.Logger.Errorf("ws error: %s", err)
-			return
-		}
-		defer conn.Close()
-
-		handler(ctx, conn)
 	})
 
 	return g
