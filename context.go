@@ -733,14 +733,14 @@ func (ctx *Context) BindJSON(obj interface{}) (err error) {
 		return errors.New("invalid request")
 	}
 
-	if ctx.Debug().IsDebugMode() {
+	if ctx.Env().Get("DEBUG_ZOOX_REQUEST_BODY") != "" {
 		// refernece: golang复用http.request.body - https://zhuanlan.zhihu.com/p/47313038
 		_, err = ctx.CloneBody()
 		if err != nil {
 			return fmt.Errorf("failed to read request body: %v", err)
 		}
 
-		ctx.Logger.Infof("[debug][ctx.BindJSON] body: %v", ctx.bodyBytes)
+		ctx.Logger.Infof("[debug][ctx.BindJSON] body: %s", ctx.bodyBytes)
 	}
 
 	return json.NewDecoder(ctx.Request.Body).Decode(obj)
