@@ -8,6 +8,7 @@ import (
 	gowebsocket "github.com/gorilla/websocket"
 )
 
+// WebSocketOption ...
 type WebSocketOption struct {
 	Middlewares []HandlerFunc
 }
