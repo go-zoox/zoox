@@ -10,9 +10,9 @@ require (
 	github.com/go-zoox/command v1.2.8
 	github.com/go-zoox/concurrency v1.2.0
 	github.com/go-zoox/cookie v1.2.0
-	github.com/go-zoox/core-utils v1.2.14
+	github.com/go-zoox/core-utils v1.3.1
 	github.com/go-zoox/counter v1.2.1
-	github.com/go-zoox/cron v1.1.2
+	github.com/go-zoox/cron v1.2.0
 	github.com/go-zoox/datetime v1.2.2
 	github.com/go-zoox/debug v1.0.2
 	github.com/go-zoox/fetch v1.7.16
