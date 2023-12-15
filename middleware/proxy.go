@@ -26,10 +26,10 @@ type ProxyErrorPages struct {
 }
 
 // Proxy is a middleware that proxies the request.
-func Proxy(fn func(ctx *zoox.Context, cfg *ProxyConfig) (next bool, err error)) zoox.Middleware {
+func Proxy(fn func(ctx *zoox.Context, cfg *ProxyConfig) (next, stop bool, err error)) zoox.Middleware {
 	return func(ctx *zoox.Context) {
 		cfg := &ProxyConfig{}
-		next, err := fn(ctx, cfg)
+		next, stop, err := fn(ctx, cfg)
 		if err != nil {
 			ctx.Logger.Errorf("[middleware.proxy] proxy error: %#v", err)
 			if v, ok := err.(*proxy.HTTPError); ok {
@@ -68,6 +68,10 @@ func Proxy(fn func(ctx *zoox.Context, cfg *ProxyConfig) (next bool, err error)) 
 
 				ctx.HTML(http.StatusInternalServerError, html)
 			}
+			return
+		}
+
+		if stop {
 			return
 		}
 
