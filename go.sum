@@ -84,8 +84,8 @@ github.com/go-zoox/core-utils v1.3.1/go.mod h1:raOOwr2l2sJQyjR0Dg33sg0ry4U1/L2eN
 github.com/go-zoox/counter v1.0.1/go.mod h1:PICilZTrnO4dFstDPlXpjc6sdWYBG7hm/XDmjAcHaX0=
 github.com/go-zoox/counter v1.2.1 h1:MPShpjJWQ/qt3pYQxuyBL/Ci6X4mtihTC3cwDr1VOI8=
 github.com/go-zoox/counter v1.2.1/go.mod h1:gOA/Bk2iWt9K4vm2Std2ciEgHwQqWSzvcyUI+jFVduY=
-github.com/go-zoox/cron v1.2.0 h1:WAcfeg0R6sASs9HjNwDz+uEIUrl62jj0zBSOF3oox9c=
-github.com/go-zoox/cron v1.2.0/go.mod h1:vN6JqnvSgF9Rjjg/+cTxm8HywA3U+0cwP9RW3kdkg4E=
+github.com/go-zoox/cron v1.2.1 h1:aOSIJUaGSxuWJw/fvPBJxxhNlfrZCOjaItWoORlAlmU=
+github.com/go-zoox/cron v1.2.1/go.mod h1:vN6JqnvSgF9Rjjg/+cTxm8HywA3U+0cwP9RW3kdkg4E=
 github.com/go-zoox/crypto v1.0.3/go.mod h1:HaWRg4tHZamqNyOnNoaK+Rw5eto+su66i8bMMP8UCBU=
 github.com/go-zoox/crypto v1.1.8 h1:oI2KPLy+SsGeb+h5A99n9MTQVp4jBhwJWkqjStUzz9I=
 github.com/go-zoox/crypto v1.1.8/go.mod h1:JqgNr9HcFFGQkMCGLJ9djtfg/RWVLxtunG01HD3lUXM=
