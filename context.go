@@ -743,7 +743,16 @@ func (ctx *Context) BindJSON(obj interface{}) (err error) {
 		ctx.Logger.Infof("[debug][ctx.BindJSON] body: %s", ctx.bodyBytes)
 	}
 
-	return json.NewDecoder(ctx.Request.Body).Decode(obj)
+	if err := json.NewDecoder(ctx.Request.Body).Decode(obj); err != nil {
+		// @TODO allow empty body
+		if err == io.EOF {
+			return nil
+		}
+
+		return err
+	}
+
+	return nil
 }
 
 // BindYAML binds the request body into the given struct.
