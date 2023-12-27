@@ -49,8 +49,13 @@ func (r *router) addRoute(method string, path string, handler ...HandlerFunc) {
 		r.roots.Set(method, &route.Node{})
 	}
 
-	r.roots.Get(method).(*route.Node).Insert(path, parts, 0)
-	r.handlers.Set(key, handler)
+	v, err := r.roots.Get(method)
+	if err == nil {
+		if method, ok := v.(*route.Node); ok {
+			method.Insert(path, parts, 0)
+			r.handlers.Set(key, handler)
+		}
+	}
 }
 
 func (r *router) getRoute(method string, path string) (*route.Node, map[string]string) {
@@ -59,7 +64,12 @@ func (r *router) getRoute(method string, path string) (*route.Node, map[string]s
 		return nil, nil
 	}
 
-	root := r.roots.Get(method).(*route.Node)
+	v, err := r.roots.Get(method)
+	if err != nil {
+		return nil, nil
+	}
+
+	root := v.(*route.Node)
 	if n := root.Search(searchParts, 0); n != nil {
 		params := make(map[string]string)
 		parts := parsePath(n.Path)
@@ -90,11 +100,16 @@ func (r *router) handle(ctx *Context) {
 
 		key := fmt.Sprintf("%s %s", ctx.Method, n.Path)
 		if ok := r.handlers.Has(key); ok {
-			handler, ok := r.handlers.Get(key).([]HandlerFunc)
-			if ok {
-				ctx.handlers = append(ctx.handlers, handler...)
-			} else {
+			v, err := r.handlers.Get(key)
+			if err != nil {
 				ctx.handlers = append(ctx.handlers, ctx.App.notfound)
+			} else {
+				handler, ok := v.([]HandlerFunc)
+				if ok {
+					ctx.handlers = append(ctx.handlers, handler...)
+				} else {
+					ctx.handlers = append(ctx.handlers, ctx.App.notfound)
+				}
 			}
 		} else {
 			ctx.handlers = append(ctx.handlers, ctx.App.notfound)
