@@ -24,13 +24,13 @@ import (
 	"github.com/go-zoox/kv"
 	"github.com/go-zoox/logger"
 	"github.com/go-zoox/session"
+	"github.com/go-zoox/websocket"
 	"github.com/go-zoox/zoox/components/application/cmd"
 	"github.com/go-zoox/zoox/components/application/cron"
 	"github.com/go-zoox/zoox/components/application/debug"
 	"github.com/go-zoox/zoox/components/application/env"
 	"github.com/go-zoox/zoox/components/application/jobqueue"
 	"github.com/go-zoox/zoox/components/application/runtime"
-	"github.com/go-zoox/zoox/components/application/websocket"
 
 	"github.com/go-zoox/mq"
 	"github.com/go-zoox/pubsub"
@@ -48,10 +48,7 @@ type GroupFunc func(group *RouterGroup)
 type Middleware = HandlerFunc
 
 // WsHandlerFunc defines the websocket handler used by zoox
-type WsHandlerFunc func(ctx *Context, client *websocket.Client)
-
-// WsGorillaHandlerFunc defines the websocket handler used by zoox
-type WsGorillaHandlerFunc func(ctx *Context, client *websocket.GorillaConn)
+type WsHandlerFunc func(ctx *Context, conn websocket.Server)
 
 // JSONRPCHandlerFunc defines the jsonrpc handler used by zoox
 type JSONRPCHandlerFunc func(registry jsonrpcServer.Server)

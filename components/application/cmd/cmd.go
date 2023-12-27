@@ -5,11 +5,12 @@ import (
 	"fmt"
 
 	"github.com/go-zoox/command"
+	"github.com/go-zoox/command/config"
 )
 
 // Cmd ...
 type Cmd interface {
-	Create(cfg *command.Config) (command.Command, error)
+	Create(cfg *config.Config) (command.Command, error)
 }
 
 type cmd struct {
@@ -24,7 +25,7 @@ func New(ctx context.Context) Cmd {
 }
 
 // Create creates a command.
-func (c *cmd) Create(cfg *command.Config) (command.Command, error) {
+func (c *cmd) Create(cfg *config.Config) (command.Command, error) {
 	if cfg == nil {
 		return nil, fmt.Errorf("command config is nil")
 	}

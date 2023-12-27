@@ -7,7 +7,7 @@ require (
 	github.com/go-zoox/cache v1.0.7
 	github.com/go-zoox/chalk v1.0.2
 	github.com/go-zoox/cli v1.3.6
-	github.com/go-zoox/command v1.3.2
+	github.com/go-zoox/command v1.3.3
 	github.com/go-zoox/concurrency v1.2.0
 	github.com/go-zoox/cookie v1.2.0
 	github.com/go-zoox/core-utils v1.3.2
@@ -32,9 +32,8 @@ require (
 	github.com/go-zoox/ratelimit v1.2.1
 	github.com/go-zoox/session v1.2.0
 	github.com/go-zoox/tag v1.2.3
-	github.com/go-zoox/uuid v0.0.1
 	github.com/go-zoox/watch v1.2.4
-	github.com/gorilla/websocket v1.5.1
+	github.com/go-zoox/websocket v0.0.3
 	github.com/stretchr/testify v1.8.4
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -63,11 +62,14 @@ require (
 	github.com/go-zoox/dotenv v1.2.3 // indirect
 	github.com/go-zoox/encoding v1.2.1 // indirect
 	github.com/go-zoox/errors v1.0.2 // indirect
+	github.com/go-zoox/eventemitter v1.0.8 // indirect
 	github.com/go-zoox/ini v1.0.4 // indirect
 	github.com/go-zoox/safe v1.0.1 // indirect
+	github.com/go-zoox/uuid v0.0.1 // indirect
 	github.com/goccy/go-yaml v1.11.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/uuid v1.5.0 // indirect
+	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
