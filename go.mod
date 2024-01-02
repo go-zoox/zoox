@@ -33,7 +33,7 @@ require (
 	github.com/go-zoox/session v1.2.0
 	github.com/go-zoox/tag v1.2.6
 	github.com/go-zoox/watch v1.2.4
-	github.com/go-zoox/websocket v0.0.6
+	github.com/go-zoox/websocket v0.0.8
 	github.com/stretchr/testify v1.8.4
 	gopkg.in/yaml.v3 v3.0.1
 )
