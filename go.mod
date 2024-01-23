@@ -14,7 +14,7 @@ require (
 	github.com/go-zoox/counter v1.2.1
 	github.com/go-zoox/cron v1.2.1
 	github.com/go-zoox/datetime v1.2.2
-	github.com/go-zoox/debug v1.0.2
+	github.com/go-zoox/debug v1.0.3
 	github.com/go-zoox/fetch v1.8.1
 	github.com/go-zoox/fs v1.3.14
 	github.com/go-zoox/gzip v1.0.0
@@ -34,7 +34,7 @@ require (
 	github.com/go-zoox/session v1.2.0
 	github.com/go-zoox/tag v1.2.6
 	github.com/go-zoox/watch v1.2.4
-	github.com/go-zoox/websocket v1.0.2
+	github.com/go-zoox/websocket v1.0.3
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.8.4
 	gopkg.in/yaml.v3 v3.0.1
