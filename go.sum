@@ -95,8 +95,8 @@ github.com/go-zoox/datetime v1.0.4/go.mod h1:os6lYW/GXNpCIseFrBr8DNcOiPuwl5Ttc/k
 github.com/go-zoox/datetime v1.2.2 h1:JrI4ekdsvpsenGzrNQAOmobBTYyotaXD3YDXngvCbM4=
 github.com/go-zoox/datetime v1.2.2/go.mod h1:qvaCrzjhq/g/gstx4sx06Nl4ll2pLSrkRa9ueLjrZ9A=
 github.com/go-zoox/debug v1.0.1/go.mod h1:7HvnBeV1dVuuGVnXSLdJ5OE6X/wIXAjIEyiaA7NqQPA=
-github.com/go-zoox/debug v1.0.3 h1:JomxwYlQMbuJaAzya1sPBPFAghHrr1pfjABe6pAEvP8=
-github.com/go-zoox/debug v1.0.3/go.mod h1:7HvnBeV1dVuuGVnXSLdJ5OE6X/wIXAjIEyiaA7NqQPA=
+github.com/go-zoox/debug v1.0.4 h1:Y3yQG3cca8CuJIdIg4H0iBpmCXPfQVht8KODUEt9IWg=
+github.com/go-zoox/debug v1.0.4/go.mod h1:gC90/McIkAgNg13Xpy8BelBYD/Ac335SDUsbKU0Ww6c=
 github.com/go-zoox/dotenv v1.0.7/go.mod h1:N2bXxghq3Zk+lpiOxv+m+0yjnGubVqJGJDR/9jWm3N0=
 github.com/go-zoox/dotenv v1.1.0/go.mod h1:elKALomz436YKX4Syo+f02ozIQYq2yFaprj6jL6GnCQ=
 github.com/go-zoox/dotenv v1.2.5 h1:zCWYvy7zARJDR6kA9CcaYCfCx8zb3Cb5wem2MikZ8lY=
