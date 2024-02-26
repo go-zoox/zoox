@@ -541,6 +541,7 @@ func (app *Application) showBanner() {
 	// allow custom banner
 	if app.Config.Banner != "" {
 		log.Println(app.Config.Banner)
+		return
 	}
 
 	// banner
