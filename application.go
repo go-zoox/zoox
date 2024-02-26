@@ -130,6 +130,9 @@ type ApplicationConfig struct {
 	TLSKeyFile string
 	// TLS Ca Certificate
 	TLSCaCertFile string
+	//
+	TLSCert []byte
+	TLSKey  []byte
 
 	//
 	LogLevel string `config:"log_level"`
@@ -596,26 +599,56 @@ func (app *Application) serve() error {
 	}
 
 	// TLS Certificate and Private Key
-	if app.Config.TLSCertFile != "" {
-		// if app.Config.TLSCertFile != "" && app.TLSCert == nil {
-		// 	tlsCaCert, err := ioutil.ReadFile(app.Config.TLSCertFile)
-		// 	if err != nil {
-		// 		return err
-		// 	}
-		// 	app.TLSCert = tlsCaCert
+	if app.Config.TLSCertFile != "" && app.Config.TLSKeyFile != "" {
+		certPEMBlock, err := os.ReadFile(app.Config.TLSCertFile)
+		if err != nil {
+			return fmt.Errorf("failed to read tls certificate: %v", err)
+		}
+		app.Config.TLSCert = certPEMBlock
+
+		keyPEMBlock, err := os.ReadFile(app.Config.TLSKeyFile)
+		if err != nil {
+			return fmt.Errorf("failed to read tls private key: %v", err)
+		}
+		app.Config.TLSKey = keyPEMBlock
+
+		// // if app.Config.TLSCertFile != "" && app.TLSCert == nil {
+		// // 	tlsCaCert, err := ioutil.ReadFile(app.Config.TLSCertFile)
+		// // 	if err != nil {
+		// // 		return err
+		// // 	}
+		// // 	app.TLSCert = tlsCaCert
+		// // }
+
+		// if app.Config.NetworkType == "unix" {
+		// 	logger.Info("Server started at unixs://%s", app.AddressForLog())
+		// } else {
+		// 	logger.Info("Server started at https://%s", app.AddressForLog())
 		// }
 
+		// // if err := http.ServeTLS(listener, app, app.Config.TLSCertFile, app.Config.TLSKeyFile); err != nil {
+		// // 	return err
+		// // }
+
+		// return server.ServeTLS(listener, app.Config.TLSCertFile, app.Config.TLSKeyFile)
+	}
+
+	if app.Config.TLSCert != nil && app.Config.TLSKey != nil {
 		if app.Config.NetworkType == "unix" {
 			logger.Info("Server started at unixs://%s", app.AddressForLog())
 		} else {
 			logger.Info("Server started at https://%s", app.AddressForLog())
 		}
 
-		// if err := http.ServeTLS(listener, app, app.Config.TLSCertFile, app.Config.TLSKeyFile); err != nil {
-		// 	return err
-		// }
+		cert, err := tls.X509KeyPair(app.Config.TLSCert, app.Config.TLSKey)
+		if err != nil {
+			return err
+		}
 
-		return server.ServeTLS(listener, app.Config.TLSCertFile, app.Config.TLSKeyFile)
+		config := &tls.Config{
+			Certificates: []tls.Certificate{cert},
+		}
+		listener = tls.NewListener(listener, config)
 	}
 
 	// load tls by sni
@@ -626,7 +659,7 @@ func (app *Application) serve() error {
 		config := &tls.Config{
 			GetCertificate: app.tlsCertLoader,
 		}
-		return server.Serve(tls.NewListener(listener, config))
+		listener = tls.NewListener(listener, config)
 	}
 
 	if app.Config.NetworkType == "unix" {
@@ -638,10 +671,10 @@ func (app *Application) serve() error {
 	// 	return err
 	// }
 
-	// if only config tls ca, should reset nil
-	if server.TLSConfig != nil {
-		server.TLSConfig = nil
-	}
+	// // if only config tls ca, should reset nil
+	// if server.TLSConfig != nil {
+	// 	server.TLSConfig = nil
+	// }
 
 	return server.Serve(listener)
 }
