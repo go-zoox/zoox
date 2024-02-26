@@ -138,6 +138,9 @@ type ApplicationConfig struct {
 	Cache cache.Config `config:"cache"`
 	//
 	Redis ApplicationConfigRedis `config:"redis"`
+
+	//
+	Banner string
 }
 
 // ApplicationConfigRedis defines the config of redis.
@@ -151,9 +154,6 @@ type ApplicationConfigRedis struct {
 
 // New is the constructor of zoox.Application.
 func New() *Application {
-	// banner
-	log.Printf(banner, chalk.Green("v"+Version), chalk.Blue(website))
-
 	app := &Application{
 		router:        newRouter(),
 		templateFuncs: template.FuncMap{},
@@ -297,6 +297,8 @@ func (app *Application) applyDefaultConfigFromEnv() error {
 //			Unix Domain Socket:
 //				/tmp/xxx.sock: Run("unix:///tmp/xxx.sock")
 func (app *Application) Run(addr ...string) (err error) {
+	app.showBanner()
+
 	var addrX string
 	if len(addr) > 0 && addr[0] != "" {
 		addrX = addr[0]
@@ -583,6 +585,17 @@ func (app *Application) AddressForLog() string {
 	}
 
 	return fmt.Sprintf("%s:%d", app.Config.Host, app.Config.Port)
+}
+
+// showBanner ...
+func (app *Application) showBanner() {
+	// allow custom banner
+	if app.Config.Banner != "" {
+		log.Println(app.Config.Banner)
+	}
+
+	// banner
+	log.Printf(banner, chalk.Green("v"+Version), chalk.Blue(website))
 }
 
 // H is a shortcut for map[string]interface{}
