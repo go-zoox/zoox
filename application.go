@@ -297,124 +297,27 @@ func (app *Application) applyDefaultConfigFromEnv() error {
 //			Unix Domain Socket:
 //				/tmp/xxx.sock: Run("unix:///tmp/xxx.sock")
 func (app *Application) Run(addr ...string) (err error) {
+	// show banner
 	app.showBanner()
 
-	var addrX string
-	if len(addr) > 0 && addr[0] != "" {
-		addrX = addr[0]
-	} else {
-		if os.Getenv("PORT") != "" {
-			addrX = ":" + os.Getenv("PORT")
-		}
+	// parse addr
+	if err := app.parseAddr(addr...); err != nil {
+		return err
 	}
 
-	if addrX != "" {
-		// Pattern@1 => :8080
-		if regexp.Match("^:\\d+$", addrX) {
-			app.Config.Port = cast.ToInt(addrX[1:])
-		} else if regexp.Match("^[\\w\\.]+:\\d+$", addrX) {
-			// Pattern@2 => 127.0.0.1:8080
-			parts := strings.Split(addrX, ":")
-			app.Config.Host = cast.ToString(parts[0])
-			app.Config.Port = cast.ToInt(parts[1])
-		} else if regexp.Match("^http://[\\w\\.]+:\\d+", addrX) {
-			// Pattern@3 => http://127.0.0.1:8080
-			u, err := url.Parse(addrX)
-			if err != nil {
-				return fmt.Errorf("failed to parse addr(%s): %v", addrX, err)
-			}
-
-			app.Config.Protocol = u.Scheme
-			app.Config.Host = u.Hostname()
-			app.Config.Port = cast.ToInt(u.Port())
-		} else if regexp.Match("^unix://", addrX) {
-			// Pattern@4 => unix:///tmp/xxx.sock
-			app.Config.Protocol = "unix"
-			app.Config.NetworkType = "unix"
-			app.Config.UnixDomainSocket = addrX[7:]
-		} else if regexp.Match("^/", addrX) {
-			// Pattern@4 => /tmp/xxx.sock
-			app.Config.Protocol = "unix"
-			app.Config.NetworkType = "unix"
-			app.Config.UnixDomainSocket = addrX
-		}
-	}
-
-	// config
+	// apply default config
 	if err := app.applyDefaultConfig(); err != nil {
 		return fmt.Errorf("failed to apply default config: %v", err)
 	}
 
-	app.Debug().Info(app)
+	// show app info in debug mode
+	app.showAppInfo()
 
-	app.Runtime().Print()
+	// show runtime info
+	app.showRuntimeInfo()
 
-	listener, err := net.Listen(app.Config.NetworkType, app.Address())
-	if err != nil {
-		return err
-	}
-	defer listener.Close()
-
-	server := &http.Server{
-		Addr:    app.Address(),
-		Handler: app,
-	}
-
-	// TLS Ca Certificate
-	if app.Config.TLSCaCertFile != "" {
-		pool := x509.NewCertPool()
-		caCrt, err := ioutil.ReadFile(app.Config.TLSCaCertFile)
-		if err != nil {
-			return fmt.Errorf("failed to read tls ca certificate")
-		}
-		pool.AppendCertsFromPEM(caCrt)
-
-		if server.TLSConfig == nil {
-			server.TLSConfig = &tls.Config{
-				ClientCAs:  pool,
-				ClientAuth: tls.RequireAndVerifyClientCert,
-			}
-		}
-	}
-
-	// TLS Certificate and Private Key
-	if app.Config.TLSCertFile != "" {
-		// if app.Config.TLSCertFile != "" && app.TLSCert == nil {
-		// 	tlsCaCert, err := ioutil.ReadFile(app.Config.TLSCertFile)
-		// 	if err != nil {
-		// 		return err
-		// 	}
-		// 	app.TLSCert = tlsCaCert
-		// }
-
-		if app.Config.NetworkType == "unix" {
-			logger.Info("Server started at unixs://%s", app.AddressForLog())
-		} else {
-			logger.Info("Server started at https://%s", app.AddressForLog())
-		}
-
-		// if err := http.ServeTLS(listener, app, app.Config.TLSCertFile, app.Config.TLSKeyFile); err != nil {
-		// 	return err
-		// }
-
-		return server.ServeTLS(listener, app.Config.TLSCertFile, app.Config.TLSKeyFile)
-	}
-
-	if app.Config.NetworkType == "unix" {
-		logger.Info("Server started at unix://%s", app.AddressForLog())
-	} else {
-		logger.Info("Server started at http://%s", app.AddressForLog())
-	}
-	// if err := http.Serve(listener, app); err != nil {
-	// 	return err
-	// }
-
-	// if only config tls ca, should reset nil
-	if server.TLSConfig != nil {
-		server.TLSConfig = nil
-	}
-
-	return server.Serve(listener)
+	// serve
+	return app.serve()
 }
 
 func (app *Application) createContext(w http.ResponseWriter, req *http.Request) *Context {
@@ -596,6 +499,132 @@ func (app *Application) showBanner() {
 
 	// banner
 	log.Printf(banner, chalk.Green("v"+Version), chalk.Blue(website))
+}
+
+// parseAddr ...
+func (app *Application) parseAddr(addr ...string) error {
+	var addrX string
+	if len(addr) > 0 && addr[0] != "" {
+		addrX = addr[0]
+	} else {
+		if os.Getenv("PORT") != "" {
+			addrX = ":" + os.Getenv("PORT")
+		}
+	}
+
+	if addrX != "" {
+		// Pattern@1 => :8080
+		if regexp.Match("^:\\d+$", addrX) {
+			app.Config.Port = cast.ToInt(addrX[1:])
+		} else if regexp.Match("^[\\w\\.]+:\\d+$", addrX) {
+			// Pattern@2 => 127.0.0.1:8080
+			parts := strings.Split(addrX, ":")
+			app.Config.Host = cast.ToString(parts[0])
+			app.Config.Port = cast.ToInt(parts[1])
+		} else if regexp.Match("^http://[\\w\\.]+:\\d+", addrX) {
+			// Pattern@3 => http://127.0.0.1:8080
+			u, err := url.Parse(addrX)
+			if err != nil {
+				return fmt.Errorf("failed to parse addr(%s): %v", addrX, err)
+			}
+
+			app.Config.Protocol = u.Scheme
+			app.Config.Host = u.Hostname()
+			app.Config.Port = cast.ToInt(u.Port())
+		} else if regexp.Match("^unix://", addrX) {
+			// Pattern@4 => unix:///tmp/xxx.sock
+			app.Config.Protocol = "unix"
+			app.Config.NetworkType = "unix"
+			app.Config.UnixDomainSocket = addrX[7:]
+		} else if regexp.Match("^/", addrX) {
+			// Pattern@4 => /tmp/xxx.sock
+			app.Config.Protocol = "unix"
+			app.Config.NetworkType = "unix"
+			app.Config.UnixDomainSocket = addrX
+		}
+	}
+
+	return nil
+}
+
+// showAppInfo ...
+func (app *Application) showAppInfo() {
+	app.Debug().Info(app)
+}
+
+// showRuntimeInfo ...
+func (app *Application) showRuntimeInfo() {
+	app.Runtime().Print()
+}
+
+// serve ...
+func (app *Application) serve() error {
+	listener, err := net.Listen(app.Config.NetworkType, app.Address())
+	if err != nil {
+		return err
+	}
+	defer listener.Close()
+
+	server := &http.Server{
+		Addr:    app.Address(),
+		Handler: app,
+	}
+
+	// TLS Ca Certificate
+	if app.Config.TLSCaCertFile != "" {
+		pool := x509.NewCertPool()
+		caCrt, err := ioutil.ReadFile(app.Config.TLSCaCertFile)
+		if err != nil {
+			return fmt.Errorf("failed to read tls ca certificate")
+		}
+		pool.AppendCertsFromPEM(caCrt)
+
+		if server.TLSConfig == nil {
+			server.TLSConfig = &tls.Config{
+				ClientCAs:  pool,
+				ClientAuth: tls.RequireAndVerifyClientCert,
+			}
+		}
+	}
+
+	// TLS Certificate and Private Key
+	if app.Config.TLSCertFile != "" {
+		// if app.Config.TLSCertFile != "" && app.TLSCert == nil {
+		// 	tlsCaCert, err := ioutil.ReadFile(app.Config.TLSCertFile)
+		// 	if err != nil {
+		// 		return err
+		// 	}
+		// 	app.TLSCert = tlsCaCert
+		// }
+
+		if app.Config.NetworkType == "unix" {
+			logger.Info("Server started at unixs://%s", app.AddressForLog())
+		} else {
+			logger.Info("Server started at https://%s", app.AddressForLog())
+		}
+
+		// if err := http.ServeTLS(listener, app, app.Config.TLSCertFile, app.Config.TLSKeyFile); err != nil {
+		// 	return err
+		// }
+
+		return server.ServeTLS(listener, app.Config.TLSCertFile, app.Config.TLSKeyFile)
+	}
+
+	if app.Config.NetworkType == "unix" {
+		logger.Info("Server started at unix://%s", app.AddressForLog())
+	} else {
+		logger.Info("Server started at http://%s", app.AddressForLog())
+	}
+	// if err := http.Serve(listener, app); err != nil {
+	// 	return err
+	// }
+
+	// if only config tls ca, should reset nil
+	if server.TLSConfig != nil {
+		server.TLSConfig = nil
+	}
+
+	return server.Serve(listener)
 }
 
 // H is a shortcut for map[string]interface{}
