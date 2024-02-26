@@ -37,8 +37,9 @@ var DefaultSessionMaxAge = 1 * 24 * time.Hour
 
 // BuiltInEnv is the built-in environment variable.
 var (
-	BuiltInEnvPort = "PORT"
-	BuiltInEnvMode = "MODE"
+	BuiltInEnvPort      = "PORT"
+	BuiltInEnvHTTPsPort = "HTTPS_PORT"
+	BuiltInEnvMode      = "MODE"
 
 	BuiltInEnvLogLevel = "LOG_LEVEL"
 

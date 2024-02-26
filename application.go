@@ -15,6 +15,9 @@ import (
 	"sync"
 	"text/template"
 
+	"golang.org/x/sync/errgroup"
+
+	"github.com/go-errors/errors"
 	"github.com/go-zoox/cache"
 	"github.com/go-zoox/chalk"
 	"github.com/go-zoox/core-utils/cast"
@@ -115,9 +118,10 @@ type Application struct {
 
 // ApplicationConfig defines the config of zoox.Application.
 type ApplicationConfig struct {
-	Protocol string
-	Host     string
-	Port     int
+	Protocol  string
+	Host      string
+	Port      int
+	HTTPSPort int
 
 	//
 	NetworkType      string
@@ -254,6 +258,10 @@ func (app *Application) applyDefaultConfigFromEnv() error {
 		app.Config.Port = cast.ToInt(os.Getenv(BuiltInEnvPort))
 	}
 
+	if app.Config.HTTPSPort == 0 && os.Getenv(BuiltInEnvHTTPsPort) != "" {
+		app.Config.HTTPSPort = cast.ToInt(os.Getenv(BuiltInEnvHTTPsPort))
+	}
+
 	if app.Config.LogLevel == "" && os.Getenv(BuiltInEnvLogLevel) != "" {
 		app.Config.LogLevel = os.Getenv(BuiltInEnvLogLevel)
 	}
@@ -359,8 +367,8 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	app.router.handle(ctx)
 }
 
-// SetTLSLoader set the tls cert loader
-func (app *Application) SetTLSLoader(loader func(helloInfo *tls.ClientHelloInfo) (*tls.Certificate, error)) {
+// SetTLSCertLoader set the tls cert loader
+func (app *Application) SetTLSCertLoader(loader func(helloInfo *tls.ClientHelloInfo) (*tls.Certificate, error)) {
 	app.tlsCertLoader = loader
 }
 
@@ -488,6 +496,15 @@ func (app *Application) Address() string {
 	return fmt.Sprintf("%s:%d", app.Config.Host, app.Config.Port)
 }
 
+// Address ...
+func (app *Application) AddressHTTPs() string {
+	if app.Config.NetworkType == "unix" {
+		return app.Config.UnixDomainSocket
+	}
+
+	return fmt.Sprintf("%s:%d", app.Config.Host, app.Config.HTTPSPort)
+}
+
 // AddressForLog ...
 func (app *Application) AddressForLog() string {
 	if app.Config.NetworkType == "unix" {
@@ -499,6 +516,19 @@ func (app *Application) AddressForLog() string {
 	}
 
 	return fmt.Sprintf("%s:%d", app.Config.Host, app.Config.Port)
+}
+
+// AddressHTTPsForLog ...
+func (app *Application) AddressHTTPsForLog() string {
+	if app.Config.NetworkType == "unix" {
+		return app.Config.UnixDomainSocket
+	}
+
+	if app.Config.Host == "0.0.0.0" {
+		return fmt.Sprintf("127.0.0.1:%d", app.Config.HTTPSPort)
+	}
+
+	return fmt.Sprintf("%s:%d", app.Config.Host, app.Config.HTTPSPort)
 }
 
 // showBanner ...
@@ -570,6 +600,29 @@ func (app *Application) showRuntimeInfo() {
 
 // serve ...
 func (app *Application) serve() error {
+	g := &errgroup.Group{}
+
+	g.Go(func() error {
+		if err := app.serveHTTP(); err != nil {
+			app.Logger.Errorf("failed to start http server: %v", err)
+			return err
+		}
+		return nil
+	})
+
+	g.Go(func() error {
+		if err := app.serveHTTPs(); err != nil {
+			app.Logger.Errorf("failed to start https server: %v", err)
+			return err
+		}
+		return nil
+	})
+
+	return g.Wait()
+}
+
+// serveHTTP ...
+func (app *Application) serveHTTP() error {
 	listener, err := net.Listen(app.Config.NetworkType, app.Address())
 	if err != nil {
 		return err
@@ -581,6 +634,35 @@ func (app *Application) serve() error {
 		Handler: app,
 	}
 
+	if app.Config.NetworkType == "unix" {
+		logger.Info("Server started at unix://%s", app.AddressForLog())
+	} else {
+		logger.Info("Server started at http://%s", app.AddressForLog())
+	}
+
+	return server.Serve(listener)
+}
+
+// serveHTTPs ...
+func (app *Application) serveHTTPs() error {
+	// if HTTPSPort is not set, ignore set https
+	if app.Config.HTTPSPort == 0 {
+		return nil
+	}
+
+	listener, err := net.Listen(app.Config.NetworkType, app.AddressHTTPs())
+	if err != nil {
+		return err
+	}
+	defer listener.Close()
+
+	server := &http.Server{
+		Addr:    app.AddressHTTPs(),
+		Handler: app,
+	}
+
+	var config *tls.Config
+
 	// TLS Ca Certificate
 	if app.Config.TLSCaCertFile != "" {
 		pool := x509.NewCertPool()
@@ -590,15 +672,15 @@ func (app *Application) serve() error {
 		}
 		pool.AppendCertsFromPEM(caCrt)
 
-		if server.TLSConfig == nil {
-			server.TLSConfig = &tls.Config{
-				ClientCAs:  pool,
-				ClientAuth: tls.RequireAndVerifyClientCert,
-			}
+		if config == nil {
+			config = &tls.Config{}
 		}
+
+		config.ClientCAs = pool
+		config.ClientAuth = tls.RequireAndVerifyClientCert
 	}
 
-	// TLS Certificate and Private Key
+	// @1 load tls from file: TLS Certificate and Private Key
 	if app.Config.TLSCertFile != "" && app.Config.TLSKeyFile != "" {
 		certPEMBlock, err := os.ReadFile(app.Config.TLSCertFile)
 		if err != nil {
@@ -633,50 +715,43 @@ func (app *Application) serve() error {
 		// return server.ServeTLS(listener, app.Config.TLSCertFile, app.Config.TLSKeyFile)
 	}
 
+	// @2 load tls from memory: TLS Certificate and Private Key
 	if app.Config.TLSCert != nil && app.Config.TLSKey != nil {
-		if app.Config.NetworkType == "unix" {
-			logger.Info("Server started at unixs://%s", app.AddressForLog())
-		} else {
-			logger.Info("Server started at https://%s", app.AddressForLog())
-		}
-
 		cert, err := tls.X509KeyPair(app.Config.TLSCert, app.Config.TLSKey)
 		if err != nil {
 			return err
 		}
 
-		config := &tls.Config{
-			Certificates: []tls.Certificate{cert},
+		if config == nil {
+			config = &tls.Config{}
 		}
-		listener = tls.NewListener(listener, config)
+
+		config.Certificates = []tls.Certificate{cert}
 	}
 
-	// load tls by sni
+	// @3 load tls by sni
 	// reference:
 	//	 - https://medium.com/@satrobit/how-to-build-https-servers-with-certificate-lazy-loading-in-go-bff5e9ef2f1f
 	//
 	if app.tlsCertLoader != nil {
-		config := &tls.Config{
-			GetCertificate: app.tlsCertLoader,
+		if config == nil {
+			config = &tls.Config{}
 		}
-		listener = tls.NewListener(listener, config)
+
+		config.GetCertificate = app.tlsCertLoader
+	}
+
+	if config == nil {
+		return errors.New(`failed to start https server, tls config is required; you can set tls cert and key by app.Config.TLSCertFile and app.Config.TLSKeyFile, or app.Config.TLSCert and app.Config.TLSKey, or app.SetTLSCertLoader method.`)
 	}
 
 	if app.Config.NetworkType == "unix" {
-		logger.Info("Server started at unix://%s", app.AddressForLog())
+		logger.Info("Server started at unix://%s", app.AddressHTTPsForLog())
 	} else {
-		logger.Info("Server started at http://%s", app.AddressForLog())
+		logger.Info("Server started at https://%s", app.AddressHTTPsForLog())
 	}
-	// if err := http.Serve(listener, app); err != nil {
-	// 	return err
-	// }
 
-	// // if only config tls ca, should reset nil
-	// if server.TLSConfig != nil {
-	// 	server.TLSConfig = nil
-	// }
-
-	return server.Serve(listener)
+	return server.Serve(tls.NewListener(listener, config))
 }
 
 // H is a shortcut for map[string]interface{}
