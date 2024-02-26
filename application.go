@@ -108,6 +108,9 @@ type Application struct {
 		//
 		cmd sync.Once
 	}
+
+	// tls cert loader
+	tlsCertLoader func(helloInfo *tls.ClientHelloInfo) (*tls.Certificate, error)
 }
 
 // ApplicationConfig defines the config of zoox.Application.
@@ -351,6 +354,11 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	ctx.handlers = middlewares
 	app.router.handle(ctx)
+}
+
+// SetTLSLoader set the tls cert loader
+func (app *Application) SetTLSLoader(loader func(helloInfo *tls.ClientHelloInfo) (*tls.Certificate, error)) {
+	app.tlsCertLoader = loader
 }
 
 // IsProd returns true if the app is in production mode.
@@ -608,6 +616,17 @@ func (app *Application) serve() error {
 		// }
 
 		return server.ServeTLS(listener, app.Config.TLSCertFile, app.Config.TLSKeyFile)
+	}
+
+	// load tls by sni
+	// reference:
+	//	 - https://medium.com/@satrobit/how-to-build-https-servers-with-certificate-lazy-loading-in-go-bff5e9ef2f1f
+	//
+	if app.tlsCertLoader != nil {
+		config := &tls.Config{
+			GetCertificate: app.tlsCertLoader,
+		}
+		return server.Serve(tls.NewListener(listener, config))
 	}
 
 	if app.Config.NetworkType == "unix" {
