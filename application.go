@@ -258,8 +258,8 @@ func (app *Application) applyDefaultConfigFromEnv() error {
 		app.Config.Port = cast.ToInt(os.Getenv(BuiltInEnvPort))
 	}
 
-	if app.Config.HTTPSPort == 0 && os.Getenv(BuiltInEnvHTTPsPort) != "" {
-		app.Config.HTTPSPort = cast.ToInt(os.Getenv(BuiltInEnvHTTPsPort))
+	if app.Config.HTTPSPort == 0 && os.Getenv(BuiltInEnvHTTPSPort) != "" {
+		app.Config.HTTPSPort = cast.ToInt(os.Getenv(BuiltInEnvHTTPSPort))
 	}
 
 	if app.Config.LogLevel == "" && os.Getenv(BuiltInEnvLogLevel) != "" {
@@ -345,6 +345,11 @@ func (app *Application) SetTemplates(dir string, fns ...template.FuncMap) {
 	}
 
 	app.templates = template.Must(template.New("").Funcs(app.templateFuncs).ParseGlob(dir + "/*"))
+}
+
+// SetBanner sets the banner
+func (app *Application) SetBanner(banner string) {
+	app.Config.Banner = banner
 }
 
 func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -496,8 +501,8 @@ func (app *Application) Address() string {
 	return fmt.Sprintf("%s:%d", app.Config.Host, app.Config.Port)
 }
 
-// Address ...
-func (app *Application) AddressHTTPs() string {
+// AddressHTTPS ...
+func (app *Application) AddressHTTPS() string {
 	if app.Config.NetworkType == "unix" {
 		return app.Config.UnixDomainSocket
 	}
@@ -518,8 +523,8 @@ func (app *Application) AddressForLog() string {
 	return fmt.Sprintf("%s:%d", app.Config.Host, app.Config.Port)
 }
 
-// AddressHTTPsForLog ...
-func (app *Application) AddressHTTPsForLog() string {
+// AddressHTTPSForLog ...
+func (app *Application) AddressHTTPSForLog() string {
 	if app.Config.NetworkType == "unix" {
 		return app.Config.UnixDomainSocket
 	}
@@ -607,7 +612,7 @@ func (app *Application) serve() error {
 	})
 
 	g.Go(func() error {
-		return app.serveHTTPs(ctx)
+		return app.serveHTTPS(ctx)
 	})
 
 	return g.Wait()
@@ -641,21 +646,21 @@ func (app *Application) serveHTTP(ctx context.Context) error {
 	return server.Serve(listener)
 }
 
-// serveHTTPs ...
-func (app *Application) serveHTTPs(ctx context.Context) error {
+// serveHTTPS ...
+func (app *Application) serveHTTPS(ctx context.Context) error {
 	// if HTTPSPort is not set, ignore set https
 	if app.Config.HTTPSPort == 0 {
 		return nil
 	}
 
-	listener, err := net.Listen(app.Config.NetworkType, app.AddressHTTPs())
+	listener, err := net.Listen(app.Config.NetworkType, app.AddressHTTPS())
 	if err != nil {
 		return err
 	}
 	defer listener.Close()
 
 	server := &http.Server{
-		Addr:    app.AddressHTTPs(),
+		Addr:    app.AddressHTTPS(),
 		Handler: app,
 	}
 
@@ -745,13 +750,13 @@ func (app *Application) serveHTTPs(ctx context.Context) error {
 	}
 
 	if config == nil {
-		return errors.New(`failed to start https server, tls config is required; you can set tls cert and key by app.Config.TLSCertFile and app.Config.TLSKeyFile, or app.Config.TLSCert and app.Config.TLSKey, or app.SetTLSCertLoader method.`)
+		return errors.New("failed to start https server, tls config is required; you can set tls cert and key by app.Config.TLSCertFile and app.Config.TLSKeyFile, or app.Config.TLSCert and app.Config.TLSKey, or app.SetTLSCertLoader method")
 	}
 
 	if app.Config.NetworkType == "unix" {
-		logger.Info("Server started at unix://%s", app.AddressHTTPsForLog())
+		logger.Info("Server started at unix://%s", app.AddressHTTPSForLog())
 	} else {
-		logger.Info("Server started at https://%s", app.AddressHTTPsForLog())
+		logger.Info("Server started at https://%s", app.AddressHTTPSForLog())
 	}
 
 	return server.Serve(tls.NewListener(listener, config))
