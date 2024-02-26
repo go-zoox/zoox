@@ -600,29 +600,21 @@ func (app *Application) showRuntimeInfo() {
 
 // serve ...
 func (app *Application) serve() error {
-	g := &errgroup.Group{}
+	g, ctx := errgroup.WithContext(context.Background())
 
 	g.Go(func() error {
-		if err := app.serveHTTP(); err != nil {
-			app.Logger.Errorf("failed to start http server: %v", err)
-			return err
-		}
-		return nil
+		return app.serveHTTP(ctx)
 	})
 
 	g.Go(func() error {
-		if err := app.serveHTTPs(); err != nil {
-			app.Logger.Errorf("failed to start https server: %v", err)
-			return err
-		}
-		return nil
+		return app.serveHTTPs(ctx)
 	})
 
 	return g.Wait()
 }
 
 // serveHTTP ...
-func (app *Application) serveHTTP() error {
+func (app *Application) serveHTTP(ctx context.Context) error {
 	listener, err := net.Listen(app.Config.NetworkType, app.Address())
 	if err != nil {
 		return err
@@ -634,17 +626,23 @@ func (app *Application) serveHTTP() error {
 		Handler: app,
 	}
 
+	go func() {
+		<-ctx.Done() // 当上下文被取消时，停止服务器
+		server.Close()
+	}()
+
 	if app.Config.NetworkType == "unix" {
 		logger.Info("Server started at unix://%s", app.AddressForLog())
 	} else {
 		logger.Info("Server started at http://%s", app.AddressForLog())
 	}
 
+	// 等待所有 goroutine 完成
 	return server.Serve(listener)
 }
 
 // serveHTTPs ...
-func (app *Application) serveHTTPs() error {
+func (app *Application) serveHTTPs(ctx context.Context) error {
 	// if HTTPSPort is not set, ignore set https
 	if app.Config.HTTPSPort == 0 {
 		return nil
@@ -660,6 +658,11 @@ func (app *Application) serveHTTPs() error {
 		Addr:    app.AddressHTTPs(),
 		Handler: app,
 	}
+
+	go func() {
+		<-ctx.Done() // 当上下文被取消时，停止服务器
+		server.Close()
+	}()
 
 	var config *tls.Config
 
