@@ -3,6 +3,7 @@ module github.com/go-zoox/zoox
 go 1.20
 
 require (
+	github.com/getsentry/sentry-go v0.27.0
 	github.com/go-errors/errors v1.5.1
 	github.com/go-zoox/cache v1.0.7
 	github.com/go-zoox/chalk v1.0.2
