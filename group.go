@@ -329,7 +329,9 @@ func (g *RouterGroup) Static(relativePath string, root string, options ...*Stati
 	if !strings.StartsWith(relativePath, "/") {
 		root = fs.JoinCurrentDir(relativePath)
 	}
+
 	absolutePath := path.Join(g.prefix, relativePath)
+	absolutePathLength := len(absolutePath)
 	handler := g.createStaticHandler(absolutePath, http.Dir(root))
 
 	g.Use(func(ctx *Context) {
@@ -342,6 +344,14 @@ func (g *RouterGroup) Static(relativePath string, root string, options ...*Stati
 			ctx.Next()
 			return
 		}
+
+		filepath := path.Join(root, ctx.Path[absolutePathLength:])
+		f, err := fs.Open(filepath)
+		if err != nil {
+			ctx.Next()
+			return
+		}
+		f.Close()
 
 		if opts != nil {
 			if opts.Suffix != "" {
