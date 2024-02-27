@@ -700,6 +700,10 @@ func (app *Application) serveHTTP(ctx context.Context) error {
 	defer listener.Close()
 
 	server := &http.Server{
+		ReadTimeout:  300 * time.Second,
+		WriteTimeout: 300 * time.Second,
+		IdleTimeout:  300 * time.Second,
+		//
 		Addr:    app.Address(),
 		Handler: app,
 	}
@@ -733,6 +737,10 @@ func (app *Application) serveHTTPS(ctx context.Context) error {
 	defer listener.Close()
 
 	server := &http.Server{
+		ReadTimeout:  300 * time.Second,
+		WriteTimeout: 300 * time.Second,
+		IdleTimeout:  300 * time.Second,
+		//
 		Addr:    app.AddressHTTPS(),
 		Handler: app,
 	}
