@@ -345,13 +345,12 @@ func (g *RouterGroup) Static(basePath string, rootDir string, options ...*Static
 			return
 		}
 
+		// @TODO fix fallback to next handler if file not found
 		filepath := path.Join(rootDir, ctx.Path[absolutePathLength:])
-		f, err := fs.Open(filepath)
-		if err != nil {
+		if !fs.IsExist(filepath) {
 			ctx.Next()
 			return
 		}
-		f.Close()
 
 		if opts != nil {
 			if opts.Suffix != "" {
