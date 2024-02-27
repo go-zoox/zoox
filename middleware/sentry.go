@@ -44,6 +44,7 @@ func Sentry(opts ...func(opt *SentryOption)) zoox.Middleware {
 
 	opt := &SentryOption{
 		Timeout: 2 * time.Second,
+		Repanic: true,
 	}
 	for _, o := range opts {
 		o(opt)
@@ -92,13 +93,19 @@ func InitSentry(opt InitSentryOption) {
 	}
 	IsSentryInitialized = true
 
+	if opt.Dsn == "" {
+		panic("sentry: DSN is required for initializing Sentry")
+	}
+
 	err := sentry.Init(opt)
 	if err != nil {
 		log.Fatalf("sentry.Init: %s", err)
 	}
+}
 
-	// @TODO
-	// defer sentry.Flush(time.Second)
+// FinishSentry ...
+func FinishSentry() {
+	sentry.Flush(time.Second)
 }
 
 // GetHubFromContext retrieves attached *sentry.Hub instance from echo.Context.

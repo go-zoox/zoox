@@ -52,4 +52,14 @@ var (
 	BuiltInEnvRedisUser = "REDIS_USER"
 	BuiltInEnvRedisPass = "REDIS_PASS"
 	BuiltInEnvRedisDB   = "REDIS_DB"
+
+	BuiltInEnvMonitorPrometheusEnabled = "MONITOR_PROMETHEUS_ENABLED"
+	BuiltInEnvMonitorPrometheusPath    = "MONITOR_PROMETHEUS_PATH"
+
+	BuiltInEnvMonitorSentryEnabled         = "MONITOR_SENTRY_ENABLED"
+	BuiltInEnvMonitorSentryDSN             = "MONITOR_SENTRY_DSN"
+	BuiltInEnvMonitorSentryDebug           = "MONITOR_SENTRY_DEBUG"
+	BuiltInEnvMonitorSentryRepanic         = "MONITOR_SENTRY_REPANIC"
+	BuiltInEnvMonitorSentryWaitForDelivery = "MONITOR_SENTRY_WAIT_FOR_DELIVERY"
+	BuiltInEnvMonitorSentryTimeout         = "MONITOR_SENTRY_TIMEOUT"
 )

@@ -14,6 +14,7 @@ import (
 	"strings"
 	"sync"
 	"text/template"
+	"time"
 
 	"golang.org/x/sync/errgroup"
 
@@ -114,6 +115,14 @@ type Application struct {
 
 	// tls cert loader
 	tlsCertLoader func(helloInfo *tls.ClientHelloInfo) (*tls.Certificate, error)
+
+	// @TODO
+	lifecycle struct {
+		// beforeReady
+		beforeReady func()
+		// beforeDestroy
+		beforeDestroy func()
+	}
 }
 
 // ApplicationConfig defines the config of zoox.Application.
@@ -148,9 +157,10 @@ type ApplicationConfig struct {
 	Cache cache.Config `config:"cache"`
 	//
 	Redis ApplicationConfigRedis `config:"redis"`
-
 	//
 	Banner string
+	//
+	Monitor ApplicationConfigMonitor `config:"monitor"`
 }
 
 // ApplicationConfigRedis defines the config of redis.
@@ -160,6 +170,24 @@ type ApplicationConfigRedis struct {
 	DB       int    `config:"db"`
 	Username string `config:"username"`
 	Password string `config:"password"`
+}
+
+// ApplicationConfigMonitor defines the config of monitor.
+type ApplicationConfigMonitor struct {
+	Prometheus struct {
+		Enabled bool   `config:"enabled"`
+		Path    string `config:"path"`
+	} `config:"prometheus"`
+
+	Sentry struct {
+		Enabled bool `config:"enabled"`
+		//
+		DSN   string `config:"dsn"`
+		Debug bool   `config:"debug"`
+		//
+		WaitForDelivery bool          `config:"wait_for_delivery"`
+		Timeout         time.Duration `config:"timeout"`
+	} `config:"sentry"`
 }
 
 // New is the constructor of zoox.Application.
@@ -294,6 +322,29 @@ func (app *Application) applyDefaultConfigFromEnv() error {
 		app.Config.Redis.DB = cast.ToInt(os.Getenv(BuiltInEnvRedisDB))
 	}
 
+	if !app.Config.Monitor.Prometheus.Enabled && os.Getenv(BuiltInEnvMonitorPrometheusEnabled) == "true" {
+		app.Config.Monitor.Prometheus.Enabled = true
+	}
+	if app.Config.Monitor.Prometheus.Path == "" && os.Getenv(BuiltInEnvMonitorPrometheusPath) != "" {
+		app.Config.Monitor.Prometheus.Path = os.Getenv(BuiltInEnvMonitorPrometheusPath)
+	}
+
+	if !app.Config.Monitor.Sentry.Enabled && os.Getenv(BuiltInEnvMonitorSentryEnabled) == "true" {
+		app.Config.Monitor.Sentry.Enabled = true
+	}
+	if app.Config.Monitor.Sentry.DSN == "" && os.Getenv(BuiltInEnvMonitorSentryDSN) != "" {
+		app.Config.Monitor.Sentry.DSN = os.Getenv(BuiltInEnvMonitorSentryDSN)
+	}
+	if app.Config.Monitor.Sentry.Debug && os.Getenv(BuiltInEnvMonitorSentryDebug) == "true" {
+		app.Config.Monitor.Sentry.Debug = true
+	}
+	if app.Config.Monitor.Sentry.WaitForDelivery && os.Getenv(BuiltInEnvMonitorSentryWaitForDelivery) == "true" {
+		app.Config.Monitor.Sentry.WaitForDelivery = true
+	}
+	if app.Config.Monitor.Sentry.Timeout == 0 && os.Getenv(BuiltInEnvMonitorSentryTimeout) != "" {
+		app.Config.Monitor.Sentry.Timeout = cast.ToDuration(os.Getenv(BuiltInEnvMonitorSentryTimeout))
+	}
+
 	return nil
 }
 
@@ -330,6 +381,17 @@ func (app *Application) Run(addr ...string) (err error) {
 	// show runtime info
 	app.showRuntimeInfo()
 
+	// before ready
+	if app.lifecycle.beforeReady != nil {
+		app.lifecycle.beforeReady()
+	}
+	// before destroy
+	defer func() {
+		if app.lifecycle.beforeDestroy != nil {
+			app.lifecycle.beforeDestroy()
+		}
+	}()
+
 	// serve
 	return app.serve()
 }
@@ -350,6 +412,16 @@ func (app *Application) SetTemplates(dir string, fns ...template.FuncMap) {
 // SetBanner sets the banner
 func (app *Application) SetBanner(banner string) {
 	app.Config.Banner = banner
+}
+
+// SetBeforeReady sets the before ready method
+func (app *Application) SetBeforeReady(fn func()) {
+	app.lifecycle.beforeReady = fn
+}
+
+// SetBeforeDestroy sets the before destroy method
+func (app *Application) SetBeforeDestroy(fn func()) {
+	app.lifecycle.beforeDestroy = fn
 }
 
 func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
