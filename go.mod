@@ -7,7 +7,7 @@ require (
 	github.com/go-zoox/cache v1.0.7
 	github.com/go-zoox/chalk v1.0.2
 	github.com/go-zoox/cli v1.3.8
-	github.com/go-zoox/command v1.3.3
+	github.com/go-zoox/command v1.4.7
 	github.com/go-zoox/concurrency v1.2.0
 	github.com/go-zoox/cookie v1.2.0
 	github.com/go-zoox/core-utils v1.3.6
