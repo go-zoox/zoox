@@ -320,19 +320,19 @@ type StaticOptions struct {
 }
 
 // Static defines the method to serve static files
-func (g *RouterGroup) Static(relativePath string, root string, options ...*StaticOptions) {
+func (g *RouterGroup) Static(basePath string, rootDir string, options ...*StaticOptions) {
 	var opts *StaticOptions
 	if len(options) > 0 {
 		opts = options[0]
 	}
 
-	if !strings.StartsWith(relativePath, "/") {
-		root = fs.JoinCurrentDir(relativePath)
+	if !strings.StartsWith(basePath, "/") {
+		rootDir = fs.JoinCurrentDir(basePath)
 	}
 
-	absolutePath := path.Join(g.prefix, relativePath)
+	absolutePath := path.Join(g.prefix, basePath)
 	absolutePathLength := len(absolutePath)
-	handler := g.createStaticHandler(absolutePath, http.Dir(root))
+	handler := g.createStaticHandler(absolutePath, http.Dir(rootDir))
 
 	g.Use(func(ctx *Context) {
 		if ctx.Method != http.MethodGet && ctx.Method != http.MethodHead {
@@ -345,7 +345,7 @@ func (g *RouterGroup) Static(relativePath string, root string, options ...*Stati
 			return
 		}
 
-		filepath := path.Join(root, ctx.Path[absolutePathLength:])
+		filepath := path.Join(rootDir, ctx.Path[absolutePathLength:])
 		f, err := fs.Open(filepath)
 		if err != nil {
 			ctx.Next()
