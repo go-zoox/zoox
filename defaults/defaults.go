@@ -59,7 +59,9 @@ func Defaults() *zoox.Application {
 			app.Logger.Infof("[middleware] register: prometheus (by config) ...")
 
 			app.Use(middleware.Prometheus(func(opt *middleware.PrometheusOption) {
-				opt.Path = app.Config.Monitor.Prometheus.Path
+				if app.Config.Monitor.Prometheus.Path != "" {
+					opt.Path = app.Config.Monitor.Prometheus.Path
+				}
 			}))
 		}
 
@@ -81,7 +83,10 @@ func Defaults() *zoox.Application {
 			app.Use(middleware.Sentry(func(opt *middleware.SentryOption) {
 				opt.Repanic = true
 				opt.WaitForDelivery = app.Config.Monitor.Sentry.WaitForDelivery
-				opt.Timeout = app.Config.Monitor.Sentry.Timeout
+
+				if app.Config.Monitor.Sentry.Timeout != 0 {
+					opt.Timeout = app.Config.Monitor.Sentry.Timeout
+				}
 			}))
 		}
 	})
