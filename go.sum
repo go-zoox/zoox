@@ -83,8 +83,8 @@ github.com/go-zoox/cookie v1.2.0/go.mod h1:+xEawxty0L+z+4EIvTF2AaHUkUM7oIecGZ9Xr
 github.com/go-zoox/core-utils v1.0.4/go.mod h1:EknM3KLL6/kagL95wZbWE7mRRcYCG/fHqiJ/EH0ihAs=
 github.com/go-zoox/core-utils v1.0.12/go.mod h1:EknM3KLL6/kagL95wZbWE7mRRcYCG/fHqiJ/EH0ihAs=
 github.com/go-zoox/core-utils v1.0.13/go.mod h1:EknM3KLL6/kagL95wZbWE7mRRcYCG/fHqiJ/EH0ihAs=
-github.com/go-zoox/core-utils v1.3.6 h1:p7d3BenyLr/SN4J3L+tr1zdSSChQt3CM9iCHgM0MdGc=
-github.com/go-zoox/core-utils v1.3.6/go.mod h1:raOOwr2l2sJQyjR0Dg33sg0ry4U1/L2eNTuLFRpUXWs=
+github.com/go-zoox/core-utils v1.3.9 h1:kjCKhHi/87/V3+jvJbdJptGswn0nZ74dSM08R/DHzd0=
+github.com/go-zoox/core-utils v1.3.9/go.mod h1:raOOwr2l2sJQyjR0Dg33sg0ry4U1/L2eNTuLFRpUXWs=
 github.com/go-zoox/counter v1.0.1/go.mod h1:PICilZTrnO4dFstDPlXpjc6sdWYBG7hm/XDmjAcHaX0=
 github.com/go-zoox/counter v1.2.1 h1:MPShpjJWQ/qt3pYQxuyBL/Ci6X4mtihTC3cwDr1VOI8=
 github.com/go-zoox/counter v1.2.1/go.mod h1:gOA/Bk2iWt9K4vm2Std2ciEgHwQqWSzvcyUI+jFVduY=
