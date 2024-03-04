@@ -19,7 +19,7 @@ type container struct {
 	model      goioc.Container
 }
 
-// IoC ...
+// New creates a ioc container
 func New() IoC {
 	return &container{
 		controller: goioc.New(),

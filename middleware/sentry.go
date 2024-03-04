@@ -32,11 +32,11 @@ type SentryOption struct {
 const sdkIdentifier = "sentry.go.zoox"
 const valuesKey = "sentry"
 
-var IsSentryInitialized = false
+var isSentryInitialized = false
 
 // Sentry ...
 func Sentry(opts ...func(opt *SentryOption)) zoox.Middleware {
-	if !IsSentryInitialized {
+	if !isSentryInitialized {
 		panic("sentry: Sentry has not been initialized yet, " +
 			"should be initialized on the top of application with " +
 			"`middleware.InitSentry(middleware.InitSentryOption{ Dsn: '' })`")
@@ -84,14 +84,15 @@ func Sentry(opts ...func(opt *SentryOption)) zoox.Middleware {
 	}
 }
 
+// InitSentryOption ...
 type InitSentryOption = sentry.ClientOptions
 
 // InitSentry ...
 func InitSentry(opt InitSentryOption) {
-	if IsSentryInitialized {
+	if isSentryInitialized {
 		panic("sentry: Sentry has been initialized already, should not be initialized more than once.")
 	}
-	IsSentryInitialized = true
+	isSentryInitialized = true
 
 	if opt.Dsn == "" {
 		panic("sentry: DSN is required for initializing Sentry")
