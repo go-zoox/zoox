@@ -40,14 +40,18 @@ func parsePath(path string) []string {
 }
 
 func (r *router) addRoute(method string, path string, handler ...HandlerFunc) {
-	logger.Info("[router] register: %8s %s", method, path)
-
 	parts := parsePath(path)
 
 	key := fmt.Sprintf("%s %s", method, path)
 	if ok := r.roots.Has(method); !ok {
 		r.roots.Set(method, &route.Node{})
 	}
+
+	if r.handlers.Has(key) {
+		panic(fmt.Sprintf("[router] failed to register, route(%8s %s) has been already registered before", method, path))
+	}
+
+	logger.Info("[router] register: %8s %s", method, path)
 
 	r.roots.Get(method).(*route.Node).Insert(path, parts, 0)
 	r.handlers.Set(key, handler)
