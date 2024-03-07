@@ -78,7 +78,15 @@ func (g *RouterGroup) WebSocket(path string, opts ...func(opt *WebSocketOption))
 			return
 		}
 
-		opt.Server.ServeHTTP(ctx.Writer, ctx.Request)
+		// @TODO rewrites handlers
+		//	=> ignore old handlers
+		//	=> only use websocket handlers
+		ctx.index = -1
+		ctx.handlers = append(opt.Middlewares, func(ctx *Context) {
+			opt.Server.ServeHTTP(ctx.Writer, ctx.Request)
+		})
+
+		ctx.Next()
 	})
 
 	return opt.Server, nil
