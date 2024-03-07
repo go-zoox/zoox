@@ -50,6 +50,12 @@ func (g *RouterGroup) WebSocket(path string, opts ...func(opt *WebSocketOption))
 			return
 		}
 
+		// ignore@2: path != path
+		if ctx.Path != path {
+			ctx.Next()
+			return
+		}
+
 		// ignore@2: connection != Upgrade
 		connection := ctx.Header().Get(headers.Connection)
 		if connection == "" {
