@@ -16,6 +16,7 @@ import (
 	"text/template"
 	"time"
 
+	"golang.org/x/crypto/acme/autocert"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/go-errors/errors"
@@ -91,6 +92,9 @@ type Application struct {
 	mq     mq.MQ
 
 	//
+	autocertManager *autocert.Manager
+
+	//
 	Config ApplicationConfig
 
 	// once
@@ -161,6 +165,14 @@ type ApplicationConfig struct {
 	Banner string
 	//
 	Monitor ApplicationConfigMonitor `config:"monitor"`
+
+	// ACME (Automatic Certificate Management Environment)
+	ACME struct {
+		Enabled  bool     `config:"enabled"`
+		Domains  []string `config:"domains"`
+		Email    string   `config:"email"`
+		CacheDir string   `config:"cache_dir,default=/etc/zoox/certs"`
+	} `config:"acme"`
 }
 
 // ApplicationConfigRedis defines the config of redis.
@@ -373,6 +385,39 @@ func (app *Application) Run(addr ...string) (err error) {
 	// apply default config
 	if err := app.applyDefaultConfig(); err != nil {
 		return fmt.Errorf("failed to apply default config: %v", err)
+	}
+
+	// apply acme
+	if app.Config.ACME.Enabled {
+		app.Logger.Info("[ACME] acme is enabled")
+		app.Config.Port = 80
+		app.Config.HTTPSPort = 443
+
+		app.Logger.Infof("[ACME] http port: %d, https port: %d ...", app.Config.Port, app.Config.HTTPSPort)
+		app.Logger.Infof("[ACME] domains: %v ...", app.Config.ACME.Domains)
+		app.Logger.Infof("[ACME] email: %s ...", app.Config.ACME.Email)
+		app.Logger.Infof("[ACME] cache dir: %s ...", app.Config.ACME.CacheDir)
+
+		app.autocertManager = &autocert.Manager{
+			Prompt:     autocert.AcceptTOS,
+			HostPolicy: autocert.HostWhitelist(app.Config.ACME.Domains...),
+			Email:      app.Config.ACME.Email,
+			Cache:      autocert.DirCache(app.Config.ACME.CacheDir),
+		}
+
+		app.tlsCertLoader = func(helloInfo *tls.ClientHelloInfo) (*tls.Certificate, error) {
+			return app.autocertManager.GetCertificate(helloInfo)
+		}
+
+		app.Use(func(ctx *Context) {
+			if strings.HasPrefix(ctx.Path, "/.well-known/acme-challenge/") {
+				ctx.Logger.Infof("[ACME] challenge: %s ...", ctx.Path)
+				app.autocertManager.HTTPHandler(nil).ServeHTTP(ctx.Writer, ctx.Request)
+				return
+			}
+
+			ctx.Next()
+		})
 	}
 
 	// show app info in debug mode
