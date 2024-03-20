@@ -698,12 +698,8 @@ func (ctx *Context) Files() map[string]*multipart.FileHeader {
 }
 
 // File gets the file by key.
-func (ctx *Context) File(key string) (multipart.File, *multipart.FileHeader) {
-	if file, header, err := ctx.Request.FormFile(key); err == nil {
-		return file, header
-	}
-
-	return nil, nil
+func (ctx *Context) File(key string) (multipart.File, *multipart.FileHeader, error) {
+	return ctx.Request.FormFile(key)
 }
 
 // Stream get the body stream.
