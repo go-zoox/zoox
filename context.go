@@ -597,6 +597,16 @@ func (ctx *Context) IP() string {
 	return ip
 }
 
+// IPs gets the ip from X-Forwarded-For or X-Real-IP or RemoteIP.
+// RemoteIP parses the IP from Request.RemoteAddr, normializes and returns the IP (without the port).
+func (ctx *Context) IPs() []string {
+	if xForwardedFor := ctx.Get(headers.XForwardedFor); xForwardedFor != "" {
+		return strings.Split(xForwardedFor, ",")
+	}
+
+	return []string{ctx.IP()}
+}
+
 // ClientIP is the client ip.
 func (ctx *Context) ClientIP() string {
 	return ctx.IP()
