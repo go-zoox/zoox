@@ -149,8 +149,8 @@ github.com/go-zoox/kv v1.4.3/go.mod h1:hRCBcPBHilKmeSEsn4o67LBaXurX0+m3Tq9Ec4aIR
 github.com/go-zoox/kv v1.5.9 h1:xEjIRJVcwIg2PhO0ZL+KWR5mCI/f5VshmcOjZPd4FRA=
 github.com/go-zoox/kv v1.5.9/go.mod h1:sD2FmWrme1gzWaLciBAPyK0BtW3BluM02UGskOqf2MA=
 github.com/go-zoox/logger v1.2.0/go.mod h1:mBImRV6zpbGtiIjDz/C9vWi80wWc2OTOl9N9P0SAJgk=
-github.com/go-zoox/logger v1.5.0 h1:7x0IADywop4jOQRHOjxKfPT6XljioHGM4IzKBogrDdg=
-github.com/go-zoox/logger v1.5.0/go.mod h1:o7ddvv/gMoMa0TomPhHoIz11ZWRbQ92pF6rwYbOY3iQ=
+github.com/go-zoox/logger v1.5.1 h1:mAACnHGxSD27bAw/xjkJp7PLlTGBkSBRQPFoEWXe+EM=
+github.com/go-zoox/logger v1.5.1/go.mod h1:o7ddvv/gMoMa0TomPhHoIz11ZWRbQ92pF6rwYbOY3iQ=
 github.com/go-zoox/mq v1.0.1 h1:JZSgWfp4JJDVKN8FgUkWWNDb3HOhV15dIdi+ecZENwQ=
 github.com/go-zoox/mq v1.0.1/go.mod h1:0Zhgww1wcFNC37NJZjtumai03MvBAZuQ4VhezcAiFJE=
 github.com/go-zoox/proxy v1.2.3/go.mod h1:T+gbngAtIgvambbYibAbzrjwdu8j5pduJdA2j6RYi94=
@@ -426,6 +426,7 @@ golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1/go.mod h1:I/5z698sn9Ka8T
 golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f/go.mod h1:K8+ghG5WaK9qNqU5K3HdILfMLy1f3aNYFI/wnl100a8=
 golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 h1:+cNy6SZtPcJQH3LJVLOSmiC7MMxXNOb3PU/VUEz+EhU=
 golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028/go.mod h1:NDW/Ps6MPRej6fsCIbMTohpP40sJ/P/vI1MoTEGwX90=
+google.golang.org/genproto v0.0.0-20231106174013-bbf56f31fb17 h1:wpZ8pe2x1Q3f2KyT5f8oP/fa9rHAKgFPr/HZdNuS+PQ=
 google.golang.org/genproto/googleapis/api v0.0.0-20240102182953-50ed04b92917 h1:rcS6EyEaoCO52hQDupoSfrxI3R6C2Tq741is7X8OvnM=
 google.golang.org/genproto/googleapis/rpc v0.0.0-20240102182953-50ed04b92917 h1:6G8oQ016D88m1xAKljMlBOOGWDZkes4kMhgGFlf8WcQ=
 google.golang.org/grpc v1.61.1 h1:kLAiWrZs7YeDM6MumDe7m3y4aM6wacLzM1Y/wiLP9XY=
