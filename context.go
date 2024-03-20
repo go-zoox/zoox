@@ -401,28 +401,22 @@ func (ctx *Context) Data(status int, contentType string, data []byte) {
 }
 
 // HTML renders the given template with the given data and writes the result
-func (ctx *Context) HTML(status int, html string) {
-	ctx.SetHeader(headers.ContentType, "text/html")
-	ctx.String(status, html)
-}
-
-// Template renders the given template with the given data and writes the result
-func (ctx *Context) Template(status int, name string, data interface{}) {
-	if ctx.App.templates == nil {
-		ctx.Error(http.StatusInternalServerError, "templates is not initialized, please use app.SetTemplates() to initialize")
-		return
-	}
-
-	ctx.Status(status)
-	ctx.SetHeader(headers.ContentType, "text/html")
-	if err := ctx.App.templates.ExecuteTemplate(ctx.Writer, name, data); err != nil {
-		ctx.Fail(err, http.StatusInternalServerError, err.Error())
-	}
+func (ctx *Context) HTML(status int, html string, data ...any) {
+	ctx.Template(status, func(tc *TemplateConfig) {
+		tc.ContentType = "text/html"
+		tc.Content = html
+		if len(data) > 0 {
+			tc.Data = data[0]
+		}
+	})
 }
 
 // Render renders a template with data and writes the result to the response.
 func (ctx *Context) Render(status int, name string, data interface{}) {
-	ctx.Template(status, name, data)
+	ctx.Template(status, func(tc *TemplateConfig) {
+		tc.Name = name
+		tc.Data = data
+	})
 }
 
 // RenderHTML renders a template with data and writes the result to the response.
