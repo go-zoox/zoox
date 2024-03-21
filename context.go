@@ -54,9 +54,14 @@ import (
 
 // Context is the request context
 type Context struct {
-	// origin objects
-	Writer  ResponseWriter
+	// Writer is the response writer.
+	Writer ResponseWriter
+
+	// Request is the original request object.
 	Request *http.Request
+	// Request is the alias of Writer.
+	Response ResponseWriter
+
 	// request
 	Method string
 	Path   string
@@ -150,15 +155,21 @@ func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Con
 	// 	path += "/"
 	// }
 
+	writer := newResponseWriter(w)
 	ctx := &Context{
-		App:     app,
-		Writer:  newResponseWriter(w),
-		Request: req,
-		Method:  req.Method,
-		Path:    path,
+		App: app,
+		//
+		Writer: writer,
+		//
+		Request:  req,
+		Response: writer,
+		//
+		Method: req.Method,
+		Path:   path,
 		//
 		index: -1,
 	}
+	//
 
 	ctx.requestID = ctx.Header().Get(utils.RequestIDHeader)
 	if ctx.requestID == "" {
@@ -190,15 +201,6 @@ func (ctx *Context) Next() {
 	}
 
 	ctx.handlers[ctx.index](ctx)
-}
-
-// Query returns the query string parameter with the given name.
-func (ctx *Context) Query() query.Query {
-	ctx.once.query.Do(func() {
-		ctx.query = query.New(ctx.Request)
-	})
-
-	return ctx.query
 }
 
 // Param returns the named URL parameter value if it exists.
