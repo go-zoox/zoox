@@ -160,7 +160,7 @@ func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Con
 		index: -1,
 	}
 
-	ctx.requestID = ctx.Get(utils.RequestIDHeader)
+	ctx.requestID = ctx.Header().Get(utils.RequestIDHeader)
 	if ctx.requestID == "" {
 		ctx.requestID = utils.GenerateRequestID()
 	}
@@ -275,7 +275,7 @@ func (ctx *Context) BasicAuth() (username string, password string, ok bool) {
 
 // Authorization returns the authorization header for auth.
 func (ctx *Context) Authorization() string {
-	return ctx.Get(headers.Authorization)
+	return ctx.Header().Get(headers.Authorization)
 }
 
 // BearerToken returns the token for bearer authentication.
@@ -290,72 +290,72 @@ func (ctx *Context) BearerToken() (token string, ok bool) {
 
 // Accept returns the request accept header.
 func (ctx *Context) Accept() string {
-	return ctx.Get(headers.Accept)
+	return ctx.Header().Get(headers.Accept)
 }
 
 // AcceptLanguage returns the request accept header.
 func (ctx *Context) AcceptLanguage() string {
-	return ctx.Get(headers.AcceptLanguage)
+	return ctx.Header().Get(headers.AcceptLanguage)
 }
 
 // AcceptEncoding returns the request accept header.
 func (ctx *Context) AcceptEncoding() string {
-	return ctx.Get(headers.AcceptEncoding)
+	return ctx.Header().Get(headers.AcceptEncoding)
 }
 
 // Connection return the request connection header.
 func (ctx *Context) Connection() string {
-	return ctx.Get(headers.Connection)
+	return ctx.Header().Get(headers.Connection)
 }
 
 // UserAgent return the request user-agent header.
 func (ctx *Context) UserAgent() string {
-	return ctx.Get(headers.UserAgent)
+	return ctx.Header().Get(headers.UserAgent)
 }
 
 // ContentType return the request content-type header.
 func (ctx *Context) ContentType() string {
-	return ctx.Get(headers.ContentType)
+	return ctx.Header().Get(headers.ContentType)
 }
 
 // XForwardedFor return the request x-forwarded-for header.
 func (ctx *Context) XForwardedFor() string {
-	return ctx.Get(headers.XForwardedFor)
+	return ctx.Header().Get(headers.XForwardedFor)
 }
 
 // XForwardedProto return the request x-forwarded-proto header.
 func (ctx *Context) XForwardedProto() string {
-	return ctx.Get(headers.XForwardedProto)
+	return ctx.Header().Get(headers.XForwardedProto)
 }
 
 // XForwardedHost return the request x-forwarded-host header.
 func (ctx *Context) XForwardedHost() string {
-	return ctx.Get(headers.XForwardedHost)
+	return ctx.Header().Get(headers.XForwardedHost)
 }
 
 // XForwardedPort return the request x-forwarded-port header.
 func (ctx *Context) XForwardedPort() string {
-	return ctx.Get(headers.XForwardedPort)
+	return ctx.Header().Get(headers.XForwardedPort)
 }
 
 // XRealIP return the request x-real-ip header.
 func (ctx *Context) XRealIP() string {
-	return ctx.Get(headers.XRealIP)
+	return ctx.Header().Get(headers.XRealIP)
 }
 
 // Upgrade return the request upgrade header.
 func (ctx *Context) Upgrade() string {
-	return ctx.Get(headers.Upgrade)
+	return ctx.Header().Get(headers.Upgrade)
 }
 
 // Origin returns the origin of the request.
 func (ctx *Context) Origin() string {
-	return ctx.Get(headers.Origin)
+	return ctx.Header().Get(headers.Origin)
 }
 
 // Referrer returns the referrer of the request.
 func (ctx *Context) Referrer() string {
-	return ctx.Get(headers.Referrer)
+	return ctx.Header().Get(headers.Referrer)
 }
 
 // IsConnectionUpgrade checks if the connection upgrade.
@@ -578,14 +578,14 @@ func (ctx *Context) URL() string {
 // IP gets the ip from X-Forwarded-For or X-Real-IP or RemoteIP.
 // RemoteIP parses the IP from Request.RemoteAddr, normializes and returns the IP (without the port).
 func (ctx *Context) IP() string {
-	if xForwardedFor := ctx.Get(headers.XForwardedFor); xForwardedFor != "" {
+	if xForwardedFor := ctx.Header().Get(headers.XForwardedFor); xForwardedFor != "" {
 		parts := strings.Split(xForwardedFor, ",")
 		if len(parts) > 0 && parts[0] != "" {
 			return parts[0]
 		}
 	}
 
-	if xRealIP := ctx.Get(headers.XRealIP); xRealIP != "" {
+	if xRealIP := ctx.Header().Get(headers.XRealIP); xRealIP != "" {
 		return xRealIP
 	}
 
@@ -600,7 +600,7 @@ func (ctx *Context) IP() string {
 // IPs gets the ip from X-Forwarded-For or X-Real-IP or RemoteIP.
 // RemoteIP parses the IP from Request.RemoteAddr, normializes and returns the IP (without the port).
 func (ctx *Context) IPs() []string {
-	if xForwardedFor := ctx.Get(headers.XForwardedFor); xForwardedFor != "" {
+	if xForwardedFor := ctx.Header().Get(headers.XForwardedFor); xForwardedFor != "" {
 		return strings.Split(xForwardedFor, ",")
 	}
 
@@ -725,7 +725,7 @@ func (ctx *Context) GetRawData() ([]byte, error) {
 
 // BindJSON binds the request body into the given struct.
 func (ctx *Context) BindJSON(obj interface{}) (err error) {
-	if !strings.Contains(ctx.Get("Content-Type"), "application/json") {
+	if !strings.Contains(ctx.Header().Get("Content-Type"), "application/json") {
 		return errors.New("[BindJSON] content-type is not json")
 	}
 
@@ -862,7 +862,7 @@ func (ctx *Context) SaveFile(key, path string) error {
 
 // AcceptJSON returns true if the request accepts json.
 func (ctx *Context) AcceptJSON() bool {
-	accept := ctx.Get(headers.Accept)
+	accept := ctx.Header().Get(headers.Accept)
 	// for curl
 	if accept == "*/*" {
 		return true
@@ -873,7 +873,7 @@ func (ctx *Context) AcceptJSON() bool {
 
 // AcceptHTML returns true if the request accepts html.
 func (ctx *Context) AcceptHTML() bool {
-	return strings.Contains(ctx.Get(headers.Accept), "text/html")
+	return strings.Contains(ctx.Header().Get(headers.Accept), "text/html")
 }
 
 // Cache returns the cache of the application.

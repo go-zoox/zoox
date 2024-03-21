@@ -8,7 +8,7 @@ import (
 // RequestID is a middleware that adds a request ID to the context.
 func RequestID() zoox.Middleware {
 	return func(ctx *zoox.Context) {
-		if ctx.Get(utils.RequestIDHeader) == "" {
+		if ctx.Header().Get(utils.RequestIDHeader) == "" {
 			requestID := ctx.RequestID()
 
 			// update request to next
