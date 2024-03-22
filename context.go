@@ -203,6 +203,15 @@ func (ctx *Context) Next() {
 	ctx.handlers[ctx.index](ctx)
 }
 
+// Query returns the query string parameter with the given name.
+func (ctx *Context) Query() query.Query {
+	ctx.once.query.Do(func() {
+		ctx.query = query.New(ctx.Request)
+	})
+
+	return ctx.query
+}
+
 // Param returns the named URL parameter value if it exists.
 func (ctx *Context) Param() param.Param {
 	return ctx.param
