@@ -11,7 +11,7 @@ require (
 	github.com/go-zoox/command v1.5.3
 	github.com/go-zoox/concurrency v1.2.0
 	github.com/go-zoox/cookie v1.2.0
-	github.com/go-zoox/core-utils v1.3.9
+	github.com/go-zoox/core-utils v1.4.1
 	github.com/go-zoox/counter v1.2.1
 	github.com/go-zoox/cron v1.2.1
 	github.com/go-zoox/datetime v1.3.0
@@ -35,7 +35,7 @@ require (
 	github.com/go-zoox/session v1.2.0
 	github.com/go-zoox/tag v1.2.6
 	github.com/go-zoox/watch v1.2.4
-	github.com/go-zoox/websocket v1.0.5
+	github.com/go-zoox/websocket v1.0.6
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/sync v0.6.0

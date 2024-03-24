@@ -11,14 +11,14 @@ import (
 )
 
 type router struct {
-	roots    *safe.Map
-	handlers *safe.Map
+	roots    *safe.Map[string, any]
+	handlers *safe.Map[string, any]
 }
 
 func newRouter() *router {
 	return &router{
-		roots:    safe.NewMap(),
-		handlers: safe.NewMap(),
+		roots:    safe.NewMap[string, any](),
+		handlers: safe.NewMap[string, any](),
 	}
 }
 

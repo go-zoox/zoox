@@ -624,8 +624,8 @@ func (ctx *Context) ClientIP() string {
 }
 
 // Headers gets all headers.
-func (ctx *Context) Headers() *safe.Map {
-	headers := safe.NewMap()
+func (ctx *Context) Headers() *safe.Map[string, any] {
+	headers := safe.NewMap[string, any]()
 
 	for key, values := range ctx.Request.Header {
 		headers.Set(key, values[0])
@@ -635,8 +635,8 @@ func (ctx *Context) Headers() *safe.Map {
 }
 
 // Queries gets all queries.
-func (ctx *Context) Queries() *safe.Map {
-	queries := safe.NewMap()
+func (ctx *Context) Queries() *safe.Map[string, any] {
+	queries := safe.NewMap[string, any]()
 
 	for key, values := range ctx.Request.URL.Query() {
 		queries.Set(key, values[0])
@@ -646,8 +646,8 @@ func (ctx *Context) Queries() *safe.Map {
 }
 
 // Forms gets all forms.
-func (ctx *Context) Forms() *safe.Map {
-	forms := safe.NewMap()
+func (ctx *Context) Forms() *safe.Map[string, any] {
+	forms := safe.NewMap[string, any]()
 
 	if err := ctx.Request.ParseForm(); err != nil {
 		return forms
@@ -661,8 +661,8 @@ func (ctx *Context) Forms() *safe.Map {
 }
 
 // Params gets all params.
-func (ctx *Context) Params() *safe.Map {
-	m := safe.NewMap()
+func (ctx *Context) Params() *safe.Map[string, any] {
+	m := safe.NewMap[string, any]()
 	if ctx.param == nil {
 		return m
 	}
