@@ -396,6 +396,13 @@ func (app *Application) Run(addr ...string) (err error) {
 	return app.serve()
 }
 
+// Listen defines the method to start the server
+//
+//	just like Run, but the port is required
+func (app *Application) Listen(port int) error {
+	return app.Run(fmt.Sprintf(":%d", port))
+}
+
 func (app *Application) createContext(w http.ResponseWriter, req *http.Request) *Context {
 	return newContext(app, w, req)
 }
