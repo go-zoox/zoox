@@ -1,6 +1,6 @@
 module github.com/go-zoox/zoox
 
-go 1.22
+go 1.22.1
 
 require (
 	github.com/getsentry/sentry-go v0.27.0

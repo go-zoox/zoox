@@ -18,7 +18,7 @@ jobs:
       - name: Set up Go
         uses: zmicro-design/action-setup-go@v1
         with:
-          go-version: v1.22
+          go-version: v1.22.1
 
       - name: install deps
         run: |
