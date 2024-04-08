@@ -1,6 +1,6 @@
 module github.com/go-zoox/zoox
 
-go 1.20
+go 1.22
 
 require (
 	github.com/getsentry/sentry-go v0.27.0
@@ -8,13 +8,13 @@ require (
 	github.com/go-zoox/cache v1.0.7
 	github.com/go-zoox/chalk v1.0.2
 	github.com/go-zoox/cli v1.3.8
-	github.com/go-zoox/command v1.5.3
+	github.com/go-zoox/command v1.5.4
 	github.com/go-zoox/concurrency v1.2.0
 	github.com/go-zoox/cookie v1.2.0
-	github.com/go-zoox/core-utils v1.4.1
+	github.com/go-zoox/core-utils v1.4.5
 	github.com/go-zoox/counter v1.2.1
 	github.com/go-zoox/cron v1.2.1
-	github.com/go-zoox/datetime v1.3.0
+	github.com/go-zoox/datetime v1.3.1
 	github.com/go-zoox/debug v1.0.5
 	github.com/go-zoox/fetch v1.8.1
 	github.com/go-zoox/fs v1.3.14
@@ -24,7 +24,7 @@ require (
 	github.com/go-zoox/ioc v1.0.1
 	github.com/go-zoox/jobqueue v1.0.1
 	github.com/go-zoox/jsonrpc v1.2.2
-	github.com/go-zoox/jwt v1.3.0
+	github.com/go-zoox/jwt v1.3.3
 	github.com/go-zoox/kv v1.5.9
 	github.com/go-zoox/logger v1.5.1
 	github.com/go-zoox/mq v1.0.1
@@ -37,8 +37,8 @@ require (
 	github.com/go-zoox/watch v1.2.4
 	github.com/go-zoox/websocket v1.0.6
 	github.com/prometheus/client_golang v1.18.0
-	github.com/stretchr/testify v1.8.4
-	golang.org/x/sync v0.6.0
+	github.com/stretchr/testify v1.9.0
+	golang.org/x/sync v0.7.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -47,12 +47,12 @@ require (
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
-	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/creack/pty v1.1.21 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/distribution/reference v0.5.0 // indirect
+	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/cli v26.0.0+incompatible // indirect
 	github.com/docker/docker v26.0.0+incompatible // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
@@ -105,18 +105,18 @@ require (
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/urfave/cli/v2 v2.25.7 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0 // indirect
-	go.opentelemetry.io/otel v1.24.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.50.0 // indirect
+	go.opentelemetry.io/otel v1.25.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.24.0 // indirect
-	go.opentelemetry.io/otel/metric v1.24.0 // indirect
-	go.opentelemetry.io/otel/trace v1.24.0 // indirect
+	go.opentelemetry.io/otel/metric v1.25.0 // indirect
+	go.opentelemetry.io/otel/trace v1.25.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.1.0 // indirect
-	golang.org/x/crypto v0.21.0 // indirect
-	golang.org/x/mod v0.16.0 // indirect
-	golang.org/x/net v0.22.0 // indirect
-	golang.org/x/sys v0.18.0 // indirect
+	golang.org/x/crypto v0.22.0 // indirect
+	golang.org/x/mod v0.17.0 // indirect
+	golang.org/x/net v0.24.0 // indirect
+	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	golang.org/x/tools v0.19.0 // indirect
+	golang.org/x/tools v0.20.0 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	google.golang.org/grpc v1.61.1 // indirect
 	google.golang.org/protobuf v1.32.0 // indirect
