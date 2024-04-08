@@ -24,7 +24,7 @@ require (
 	github.com/go-zoox/ioc v1.0.1
 	github.com/go-zoox/jobqueue v1.0.1
 	github.com/go-zoox/jsonrpc v1.2.2
-	github.com/go-zoox/jwt v1.3.3
+	github.com/go-zoox/jwt v1.3.5
 	github.com/go-zoox/kv v1.5.9
 	github.com/go-zoox/logger v1.5.1
 	github.com/go-zoox/mq v1.0.1

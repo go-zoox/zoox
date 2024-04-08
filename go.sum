@@ -149,6 +149,8 @@ github.com/go-zoox/jsonrpc v1.2.2/go.mod h1:HdxJW/T0hkVHlfm+ULRnNEqvTtvZ7o4qxdQG
 github.com/go-zoox/jwt v1.0.0/go.mod h1:a6ANQHmSs+b9GJv5aad2cQLl8opFmP3hMOxZtgXRmis=
 github.com/go-zoox/jwt v1.3.3 h1:DBdPWtB9GYW4KMlaKP+FXo73sD4cpeWzLFmJFWgaVF4=
 github.com/go-zoox/jwt v1.3.3/go.mod h1:Cfc+t0XhNCgDjXLR5sK6ao7qz1GSIq896gZ1usNb7t8=
+github.com/go-zoox/jwt v1.3.5 h1:uM9r6/xl3Aow6ex+2HvZm836m9x+Cz8bHi09TNvswcY=
+github.com/go-zoox/jwt v1.3.5/go.mod h1:Cfc+t0XhNCgDjXLR5sK6ao7qz1GSIq896gZ1usNb7t8=
 github.com/go-zoox/kv v1.4.1/go.mod h1:dc3whoIvGrYmQA2wi6g6ZE0oOtRg+loxaJEj6bLKlJA=
 github.com/go-zoox/kv v1.4.3/go.mod h1:hRCBcPBHilKmeSEsn4o67LBaXurX0+m3Tq9Ec4aIRWk=
 github.com/go-zoox/kv v1.5.9 h1:xEjIRJVcwIg2PhO0ZL+KWR5mCI/f5VshmcOjZPd4FRA=
