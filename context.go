@@ -21,7 +21,6 @@ import (
 	"github.com/go-zoox/fs"
 	"github.com/go-zoox/i18n"
 	"github.com/go-zoox/proxy"
-	"github.com/go-zoox/tag/datasource"
 	"github.com/go-zoox/zoox/components/application/cmd"
 	"github.com/go-zoox/zoox/components/application/cron"
 	"github.com/go-zoox/zoox/components/application/debug"
@@ -49,6 +48,7 @@ import (
 	"github.com/go-zoox/random"
 	"github.com/go-zoox/session"
 	"github.com/go-zoox/tag"
+	"github.com/go-zoox/tag/datasource"
 	"gopkg.in/yaml.v3"
 )
 
@@ -795,7 +795,7 @@ func (ctx *Context) BindForm(obj interface{}) error {
 		}
 	}
 
-	return tag.New("form", forms).Decode(obj)
+	return tag.New("form", datasource.GetterToDataSource(forms)).Decode(obj)
 }
 
 // BindParams binds the params into the given struct.
@@ -808,7 +808,7 @@ func (ctx *Context) BindParams(obj interface{}) error {
 		}
 	}
 
-	return tag.New("param", params).Decode(obj)
+	return tag.New("param", datasource.GetterToDataSource(params)).Decode(obj)
 }
 
 // BindHeader binds the header into the given struct.
@@ -821,7 +821,7 @@ func (ctx *Context) BindHeader(obj interface{}) error {
 		}
 	}
 
-	return tag.New("header", headers).Decode(obj)
+	return tag.New("header", datasource.GetterToDataSource(headers)).Decode(obj)
 }
 
 // BindQuery binds the query into the given struct.
@@ -834,7 +834,7 @@ func (ctx *Context) BindQuery(obj interface{}) error {
 		}
 	}
 
-	return tag.New("query", queries).Decode(obj)
+	return tag.New("query", datasource.GetterToDataSource(queries)).Decode(obj)
 }
 
 // BindBody binds the body into the given struct.
