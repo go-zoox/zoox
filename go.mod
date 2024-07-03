@@ -8,16 +8,16 @@ require (
 	github.com/go-zoox/cache v1.0.7
 	github.com/go-zoox/chalk v1.0.2
 	github.com/go-zoox/cli v1.4.0
-	github.com/go-zoox/command v1.6.0
+	github.com/go-zoox/command v1.6.2
 	github.com/go-zoox/concurrency v1.2.0
 	github.com/go-zoox/cookie v1.2.0
-	github.com/go-zoox/core-utils v1.4.9
+	github.com/go-zoox/core-utils v1.4.10
 	github.com/go-zoox/counter v1.2.1
 	github.com/go-zoox/cron v1.2.2
 	github.com/go-zoox/datetime v1.3.1
 	github.com/go-zoox/debug v1.0.5
 	github.com/go-zoox/fetch v1.8.2
-	github.com/go-zoox/fs v1.3.14
+	github.com/go-zoox/fs v1.3.15
 	github.com/go-zoox/gzip v1.0.0
 	github.com/go-zoox/headers v1.0.8
 	github.com/go-zoox/i18n v1.0.3
@@ -35,7 +35,7 @@ require (
 	github.com/go-zoox/session v1.2.0
 	github.com/go-zoox/tag v1.3.3
 	github.com/go-zoox/watch v1.2.4
-	github.com/go-zoox/websocket v1.2.2
+	github.com/go-zoox/websocket v1.3.2
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/sync v0.7.0
@@ -53,13 +53,14 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/distribution/reference v0.6.0 // indirect
-	github.com/docker/cli v26.1.4+incompatible // indirect
-	github.com/docker/docker v26.1.4+incompatible // indirect
+	github.com/docker/cli v27.0.3+incompatible // indirect
+	github.com/docker/docker v27.0.3+incompatible // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/fatih/color v1.17.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.4 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-redis/redis/v8 v8.11.5 // indirect
@@ -77,7 +78,7 @@ require (
 	github.com/goccy/go-yaml v1.11.3 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/gorilla/websocket v1.5.2 // indirect
+	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
@@ -103,13 +104,13 @@ require (
 	github.com/tidwall/gjson v1.17.1 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
-	github.com/urfave/cli/v2 v2.27.1 // indirect
-	github.com/xrash/smetrics v0.0.0-20240312152122-5f08fbb34913 // indirect
+	github.com/urfave/cli/v2 v2.27.2 // indirect
+	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.52.0 // indirect
-	go.opentelemetry.io/otel v1.27.0 // indirect
+	go.opentelemetry.io/otel v1.28.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.24.0 // indirect
-	go.opentelemetry.io/otel/metric v1.27.0 // indirect
-	go.opentelemetry.io/otel/trace v1.27.0 // indirect
+	go.opentelemetry.io/otel/metric v1.28.0 // indirect
+	go.opentelemetry.io/otel/trace v1.28.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.1.0 // indirect
 	golang.org/x/crypto v0.24.0 // indirect
 	golang.org/x/net v0.26.0 // indirect
