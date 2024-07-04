@@ -35,7 +35,7 @@ require (
 	github.com/go-zoox/session v1.2.0
 	github.com/go-zoox/tag v1.3.3
 	github.com/go-zoox/watch v1.2.4
-	github.com/go-zoox/websocket v1.3.2
+	github.com/go-zoox/websocket v1.3.3
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/sync v0.7.0
@@ -71,9 +71,9 @@ require (
 	github.com/go-zoox/dotenv v1.3.0 // indirect
 	github.com/go-zoox/encoding v1.2.1 // indirect
 	github.com/go-zoox/errors v1.0.2 // indirect
-	github.com/go-zoox/eventemitter v1.4.0 // indirect
+	github.com/go-zoox/eventemitter v1.4.1 // indirect
 	github.com/go-zoox/ini v1.0.4 // indirect
-	github.com/go-zoox/safe v1.0.1 // indirect
+	github.com/go-zoox/safe v1.2.0 // indirect
 	github.com/go-zoox/uuid v0.0.1 // indirect
 	github.com/goccy/go-yaml v1.11.3 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
