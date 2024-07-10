@@ -16,7 +16,10 @@ import (
 func Recovery() zoox.Middleware {
 	return func(ctx *zoox.Context) {
 		defer func() {
-			if err := recover(); err != nil {
+			// fix: net/http: abort Handler
+			// issue: https://github.com/golang/go/issues/28239
+			//	code: v1.22.2/src/net/http/server.go#1895
+			if err := recover(); err != nil && err != http.ErrAbortHandler {
 				// stackoverflow: https://stackoverflow.com/questions/52103182/how-to-get-the-stacktrace-of-a-panic-and-store-as-a-variable
 				if ctx.Debug().IsDebugMode() {
 					fmt.Println("stacktrace from panic: \n" + string(debug.Stack()))
