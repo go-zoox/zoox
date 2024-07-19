@@ -11,6 +11,7 @@ import (
 // Runtime ...
 type Runtime interface {
 	CurrentTime() *datetime.DateTime
+	RunningAt() *datetime.DateTime
 	OS() string
 	Arch() string
 	CPUCores() int
@@ -33,22 +34,30 @@ type Info struct {
 	MemoryTotal uint64  `json:"memory_total"`
 	DiskUsed    float64 `json:"disk_used"`
 	DiskTotal   float64 `json:"disk_total"`
-	Timestamp   string  `json:"current_time"`
+	CurrentTime string  `json:"current_time"`
+	RunningAt   string  `json:"running_at"`
 }
 
 type runtime struct {
 	logger *logger.Logger
+
+	runningAt *datetime.DateTime
 }
 
 // New ...
 func New(logger *logger.Logger) Runtime {
 	return &runtime{
-		logger: logger,
+		logger:    logger,
+		runningAt: datetime.Now(),
 	}
 }
 
 func (r *runtime) CurrentTime() *datetime.DateTime {
 	return datetime.Now()
+}
+
+func (r *runtime) RunningAt() *datetime.DateTime {
+	return r.runningAt
 }
 
 func (r *runtime) OS() string {
@@ -105,7 +114,8 @@ func (r *runtime) Info() *Info {
 		MemoryTotal: memTotal,
 		DiskUsed:    diskTotal - diskFree,
 		DiskTotal:   diskTotal,
-		Timestamp:   r.CurrentTime().Format("YYYY-MM-DD HH:mm:ss"),
+		CurrentTime: r.CurrentTime().Format("YYYY-MM-DD HH:mm:ss"),
+		RunningAt:   r.runningAt.Format("YYYY-MM-DD HH:mm:ss"),
 	}
 }
 
