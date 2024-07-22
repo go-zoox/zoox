@@ -35,7 +35,7 @@ require (
 	github.com/go-zoox/session v1.2.0
 	github.com/go-zoox/tag v1.3.3
 	github.com/go-zoox/watch v1.2.4
-	github.com/go-zoox/websocket v1.3.3
+	github.com/go-zoox/websocket v1.3.4
 	github.com/prometheus/client_golang v1.18.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/sync v0.7.0
