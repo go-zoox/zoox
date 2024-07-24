@@ -46,7 +46,7 @@ import (
 type HandlerFunc func(ctx *Context)
 
 // GroupFunc defines the group handler used by zoox
-type GroupFunc func(group *RouterGroup)
+type GroupFunc func(g *RouterGroup)
 
 // Middleware defines the signature of the middleware function.
 type Middleware = HandlerFunc
