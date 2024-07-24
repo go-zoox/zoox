@@ -27,7 +27,6 @@ import (
 	jsonrpcServer "github.com/go-zoox/jsonrpc/server"
 	"github.com/go-zoox/kv"
 	"github.com/go-zoox/logger"
-	"github.com/go-zoox/session"
 	"github.com/go-zoox/websocket"
 	"github.com/go-zoox/zoox/components/application/cmd"
 	"github.com/go-zoox/zoox/components/application/cron"
@@ -35,6 +34,7 @@ import (
 	"github.com/go-zoox/zoox/components/application/env"
 	"github.com/go-zoox/zoox/components/application/jobqueue"
 	"github.com/go-zoox/zoox/components/application/runtime"
+	"github.com/go-zoox/zoox/config"
 
 	"github.com/go-zoox/mq"
 	"github.com/go-zoox/pubsub"
@@ -91,7 +91,7 @@ type Application struct {
 	mq     mq.MQ
 
 	//
-	Config ApplicationConfig
+	Config config.Config
 
 	// once
 	once struct {
@@ -123,71 +123,6 @@ type Application struct {
 		// beforeDestroy
 		beforeDestroy func()
 	}
-}
-
-// ApplicationConfig defines the config of zoox.Application.
-type ApplicationConfig struct {
-	Protocol  string
-	Host      string
-	Port      int
-	HTTPSPort int
-
-	//
-	NetworkType      string
-	UnixDomainSocket string
-
-	// TLS
-	// TLS Certificate
-	TLSCertFile string
-	// TLS Private Key
-	TLSKeyFile string
-	// TLS Ca Certificate
-	TLSCaCertFile string
-	//
-	TLSCert []byte
-	TLSKey  []byte
-
-	//
-	LogLevel string `config:"log_level"`
-	//
-	SecretKey string `config:"secret_key"`
-	//
-	Session session.Config `config:"session"`
-	//
-	Cache cache.Config `config:"cache"`
-	//
-	Redis ApplicationConfigRedis `config:"redis"`
-	//
-	Banner string
-	//
-	Monitor ApplicationConfigMonitor `config:"monitor"`
-}
-
-// ApplicationConfigRedis defines the config of redis.
-type ApplicationConfigRedis struct {
-	Host     string `config:"host"`
-	Port     int    `config:"port"`
-	DB       int    `config:"db"`
-	Username string `config:"username"`
-	Password string `config:"password"`
-}
-
-// ApplicationConfigMonitor defines the config of monitor.
-type ApplicationConfigMonitor struct {
-	Prometheus struct {
-		Enabled bool   `config:"enabled"`
-		Path    string `config:"path"`
-	} `config:"prometheus"`
-
-	Sentry struct {
-		Enabled bool `config:"enabled"`
-		//
-		DSN   string `config:"dsn"`
-		Debug bool   `config:"debug"`
-		//
-		WaitForDelivery bool          `config:"wait_for_delivery"`
-		Timeout         time.Duration `config:"timeout"`
-	} `config:"sentry"`
 }
 
 // New is the constructor of zoox.Application.
