@@ -372,12 +372,7 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	var middlewares []HandlerFunc
 
 	for _, group := range app.groups {
-		if strings.HasPrefix(ctx.Path, group.prefix) {
-			// @TODO /v1 => /v1/
-			// if ctx.Path == group.prefix && !strings.HasSuffix(group.prefix, "/") {
-			// 	ctx.Path += "/"
-			// }
-
+		if ok := group.matchPath(ctx.Path); ok {
 			middlewares = append(middlewares, group.middlewares...)
 		}
 	}

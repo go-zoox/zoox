@@ -8,6 +8,7 @@ import (
 	"path"
 	"time"
 
+	"github.com/go-zoox/core-utils/regexp"
 	"github.com/go-zoox/core-utils/strings"
 	"github.com/go-zoox/fs"
 	"github.com/go-zoox/headers"
@@ -46,6 +47,28 @@ func (g *RouterGroup) Group(prefix string, cb ...GroupFunc) *RouterGroup {
 	}
 
 	return newGroup
+}
+
+func (g *RouterGroup) matchPath(path string) (ok bool) {
+	// /v1 	=> /v1
+	// /v1/ => /v1
+	if ok := strings.HasPrefix(path, g.prefix); ok {
+		return ok
+	}
+
+	// @TODO /v1/containers/123456/terminal => /v1/containers/:id
+	re := g.prefix
+	if strings.Contains(re, ":") {
+		re = strings.ReplaceAllFunc(re, ":\\w+", func(b []byte) []byte {
+			return []byte("\\w+")
+		})
+	} else if strings.Contains(re, "{") {
+		re = strings.ReplaceAllFunc(re, "{.*}", func(b []byte) []byte {
+			return []byte("\\w+")
+		})
+	}
+
+	return regexp.Match(re, path)
 }
 
 func (g *RouterGroup) addRoute(method string, path string, handler ...HandlerFunc) {
