@@ -1,9 +1,11 @@
 package zoox
 
 import (
+	"fmt"
 	"net/http"
-	"strings"
 
+	"github.com/go-zoox/core-utils/regexp"
+	"github.com/go-zoox/core-utils/strings"
 	"github.com/go-zoox/headers"
 	"github.com/go-zoox/logger"
 
@@ -42,16 +44,25 @@ func (g *RouterGroup) WebSocket(path string, opts ...func(opt *WebSocketOption))
 
 	// g.addRoute(http.MethodGet, path, handleFunc...)
 
-	logger.Info("[router] register: WS %s", path)
+	logger.Info("[router] register: %8s %s", "WS", g.prefix+path)
+	matchPath := func(requestPath string) (ok bool) {
+		re := fmt.Sprintf("^%s$", g.prefix+path)
+		if strings.Contains(re, ":") {
+			re = strings.ReplaceAllFunc(re, ":\\w+", func(b []byte) []byte {
+				return []byte("\\w+")
+			})
+		} else if strings.Contains(re, "{") {
+			re = strings.ReplaceAllFunc(re, "{.*}", func(b []byte) []byte {
+				return []byte("\\w+")
+			})
+		}
+
+		return regexp.Match(re, requestPath)
+	}
+
 	g.Use(func(ctx *Context) {
 		// ignore@1: method != get
 		if ctx.Method != http.MethodGet {
-			ctx.Next()
-			return
-		}
-
-		// ignore@2: path != path
-		if ctx.Path != path {
 			ctx.Next()
 			return
 		}
@@ -61,8 +72,7 @@ func (g *RouterGroup) WebSocket(path string, opts ...func(opt *WebSocketOption))
 		if connection == "" {
 			ctx.Next()
 			return
-		}
-		if strings.ToLower(connection) != headerConnectionValueUpgrade {
+		} else if strings.ToLower(connection) != headerConnectionValueUpgrade {
 			ctx.Next()
 			return
 		}
@@ -72,8 +82,13 @@ func (g *RouterGroup) WebSocket(path string, opts ...func(opt *WebSocketOption))
 		if upgrade == "" {
 			ctx.Next()
 			return
+		} else if strings.ToLower(upgrade) != headerUpgradeValueWebSocket {
+			ctx.Next()
+			return
 		}
-		if strings.ToLower(upgrade) != headerUpgradeValueWebSocket {
+
+		// ignore@4: path != path
+		if ok := matchPath(ctx.Path); !ok {
 			ctx.Next()
 			return
 		}
