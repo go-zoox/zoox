@@ -26,7 +26,7 @@ require (
 	github.com/go-zoox/jsonrpc v1.2.2
 	github.com/go-zoox/jwt v1.3.5
 	github.com/go-zoox/kv v1.5.9
-	github.com/go-zoox/logger v1.5.1
+	github.com/go-zoox/logger v1.6.2
 	github.com/go-zoox/mq v1.0.1
 	github.com/go-zoox/proxy v1.5.6
 	github.com/go-zoox/pubsub v1.2.3

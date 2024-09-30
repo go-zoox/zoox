@@ -138,8 +138,8 @@ func New() *Application {
 
 	app.Env = env.New()
 
-	app.Logger = logger.New(&logger.Options{
-		Level: app.Config.LogLevel,
+	app.Logger = logger.New(func(opt *logger.Option) {
+		opt.Level = app.Config.LogLevel
 	})
 
 	// global middlewares
