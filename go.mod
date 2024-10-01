@@ -37,6 +37,7 @@ require (
 	github.com/go-zoox/watch v1.2.4
 	github.com/go-zoox/websocket v1.3.4
 	github.com/prometheus/client_golang v1.18.0
+	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/sync v0.7.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -63,6 +64,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.4 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
+	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-redis/redis/v8 v8.11.5 // indirect
 	github.com/go-zoox/commands-as-a-service v1.7.11 // indirect
 	github.com/go-zoox/compress v1.0.1 // indirect
@@ -106,6 +108,7 @@ require (
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/urfave/cli/v2 v2.27.2 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
+	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.52.0 // indirect
 	go.opentelemetry.io/otel v1.28.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.24.0 // indirect
