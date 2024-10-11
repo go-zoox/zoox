@@ -114,7 +114,7 @@ type Application struct {
 	}
 
 	// tls cert loader
-	tlsCertLoader func(helloInfo *tls.ClientHelloInfo) (*tls.Certificate, error)
+	tlsCertLoader func(sni string) (key, cert string, err error)
 
 	// @TODO
 	lifecycle struct {
@@ -382,7 +382,7 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 // SetTLSCertLoader set the tls cert loader
-func (app *Application) SetTLSCertLoader(loader func(helloInfo *tls.ClientHelloInfo) (*tls.Certificate, error)) {
+func (app *Application) SetTLSCertLoader(loader func(sni string) (key, cert string, err error)) {
 	app.tlsCertLoader = loader
 }
 
@@ -712,13 +712,13 @@ func (app *Application) serveHTTPS(ctx context.Context) error {
 		if err != nil {
 			return fmt.Errorf("failed to read tls certificate: %v", err)
 		}
-		app.Config.TLSCert = certPEMBlock
+		app.Config.TLSCert = string(certPEMBlock)
 
 		keyPEMBlock, err := os.ReadFile(app.Config.TLSKeyFile)
 		if err != nil {
 			return fmt.Errorf("failed to read tls private key: %v", err)
 		}
-		app.Config.TLSKey = keyPEMBlock
+		app.Config.TLSKey = string(keyPEMBlock)
 
 		// // if app.Config.TLSCertFile != "" && app.TLSCert == nil {
 		// // 	tlsCaCert, err := ioutil.ReadFile(app.Config.TLSCertFile)
@@ -742,8 +742,8 @@ func (app *Application) serveHTTPS(ctx context.Context) error {
 	}
 
 	// @2 load tls from memory: TLS Certificate and Private Key
-	if app.Config.TLSCert != nil && app.Config.TLSKey != nil {
-		cert, err := tls.X509KeyPair(app.Config.TLSCert, app.Config.TLSKey)
+	if app.Config.TLSCert != "" && app.Config.TLSKey != "" {
+		cert, err := tls.X509KeyPair([]byte(app.Config.TLSCert), []byte(app.Config.TLSKey))
 		if err != nil {
 			return err
 		}
@@ -764,7 +764,19 @@ func (app *Application) serveHTTPS(ctx context.Context) error {
 			config = &tls.Config{}
 		}
 
-		config.GetCertificate = app.tlsCertLoader
+		config.GetCertificate = func(chi *tls.ClientHelloInfo) (*tls.Certificate, error) {
+			key, cert, err := app.tlsCertLoader(chi.ServerName)
+			if err != nil {
+				return nil, err
+			}
+
+			certificate, err := tls.X509KeyPair([]byte(cert), []byte(key))
+			if err != nil {
+				return nil, err
+			}
+
+			return &certificate, nil
+		}
 	}
 
 	if config == nil {

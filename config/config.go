@@ -24,8 +24,8 @@ type Config struct {
 	// TLS Ca Certificate
 	TLSCaCertFile string
 	//
-	TLSCert []byte
-	TLSKey  []byte
+	TLSCert string
+	TLSKey  string
 
 	//
 	LogLevel string `config:"log_level"`
