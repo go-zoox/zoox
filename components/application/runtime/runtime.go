@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-zoox/datetime"
 	"github.com/go-zoox/logger"
+	"github.com/shirou/gopsutil/mem"
 )
 
 // Runtime ...
@@ -72,11 +73,15 @@ func (r *runtime) CPUCores() int {
 	return rt.NumCPU()
 }
 
-func (r *runtime) Memory() (allocated, total uint64) {
-	var memStats rt.MemStats
-	rt.ReadMemStats(&memStats)
-	allocated = memStats.Alloc / 1024 / 1024 // 转换为 MB
-	total = memStats.Sys / 1024 / 1024       // 转换为 MB
+func (r *runtime) Memory() (used, total uint64) {
+	// var memStats rt.MemStats
+	// rt.ReadMemStats(&memStats)
+	// allocated = memStats.Alloc / 1024 / 1024 // 转换为 MB
+	// total = memStats.Sys / 1024 / 1024       // 转换为 MB
+	v, _ := mem.VirtualMemory()
+	total = v.Total / 1024 / 1024
+	available := v.Available / 1024 / 1024
+	used = total - available
 	return
 }
 
