@@ -15,6 +15,8 @@ import (
 
 	"github.com/go-errors/errors"
 
+	rd "runtime/debug"
+
 	"time"
 
 	"github.com/go-zoox/cache"
@@ -508,7 +510,11 @@ func (ctx *Context) Fail(err error, code int, message string, status ...int) {
 	// reset := string([]byte{27, 91, 48, 109})
 	// ctx.Logger.Errorf("[Nice ctx.Fail] error:\n\n%s%s\n\n%s%s", httprequest, goErr.Error(), goErr.Stack(), reset)
 
-	ctx.Logger.Infof("[ctx.Fail] error: %s (raw: %#v)", err, err)
+	ctx.Logger.Infof("[ctx.Fail] error: %s", err)
+
+	if ok := ctx.debug.IsDebugMode(); ok {
+		fmt.Println("[ctx.Fail] error stack: \n", string(rd.Stack())+"\n")
+	}
 
 	ctx.JSON(statusX, map[string]any{
 		"code":    code,
