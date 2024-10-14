@@ -652,18 +652,23 @@ func (ctx *Context) Queries() *safe.Map[string, any] {
 }
 
 // Forms gets all forms.
-func (ctx *Context) Forms() *safe.Map[string, any] {
+func (ctx *Context) Forms() (*safe.Map[string, any], error) {
 	forms := safe.NewMap[string, any]()
 
 	if err := ctx.Request.ParseForm(); err != nil {
-		return forms
+		// http: request body too large
+		if err.Error() == "http: request body too large" {
+			return nil, errors.New("request body too large")
+		}
+
+		return nil, err
 	}
 
 	for key, values := range ctx.Request.Form {
 		forms.Set(key, values[0])
 	}
 
-	return forms
+	return forms, nil
 }
 
 // Params gets all params.
@@ -766,6 +771,11 @@ func (ctx *Context) BindJSON(obj interface{}) (err error) {
 			return nil
 		}
 
+		// request body too large
+		if err.Error() == "http: request body too large" {
+			return errors.New("request body too large")
+		}
+
 		return err
 	}
 
@@ -793,7 +803,11 @@ func (ctx *Context) BindYAML(obj interface{}) (err error) {
 
 // BindForm binds the query into the given struct.
 func (ctx *Context) BindForm(obj interface{}) error {
-	forms := ctx.Forms()
+	forms, err := ctx.Forms()
+	if err != nil {
+		return err
+	}
+
 	if ctx.Debug().IsDebugMode() {
 		ctx.Logger.Infof("[debug][ctx.BindForm]")
 		for k, v := range forms.ToMap() {

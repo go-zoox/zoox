@@ -12,6 +12,9 @@ type Config struct {
 	Port      int
 	HTTPSPort int
 
+	// BodySizeLimit is the limit of the request body size.
+	BodySizeLimit int64
+
 	//
 	NetworkType      string
 	UnixDomainSocket string
