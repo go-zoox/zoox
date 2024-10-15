@@ -512,7 +512,7 @@ func (ctx *Context) Fail(err error, code int, message string, status ...int) {
 
 	ctx.Logger.Infof("[ctx.Fail] error: %s", err)
 
-	if ok := ctx.debug.IsDebugMode(); ok {
+	if ok := ctx.Debug().IsDebugMode(); ok {
 		fmt.Println("[ctx.Fail] error stack: \n", string(rd.Stack())+"\n")
 	}
 
