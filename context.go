@@ -179,6 +179,7 @@ func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Con
 	}
 
 	ctx.Logger = logger.New(func(opt *logger.Option) {
+		// fmt.Println("ctx.Logger:", app.Config.LogLevel)
 		opt.Level = app.Config.LogLevel
 	})
 
@@ -955,7 +956,7 @@ func (ctx *Context) Debug() debug.Debug {
 // Env returns the env of the
 func (ctx *Context) Env() env.Env {
 	ctx.once.env.Do(func() {
-		ctx.env = ctx.App.Env
+		ctx.env = ctx.App.Env()
 	})
 
 	return ctx.env

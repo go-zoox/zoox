@@ -77,8 +77,9 @@ type Application struct {
 	// i18n
 	i18n i18n.I18n
 	//
-	Env    env.Env
-	Logger *logger.Logger
+	env env.Env
+	//
+	logger *logger.Logger
 	// Debug
 	debug debug.Debug
 	// Runtime
@@ -95,6 +96,9 @@ type Application struct {
 
 	// once
 	once struct {
+		env sync.Once
+		//
+		logger sync.Once
 		//
 		debug   sync.Once
 		runtime sync.Once
@@ -135,12 +139,6 @@ func New() *Application {
 
 	app.RouterGroup = newRouterGroup(app, "")
 	app.groups = []*RouterGroup{app.RouterGroup}
-
-	app.Env = env.New()
-
-	app.Logger = logger.New(func(opt *logger.Option) {
-		opt.Level = app.Config.LogLevel
-	})
 
 	// global middlewares
 	for _, mf := range DefaultMiddlewares {
@@ -388,7 +386,7 @@ func (app *Application) SetTLSCertLoader(loader func(sni string) (key, cert stri
 
 // IsProd returns true if the app is in production mode.
 func (app *Application) IsProd() bool {
-	return app.Env.Get("MODE") == "production"
+	return app.Env().Get("MODE") == "production"
 }
 
 // JSONRPCRegistry get a new JSONRPCRegistry handler.
@@ -483,10 +481,31 @@ func (app *Application) I18n() i18n.I18n {
 	return app.i18n
 }
 
+// Env ...
+func (app *Application) Env() env.Env {
+	app.once.env.Do(func() {
+		app.env = env.New()
+	})
+
+	return app.env
+}
+
+// Logger ...
+func (app *Application) Logger() *logger.Logger {
+	app.once.logger.Do(func() {
+		app.logger = logger.New(func(opt *logger.Option) {
+			// fmt.Println("app.Config.LogLevel:", app.Config.LogLevel)
+			opt.Level = app.Config.LogLevel
+		})
+	})
+
+	return app.logger
+}
+
 // Debug ...
 func (app *Application) Debug() debug.Debug {
 	app.once.debug.Do(func() {
-		app.debug = debug.New(app.Logger)
+		app.debug = debug.New(app.Logger())
 	})
 
 	return app.debug
@@ -495,7 +514,7 @@ func (app *Application) Debug() debug.Debug {
 // Runtime ...
 func (app *Application) Runtime() runtime.Runtime {
 	app.once.runtime.Do(func() {
-		app.runtime = runtime.New(app.Logger)
+		app.runtime = runtime.New(app.Logger())
 	})
 
 	return app.runtime

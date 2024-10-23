@@ -56,7 +56,7 @@ func Defaults() *zoox.Application {
 
 	app.SetBeforeReady(func() {
 		if app.Config.BodySizeLimit > 0 {
-			app.Logger.Infof("[middleware] register: body limit (app.Config) ...")
+			app.Logger().Infof("[middleware] register: body limit (app.Config) ...")
 
 			app.Use(middleware.BodyLimit(func(cfg *middleware.BodyLimitConfig) {
 				cfg.MaxSize = app.Config.BodySizeLimit
@@ -64,7 +64,7 @@ func Defaults() *zoox.Application {
 		}
 
 		if app.Config.Monitor.Prometheus.Enabled {
-			app.Logger.Infof("[middleware] register: prometheus (app.Config) ...")
+			app.Logger().Infof("[middleware] register: prometheus (app.Config) ...")
 
 			app.Use(middleware.Prometheus(func(opt *middleware.PrometheusOption) {
 				if app.Config.Monitor.Prometheus.Path != "" {
@@ -78,7 +78,7 @@ func Defaults() *zoox.Application {
 				panic("app.Config.Monitor.Sentry.DSN is required")
 			}
 
-			app.Logger.Infof("[middleware] register: sentry (app.Config) ...")
+			app.Logger().Infof("[middleware] register: sentry (app.Config) ...")
 
 			// @TODO
 			if os.Getenv(zoox.BuiltInEnvMonitorSentryEnabled) != "true" {
