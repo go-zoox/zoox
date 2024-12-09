@@ -37,6 +37,7 @@ import (
 	"github.com/go-zoox/zoox/components/context/sse"
 	"github.com/go-zoox/zoox/components/context/state"
 	"github.com/go-zoox/zoox/components/context/user"
+	"github.com/go-zoox/zoox/components/context/useragent"
 	"github.com/go-zoox/zoox/utils"
 
 	"github.com/go-zoox/concurrency"
@@ -323,8 +324,8 @@ func (ctx *Context) Connection() string {
 }
 
 // UserAgent return the request user-agent header.
-func (ctx *Context) UserAgent() string {
-	return ctx.Header().Get(headers.UserAgent)
+func (ctx *Context) UserAgent() useragent.UserAgent {
+	return useragent.New(ctx.Header().Get(headers.UserAgent))
 }
 
 // ContentType return the request content-type header.
