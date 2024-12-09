@@ -6,6 +6,7 @@ import (
 	"github.com/go-zoox/zoox"
 )
 
+// BodyLimitConfig is the configuration for BodyLimit middleware.
 type BodyLimitConfig struct {
 	MaxSize int64
 }
