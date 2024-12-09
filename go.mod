@@ -21,7 +21,7 @@ require (
 	github.com/go-zoox/gzip v1.0.0
 	github.com/go-zoox/headers v1.0.8
 	github.com/go-zoox/i18n v1.0.3
-	github.com/go-zoox/ioc v1.0.1
+	github.com/go-zoox/ioc v1.0.2
 	github.com/go-zoox/jobqueue v1.0.1
 	github.com/go-zoox/jsonrpc v1.2.2
 	github.com/go-zoox/jwt v1.4.0
