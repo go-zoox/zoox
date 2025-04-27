@@ -6,6 +6,8 @@ import "github.com/go-zoox/core-utils/strings"
 type Param interface {
 	Get(key string, defaultValue ...string) strings.Value
 	Iterator() map[string]string
+	//
+	ID() (id strings.Value, err error)
 }
 
 type param struct {
@@ -17,23 +19,4 @@ func New(value map[string]string) Param {
 	return &param{
 		params: value,
 	}
-}
-
-// Get gets request param with the given name.
-func (q *param) Get(key string, defaultValue ...string) strings.Value {
-	value, ok := q.params[key]
-	if ok {
-		return strings.Value(value)
-	}
-
-	if value == "" && len(defaultValue) > 0 {
-		value = defaultValue[0]
-	}
-
-	return strings.Value(value)
-}
-
-// Iterator ...
-func (q *param) Iterator() map[string]string {
-	return q.params
 }

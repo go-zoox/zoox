@@ -12,8 +12,13 @@ type Query interface {
 	//
 	Page(defaultValue ...uint) uint
 	PageSize(defaultValue ...uint) uint
-	Where() map[string]strings.Value
-	OrderBy() map[string]strings.Value
+	Where() *Where
+	OrderBy() *OrderBy
+	//
+	ID() (id strings.Value, err error)
+	MustID() (id strings.Value)
+	AccessToken() (accessToken string, err error)
+	MustAccessToken() (accessToken string)
 }
 
 type query struct {
@@ -27,73 +32,32 @@ func New(request *http.Request) Query {
 	}
 }
 
-// Get gets request query with the given name.
-func (q *query) Get(key string, defaultValue ...string) strings.Value {
-	value := q.request.URL.Query().Get(key)
-	if value == "" && len(defaultValue) > 0 {
-		value = defaultValue[0]
-	}
+// // Where returns the where.
+// func (q *query) Where() map[string]strings.Value {
+// 	// where := make(map[string]strings.Value)
+// 	// ignoreKeys := map[string]bool{
+// 	// 	"page":      true,
+// 	// 	"page_size": true,
+// 	// 	"pageSize":  true,
+// 	// 	"order_by":  true,
+// 	// 	"orderBy":   true,
+// 	// }
 
-	return strings.Value(value)
-}
+// 	// values := q.request.URL.Query()
+// 	// for key, value := range values {
+// 	// 	if ok := ignoreKeys[key]; ok {
+// 	// 		continue
+// 	// 	}
 
-// Page returns the page.
-func (q *query) Page(defaultValue ...uint) uint {
-	if v := q.Get("page").UInt(); v != 0 {
-		return v
-	}
+// 	// 	where[key] = strings.Value(value[0])
+// 	// }
 
-	if len(defaultValue) > 0 {
-		return defaultValue[0]
-	}
+// 	// return where
 
-	return 1
-}
+// 	panic("not implemented")
+// }
 
-// PageSize returns the page size.
-// If the page size is not set, it returns 10.
-func (q *query) PageSize(defaultValue ...uint) uint {
-	if v := q.Get("page_size").UInt(); v != 0 {
-		return v
-	}
-
-	if v := q.Get("pageSize").UInt(); v != 0 {
-		return v
-	}
-
-	if len(defaultValue) > 0 {
-		return defaultValue[0]
-	}
-
-	return 10
-}
-
-// Where returns the where.
-func (q *query) Where() map[string]strings.Value {
-	// where := make(map[string]strings.Value)
-	// ignoreKeys := map[string]bool{
-	// 	"page":      true,
-	// 	"page_size": true,
-	// 	"pageSize":  true,
-	// 	"order_by":  true,
-	// 	"orderBy":   true,
-	// }
-
-	// values := q.request.URL.Query()
-	// for key, value := range values {
-	// 	if ok := ignoreKeys[key]; ok {
-	// 		continue
-	// 	}
-
-	// 	where[key] = strings.Value(value[0])
-	// }
-
-	// return where
-
-	panic("not implemented")
-}
-
-// OrderBy returns the order by.
-func (q *query) OrderBy() map[string]strings.Value {
-	panic("not implemented")
-}
+// // OrderBy returns the order by.
+// func (q *query) OrderBy() map[string]strings.Value {
+// 	panic("not implemented")
+// }

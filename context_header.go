@@ -19,7 +19,7 @@ func (ctx *Context) SetCacheControl(cacheControl string) {
 
 // SetCacheControlWithMaxAge sets the request cache-control header with max-age.
 func (ctx *Context) SetCacheControlWithMaxAge(maxAge time.Duration) {
-	ctx.SetCacheControl(fmt.Sprintf("max-age=%d", int(maxAge.Seconds())))
+	ctx.SetCacheControl(fmt.Sprintf("public, max-age=%d", int(maxAge.Seconds())))
 }
 
 // SetCacheControlWithNoCache sets the request cache-control header with no-cache.
