@@ -42,6 +42,7 @@ import (
 
 	"github.com/go-zoox/concurrency"
 	"github.com/go-zoox/cookie"
+	"github.com/go-zoox/core-utils/cast"
 	"github.com/go-zoox/core-utils/safe"
 	"github.com/go-zoox/core-utils/strings"
 	"github.com/go-zoox/fetch"
@@ -501,10 +502,21 @@ func (ctx *Context) Success(result interface{}) {
 }
 
 // Fail writes the given error with code-message-result specification to the response.
+// code is an interger (length 7), e.g. 4000001, 4001001, 4010001, 5000001
+// message is a string, e.g. "invalid parameter", "not found", "internal server error"
+// status is an interger, e.g. 400, 401, 403, 404, 500
 func (ctx *Context) Fail(err error, code int, message string, status ...int) {
 	statusX := http.StatusBadRequest
 	if len(status) > 0 {
 		statusX = status[0]
+	} else {
+		// detect status from code
+		codeStr := cast.ToString(code)
+		if len(codeStr) > 3 {
+			if v := cast.ToInt(codeStr[:3]); v > 0 {
+				statusX = v
+			}
+		}
 	}
 
 	// httprequest, _ := httputil.DumpRequest(ctx.Request, false)
