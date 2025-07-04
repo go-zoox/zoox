@@ -370,14 +370,14 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	var middlewares []HandlerFunc
 	var matchedGroups []*RouterGroup
 
-	// 收集所有匹配的 groups，按层级深度排序
+	// Collect all matching groups, sorted by hierarchy depth
 	for _, group := range app.groups {
 		if group.matchPath(ctx.Path) {
 			matchedGroups = append(matchedGroups, group)
 		}
 	}
 
-	// 按前缀长度排序，确保更具体的路径先匹配
+	// Sort by prefix length to ensure more specific paths match first
 	for i := 0; i < len(matchedGroups); i++ {
 		for j := i + 1; j < len(matchedGroups); j++ {
 			if len(matchedGroups[i].prefix) < len(matchedGroups[j].prefix) {
@@ -386,16 +386,16 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	// 收集中间件，避免重复
+	// Collect middlewares, avoiding duplicates
 	middlewareMap := make(map[*HandlerFunc]bool)
 	
-	// 只取最具体的匹配 group
+	// Only take the most specific matching group
 	if len(matchedGroups) > 0 {
 		group := matchedGroups[0]
 		allMiddlewares := group.getAllMiddlewares()
 		
 		for _, middleware := range allMiddlewares {
-			// 使用函数地址作为键来避免重复
+			// Use function address as key to avoid duplicates
 			middlewarePtr := &middleware
 			if !middlewareMap[middlewarePtr] {
 				middlewareMap[middlewarePtr] = true
@@ -694,7 +694,7 @@ func (app *Application) serveHTTP(ctx context.Context) error {
 	}
 
 	go func() {
-		<-ctx.Done() // 当上下文被取消时，停止服务器
+		<-ctx.Done() // When context is canceled, stop the server
 		server.Close()
 	}()
 
@@ -704,7 +704,7 @@ func (app *Application) serveHTTP(ctx context.Context) error {
 		logger.Info("Server started at http://%s", app.AddressForLog())
 	}
 
-	// 等待所有 goroutine 完成
+	// Wait for all goroutines to complete
 	return server.Serve(listener)
 }
 
@@ -731,7 +731,7 @@ func (app *Application) serveHTTPS(ctx context.Context) error {
 	}
 
 	go func() {
-		<-ctx.Done() // 当上下文被取消时，停止服务器
+		<-ctx.Done() // When context is canceled, stop the server
 		server.Close()
 	}()
 

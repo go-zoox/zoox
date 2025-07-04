@@ -49,39 +49,39 @@ func (g *RouterGroup) Group(prefix string, cb ...GroupFunc) *RouterGroup {
 	return newGroup
 }
 
-// matchPath 改进的路径匹配逻辑
+// matchPath improved path matching logic
 func (g *RouterGroup) matchPath(path string) (ok bool) {
-	// 空前缀匹配所有路径
+	// Empty prefix matches all paths
 	if g.prefix == "" || g.prefix == "/" {
 		return true
 	}
 
-	// 确保前缀以 / 开头
+	// Ensure prefix starts with /
 	prefix := g.prefix
 	if !strings.HasPrefix(prefix, "/") {
 		prefix = "/" + prefix
 	}
 
-	// 确保路径以 / 开头
+	// Ensure path starts with /
 	if !strings.HasPrefix(path, "/") {
 		path = "/" + path
 	}
 
-	// 精确匹配
+	// Exact match
 	if path == prefix {
 		return true
 	}
 
-	// 前缀匹配，但需要检查边界
+	// Prefix match, but need to check boundaries
 	if strings.HasPrefix(path, prefix) {
-		// 确保前缀后面是 / 或者前缀本身以 / 结尾
+		// Ensure prefix is followed by / or prefix itself ends with /
 		if strings.HasSuffix(prefix, "/") || 
 		   (len(path) > len(prefix) && path[len(prefix)] == '/') {
 			return true
 		}
 	}
 
-	// 处理动态路径参数
+	// Handle dynamic path parameters
 	if strings.Contains(prefix, ":") || strings.Contains(prefix, "{") || strings.Contains(prefix, "*") {
 		return g.matchDynamicPath(path, prefix)
 	}
@@ -89,18 +89,18 @@ func (g *RouterGroup) matchPath(path string) (ok bool) {
 	return false
 }
 
-// matchDynamicPath 处理动态路径匹配
+// matchDynamicPath handles dynamic path matching
 func (g *RouterGroup) matchDynamicPath(path, prefix string) bool {
-	// 将动态参数转换为正则表达式
+	// Convert dynamic parameters to regular expressions
 	pattern := g.buildRegexPattern(prefix)
 	
-	// 使用正则表达式匹配
+	// Use regular expression matching
 	matched, err := regexp.MatchString("^"+pattern+"(/.*)?$", path)
 	if err != nil {
 		return false
 	}
 	
-	// 如果没有匹配，尝试精确匹配（用于通配符情况）
+	// If no match, try exact matching (for wildcard cases)
 	if !matched {
 		matched, err = regexp.MatchString("^"+pattern+"$", path)
 		if err != nil {
@@ -111,53 +111,53 @@ func (g *RouterGroup) matchDynamicPath(path, prefix string) bool {
 	return matched
 }
 
-// buildRegexPattern 构建正则表达式模式
+// buildRegexPattern builds regular expression pattern
 func (g *RouterGroup) buildRegexPattern(prefix string) string {
-	// 转义特殊字符
+	// Escape special characters
 	pattern := regexp.QuoteMeta(prefix)
 	
-	// 处理 :param 格式的参数 - 冒号不会被QuoteMeta转义
+	// Handle :param format parameters - colon is not escaped by QuoteMeta
 	re1 := regexp.MustCompile(`:([a-zA-Z_][a-zA-Z0-9_]*)`)
 	pattern = re1.ReplaceAllString(pattern, `([^/]+)`)
 	
-	// 处理 {param} 格式的参数 - 花括号会被转义为\{和\}
+	// Handle {param} format parameters - braces are escaped as \{ and \}
 	re2 := regexp.MustCompile(`\\{([^}]+)\\}`)
 	pattern = re2.ReplaceAllString(pattern, `([^/]+)`)
 	
-	// 处理通配符 * - 星号会被转义为\*
+	// Handle wildcard * - asterisk is escaped as \*
 	re3 := regexp.MustCompile(`\\\*([a-zA-Z_][a-zA-Z0-9_]*)?`)
 	pattern = re3.ReplaceAllString(pattern, `(.*)`)
 	
 	return pattern
 }
 
-// getAllMiddlewares 获取所有中间件（包括父级）
+// getAllMiddlewares gets all middlewares (including parent)
 func (g *RouterGroup) getAllMiddlewares() []HandlerFunc {
 	var middlewares []HandlerFunc
 	
-	// 递归收集父级中间件
+	// Recursively collect parent middlewares
 	if g.parent != nil {
 		middlewares = append(middlewares, g.parent.getAllMiddlewares()...)
 	}
 	
-	// 添加当前级别的中间件
+	// Add current level middlewares
 	middlewares = append(middlewares, g.middlewares...)
 	
 	return middlewares
 }
 
-// joinPath 正确拼接URL路径
+// joinPath correctly joins URL paths
 func (g *RouterGroup) joinPath(path string) string {
 	if g.prefix == "" {
 		return path
 	}
 	
-	// 处理根路径的特殊情况
+	// Handle root path special case
 	if g.prefix == "/" && path == "/" {
 		return "/"
 	}
 	
-	// 确保前缀和路径都正确处理
+	// Ensure prefix and path are properly handled
 	prefix := strings.TrimSuffix(g.prefix, "/")
 	path = strings.TrimPrefix(path, "/")
 	
