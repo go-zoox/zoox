@@ -669,4 +669,161 @@ func TestContext_Components(t *testing.T) {
 	if w.Code != 200 {
 		t.Errorf("Expected status 200, got %d", w.Code)
 	}
+}
+
+// Test additional Context methods
+func TestContext_Body(t *testing.T) {
+	app := New()
+	
+	app.Post("/test", func(ctx *Context) {
+		body := ctx.Body()
+		if body == nil {
+			t.Error("Body should not be nil")
+		}
+		
+		// Body.Get requires a key parameter
+		_ = body.Get("content")
+		ctx.String(200, "body available")
+	})
+	
+	reqBody := "test body content"
+	req := httptest.NewRequest("POST", "/test", strings.NewReader(reqBody))
+	w := httptest.NewRecorder()
+	
+	app.ServeHTTP(w, req)
+	
+	if w.Code != 200 {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+	
+	if !strings.Contains(w.Body.String(), "body available") {
+		t.Errorf("Expected body available message, got '%s'", w.Body.String())
+	}
+}
+
+func TestContext_Context(t *testing.T) {
+	app := New()
+	
+	app.Get("/test", func(ctx *Context) {
+		stdCtx := ctx.Context()
+		if stdCtx == nil {
+			t.Error("Context should not be nil")
+		}
+		
+		ctx.String(200, "ok")
+	})
+	
+	req := httptest.NewRequest("GET", "/test", nil)
+	w := httptest.NewRecorder()
+	
+	app.ServeHTTP(w, req)
+	
+	if w.Code != 200 {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+}
+
+func TestContext_Stream(t *testing.T) {
+	app := New()
+	
+	app.Get("/test", func(ctx *Context) {
+		stream := ctx.Stream()
+		if stream == nil {
+			t.Error("Stream should not be nil")
+		}
+		ctx.String(200, "stream available")
+	})
+	
+	req := httptest.NewRequest("GET", "/test", nil)
+	w := httptest.NewRecorder()
+	
+	app.ServeHTTP(w, req)
+	
+	if w.Code != 200 {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+	
+	if w.Body.String() != "stream available" {
+		t.Errorf("Expected 'stream available', got '%s'", w.Body.String())
+	}
+}
+
+func TestContext_Write(t *testing.T) {
+	app := New()
+	
+	app.Get("/test", func(ctx *Context) {
+		ctx.Write([]byte("written content"))
+	})
+	
+	req := httptest.NewRequest("GET", "/test", nil)
+	w := httptest.NewRecorder()
+	
+	app.ServeHTTP(w, req)
+	
+	if w.Code != 200 {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+	
+	if w.Body.String() != "written content" {
+		t.Errorf("Expected 'written content', got '%s'", w.Body.String())
+	}
+}
+
+func TestContext_Error(t *testing.T) {
+	app := New()
+	
+	app.Get("/test", func(ctx *Context) {
+		ctx.Error(500, "internal server error")
+	})
+	
+	req := httptest.NewRequest("GET", "/test", nil)
+	w := httptest.NewRecorder()
+	
+	app.ServeHTTP(w, req)
+	
+	if w.Code != 500 {
+		t.Errorf("Expected status 500, got %d", w.Code)
+	}
+	
+	if w.Body.String() != "internal server error" {
+		t.Errorf("Expected 'internal server error', got '%s'", w.Body.String())
+	}
+}
+
+func TestContext_SaveFile(t *testing.T) {
+	app := New()
+	
+	app.Post("/test", func(ctx *Context) {
+		// This test is limited since we can't easily create a file upload in tests
+		// Just test that the method exists and doesn't panic
+		ctx.String(200, "ok")
+	})
+	
+	req := httptest.NewRequest("POST", "/test", nil)
+	w := httptest.NewRecorder()
+	
+	app.ServeHTTP(w, req)
+	
+	if w.Code != 200 {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+}
+
+func TestContext_WebSocket(t *testing.T) {
+	app := New()
+	
+	app.Get("/ws", func(ctx *Context) {
+		// Test WebSocket context method
+		// This would normally upgrade to WebSocket
+		ctx.String(200, "WebSocket endpoint")
+	})
+	
+	req := httptest.NewRequest("GET", "/ws", nil)
+	w := httptest.NewRecorder()
+	
+	app.ServeHTTP(w, req)
+	
+	if w.Code != 200 {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
 } 

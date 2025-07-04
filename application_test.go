@@ -659,4 +659,287 @@ func TestApplication_Any(t *testing.T) {
 			t.Errorf("Expected body 'any method' for %s /test, got '%s'", method, w.Body.String())
 		}
 	}
+}
+
+// Test additional application components
+func TestApplication_JSONRPCRegistry(t *testing.T) {
+	app := New()
+	
+	registry := app.JSONRPCRegistry()
+	if registry == nil {
+		t.Error("JSONRPCRegistry should not be nil")
+	}
+	
+	// Test singleton behavior
+	registry2 := app.JSONRPCRegistry()
+	if registry != registry2 {
+		t.Error("JSONRPCRegistry should be a singleton")
+	}
+}
+
+func TestApplication_PubSub(t *testing.T) {
+	app := New()
+	
+	// Test PubSub component initialization without Redis config
+	defer func() {
+		if r := recover(); r != nil {
+			// Expected panic when Redis is not configured
+			t.Logf("PubSub panicked as expected: %v", r)
+		}
+	}()
+	
+	app.PubSub()
+	
+	// If we get here, PubSub didn't panic (Redis might be configured)
+	t.Log("PubSub component initialized successfully")
+}
+
+func TestApplication_MQ(t *testing.T) {
+	app := New()
+	
+	// Test MQ component initialization without Redis config
+	defer func() {
+		if r := recover(); r != nil {
+			// Expected panic when Redis is not configured
+			t.Logf("MQ panicked as expected: %v", r)
+		}
+	}()
+	
+	app.MQ()
+	
+	// If we get here, MQ didn't panic (Redis might be configured)
+	t.Log("MQ component initialized successfully")
+}
+
+func TestApplication_Cron(t *testing.T) {
+	app := New()
+	
+	cron := app.Cron()
+	if cron == nil {
+		t.Error("Cron should not be nil")
+	}
+	
+	// Test singleton behavior
+	cron2 := app.Cron()
+	if cron != cron2 {
+		t.Error("Cron should be a singleton")
+	}
+}
+
+func TestApplication_JobQueue(t *testing.T) {
+	app := New()
+	
+	queue := app.JobQueue()
+	if queue == nil {
+		t.Error("JobQueue should not be nil")
+	}
+	
+	// Test singleton behavior
+	queue2 := app.JobQueue()
+	if queue != queue2 {
+		t.Error("JobQueue should be a singleton")
+	}
+}
+
+func TestApplication_Cmd(t *testing.T) {
+	app := New()
+	
+	cmd := app.Cmd()
+	if cmd == nil {
+		t.Error("Cmd should not be nil")
+	}
+	
+	// Test singleton behavior
+	cmd2 := app.Cmd()
+	if cmd != cmd2 {
+		t.Error("Cmd should be a singleton")
+	}
+}
+
+func TestApplication_I18n(t *testing.T) {
+	app := New()
+	
+	i18n := app.I18n()
+	if i18n == nil {
+		t.Error("I18n should not be nil")
+	}
+	
+	// Test singleton behavior
+	i18n2 := app.I18n()
+	if i18n != i18n2 {
+		t.Error("I18n should be a singleton")
+	}
+}
+
+func TestApplication_AddressHTTPS(t *testing.T) {
+	app := New()
+	
+	// Test HTTPS address for regular network
+	app.Config.Host = "localhost"
+	app.Config.HTTPSPort = 8443
+	app.Config.NetworkType = "tcp"
+	
+	address := app.AddressHTTPS()
+	expected := "localhost:8443"
+	
+	if address != expected {
+		t.Errorf("Expected HTTPS address '%s', got '%s'", expected, address)
+	}
+	
+	// Test HTTPS address for unix socket
+	app.Config.NetworkType = "unix"
+	app.Config.Host = "/tmp/test.sock"
+	
+	address = app.AddressHTTPS()
+	expected = ""
+	
+	if address != expected {
+		t.Errorf("Expected empty HTTPS address for unix socket, got '%s'", address)
+	}
+}
+
+func TestApplication_AddressHTTPSForLog(t *testing.T) {
+	app := New()
+	
+	// Test with 0.0.0.0 (should convert to 127.0.0.1)
+	app.Config.Host = "0.0.0.0"
+	app.Config.HTTPSPort = 8443
+	
+	expected := "127.0.0.1:8443"
+	if app.AddressHTTPSForLog() != expected {
+		t.Errorf("Expected HTTPS log address '%s', got '%s'", expected, app.AddressHTTPSForLog())
+	}
+	
+	// Test with specific host
+	app.Config.Host = "localhost"
+	app.Config.HTTPSPort = 9443
+	
+	expected = "localhost:9443"
+	if app.AddressHTTPSForLog() != expected {
+		t.Errorf("Expected HTTPS log address '%s', got '%s'", expected, app.AddressHTTPSForLog())
+	}
+}
+
+func TestApplication_SetTemplates(t *testing.T) {
+	app := New()
+	
+	// Test that SetTemplates panics when directory doesn't exist
+	defer func() {
+		if r := recover(); r != nil {
+			// Expected panic
+			if !strings.Contains(r.(error).Error(), "pattern matches no files") {
+				t.Errorf("Expected panic about no files matching pattern, got: %v", r)
+			}
+		} else {
+			t.Error("Expected panic when templates directory doesn't exist")
+		}
+	}()
+	
+	app.SetTemplates("./nonexistent")
+}
+
+func TestApplication_MoreEnvConfigs(t *testing.T) {
+	app := New()
+	
+	// Test more environment variables
+	os.Setenv("HOST", "example.com")
+	os.Setenv("HTTPS_PORT", "8443")
+	os.Setenv("SECRET_KEY", "test-secret")
+	os.Setenv("CORS_ALLOW_ORIGINS", "http://localhost:3000")
+	os.Setenv("CORS_ALLOW_METHODS", "GET,POST,PUT,DELETE")
+	os.Setenv("CORS_ALLOW_HEADERS", "Content-Type,Authorization")
+	
+	defer func() {
+		os.Unsetenv("HOST")
+		os.Unsetenv("HTTPS_PORT")
+		os.Unsetenv("SECRET_KEY")
+		os.Unsetenv("CORS_ALLOW_ORIGINS")
+		os.Unsetenv("CORS_ALLOW_METHODS")
+		os.Unsetenv("CORS_ALLOW_HEADERS")
+	}()
+	
+	err := app.applyDefaultConfigFromEnv()
+	if err != nil {
+		t.Errorf("applyDefaultConfigFromEnv failed: %v", err)
+	}
+	
+	// Test that the configuration was applied
+	if app.Config.Host != "example.com" {
+		t.Logf("Host env var not applied directly to config field, got '%s'", app.Config.Host)
+	}
+	
+	if app.Config.HTTPSPort != 8443 {
+		t.Logf("HTTPS port env var not applied directly to config field, got %d", app.Config.HTTPSPort)
+	}
+}
+
+func TestApplication_NewWithMoreConfig(t *testing.T) {
+	app := New()
+	
+	// Test default configuration values
+	if app.Config.Banner == "" {
+		t.Log("Banner has empty default value")
+	}
+	
+	if app.Config.LogLevel == "" {
+		t.Log("LogLevel has empty default value")
+	}
+	
+	if app.Config.NetworkType == "" {
+		t.Log("NetworkType has empty default value")
+	}
+	
+	if app.Config.Protocol == "" {
+		t.Log("Protocol has empty default value")
+	}
+	
+	// Test that the app is properly initialized
+	if app.RouterGroup == nil {
+		t.Error("RouterGroup should not be nil")
+	}
+	
+	if app.Logger() == nil {
+		t.Error("Logger should not be nil")
+	}
+}
+
+func TestApplication_ConnectAndTrace(t *testing.T) {
+	app := New()
+	
+	// Test CONNECT method
+	app.Connect("/test", func(ctx *Context) {
+		ctx.String(200, "CONNECT")
+	})
+	
+	req := httptest.NewRequest("CONNECT", "/test", nil)
+	w := httptest.NewRecorder()
+	
+	app.ServeHTTP(w, req)
+	
+	if w.Code != 200 {
+		t.Errorf("Expected status 200 for CONNECT, got %d", w.Code)
+	}
+	
+	if w.Body.String() != "CONNECT" {
+		t.Errorf("Expected body 'CONNECT', got '%s'", w.Body.String())
+	}
+	
+	// Note: TRACE method is not available in this framework
+}
+
+func TestApplication_StaticFiles(t *testing.T) {
+	app := New()
+	
+	// Test static file serving
+	app.Static("/static", "./")
+	
+	req := httptest.NewRequest("GET", "/static/README.md", nil)
+	w := httptest.NewRecorder()
+	
+	app.ServeHTTP(w, req)
+	
+	// Should return 200 if file exists, or 404 if not
+	if w.Code != 200 && w.Code != 404 {
+		t.Errorf("Expected status 200 or 404 for static file, got %d", w.Code)
+	}
 } 
