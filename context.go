@@ -196,16 +196,9 @@ func (ctx *Context) Context() context.Context {
 // Next runs the next handler in the middleware stack
 func (ctx *Context) Next() {
 	ctx.index++
-	s := len(ctx.handlers)
-	// for ; ctx.index < s; ctx.index ++ {
-	// 	ctx.handlers[ctx.index](ctx)
-	// }
-
-	if ctx.index >= s {
-		panic("Handler cannot call ctx.Next")
+	if ctx.index < len(ctx.handlers) {
+		ctx.handlers[ctx.index](ctx)
 	}
-
-	ctx.handlers[ctx.index](ctx)
 }
 
 // Query returns the query string parameter with the given name.

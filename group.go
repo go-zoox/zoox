@@ -6,10 +6,10 @@ import (
 	"mime"
 	"net/http"
 	"path"
+	"regexp"
+	"strings"
 	"time"
 
-	"github.com/go-zoox/core-utils/regexp"
-	"github.com/go-zoox/core-utils/strings"
 	"github.com/go-zoox/fs"
 	"github.com/go-zoox/headers"
 	"github.com/go-zoox/proxy"
@@ -49,30 +49,127 @@ func (g *RouterGroup) Group(prefix string, cb ...GroupFunc) *RouterGroup {
 	return newGroup
 }
 
+// matchPath 改进的路径匹配逻辑
 func (g *RouterGroup) matchPath(path string) (ok bool) {
-	// /v1 	=> /v1
-	// /v1/ => /v1
-	if ok := strings.HasPrefix(path, g.prefix); ok {
-		return ok
+	// 空前缀匹配所有路径
+	if g.prefix == "" || g.prefix == "/" {
+		return true
 	}
 
-	// @TODO /v1/containers/123456/terminal => /v1/containers/:id
-	re := g.prefix
-	if strings.Contains(re, ":") {
-		re = strings.ReplaceAllFunc(re, ":\\w+", func(b []byte) []byte {
-			return []byte("\\w+")
-		})
-	} else if strings.Contains(re, "{") {
-		re = strings.ReplaceAllFunc(re, "{.*}", func(b []byte) []byte {
-			return []byte("\\w+")
-		})
+	// 确保前缀以 / 开头
+	prefix := g.prefix
+	if !strings.HasPrefix(prefix, "/") {
+		prefix = "/" + prefix
 	}
 
-	return regexp.Match(re, path)
+	// 确保路径以 / 开头
+	if !strings.HasPrefix(path, "/") {
+		path = "/" + path
+	}
+
+	// 精确匹配
+	if path == prefix {
+		return true
+	}
+
+	// 前缀匹配，但需要检查边界
+	if strings.HasPrefix(path, prefix) {
+		// 确保前缀后面是 / 或者前缀本身以 / 结尾
+		if strings.HasSuffix(prefix, "/") || 
+		   (len(path) > len(prefix) && path[len(prefix)] == '/') {
+			return true
+		}
+	}
+
+	// 处理动态路径参数
+	if strings.Contains(prefix, ":") || strings.Contains(prefix, "{") || strings.Contains(prefix, "*") {
+		return g.matchDynamicPath(path, prefix)
+	}
+
+	return false
+}
+
+// matchDynamicPath 处理动态路径匹配
+func (g *RouterGroup) matchDynamicPath(path, prefix string) bool {
+	// 将动态参数转换为正则表达式
+	pattern := g.buildRegexPattern(prefix)
+	
+	// 使用正则表达式匹配
+	matched, err := regexp.MatchString("^"+pattern+"(/.*)?$", path)
+	if err != nil {
+		return false
+	}
+	
+	// 如果没有匹配，尝试精确匹配（用于通配符情况）
+	if !matched {
+		matched, err = regexp.MatchString("^"+pattern+"$", path)
+		if err != nil {
+			return false
+		}
+	}
+	
+	return matched
+}
+
+// buildRegexPattern 构建正则表达式模式
+func (g *RouterGroup) buildRegexPattern(prefix string) string {
+	// 转义特殊字符
+	pattern := regexp.QuoteMeta(prefix)
+	
+	// 处理 :param 格式的参数 - 冒号不会被QuoteMeta转义
+	re1 := regexp.MustCompile(`:([a-zA-Z_][a-zA-Z0-9_]*)`)
+	pattern = re1.ReplaceAllString(pattern, `([^/]+)`)
+	
+	// 处理 {param} 格式的参数 - 花括号会被转义为\{和\}
+	re2 := regexp.MustCompile(`\\{([^}]+)\\}`)
+	pattern = re2.ReplaceAllString(pattern, `([^/]+)`)
+	
+	// 处理通配符 * - 星号会被转义为\*
+	re3 := regexp.MustCompile(`\\\*([a-zA-Z_][a-zA-Z0-9_]*)?`)
+	pattern = re3.ReplaceAllString(pattern, `(.*)`)
+	
+	return pattern
+}
+
+// getAllMiddlewares 获取所有中间件（包括父级）
+func (g *RouterGroup) getAllMiddlewares() []HandlerFunc {
+	var middlewares []HandlerFunc
+	
+	// 递归收集父级中间件
+	if g.parent != nil {
+		middlewares = append(middlewares, g.parent.getAllMiddlewares()...)
+	}
+	
+	// 添加当前级别的中间件
+	middlewares = append(middlewares, g.middlewares...)
+	
+	return middlewares
+}
+
+// joinPath 正确拼接URL路径
+func (g *RouterGroup) joinPath(path string) string {
+	if g.prefix == "" {
+		return path
+	}
+	
+	// 处理根路径的特殊情况
+	if g.prefix == "/" && path == "/" {
+		return "/"
+	}
+	
+	// 确保前缀和路径都正确处理
+	prefix := strings.TrimSuffix(g.prefix, "/")
+	path = strings.TrimPrefix(path, "/")
+	
+	if path == "" {
+		return prefix
+	}
+	
+	return prefix + "/" + path
 }
 
 func (g *RouterGroup) addRoute(method string, path string, handler ...HandlerFunc) {
-	pathX := fs.JoinPath(g.prefix, path)
+	pathX := g.joinPath(path)
 	g.app.router.addRoute(method, pathX, handler...)
 }
 
@@ -164,7 +261,7 @@ func (g *RouterGroup) Proxy(path, target string, options ...func(cfg *ProxyConfi
 	handler := WrapH(proxy.NewSingleHost(target, &cfg.SingleHostConfig))
 
 	g.Use(func(ctx *Context) {
-		if strings.StartsWith(ctx.Path, path) {
+		if strings.HasPrefix(ctx.Path, path) {
 			if cfg.OnRequestWithContext != nil {
 				if err := cfg.OnRequestWithContext(ctx); err != nil {
 					ctx.Logger.Errorf("proxy error: %s", err)
@@ -349,7 +446,7 @@ func (g *RouterGroup) Static(basePath string, rootDir string, options ...*Static
 		opts = options[0]
 	}
 
-	if !strings.StartsWith(basePath, "/") {
+	if !strings.HasPrefix(basePath, "/") {
 		rootDir = fs.JoinCurrentDir(basePath)
 	}
 
@@ -363,7 +460,7 @@ func (g *RouterGroup) Static(basePath string, rootDir string, options ...*Static
 			return
 		}
 
-		if !strings.StartsWith(ctx.Path, absolutePath) {
+		if !strings.HasPrefix(ctx.Path, absolutePath) {
 			ctx.Next()
 			return
 		}

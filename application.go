@@ -368,10 +368,39 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	ctx := app.createContext(w, req)
 
 	var middlewares []HandlerFunc
+	var matchedGroups []*RouterGroup
 
+	// 收集所有匹配的 groups，按层级深度排序
 	for _, group := range app.groups {
-		if ok := group.matchPath(ctx.Path); ok {
-			middlewares = append(middlewares, group.middlewares...)
+		if group.matchPath(ctx.Path) {
+			matchedGroups = append(matchedGroups, group)
+		}
+	}
+
+	// 按前缀长度排序，确保更具体的路径先匹配
+	for i := 0; i < len(matchedGroups); i++ {
+		for j := i + 1; j < len(matchedGroups); j++ {
+			if len(matchedGroups[i].prefix) < len(matchedGroups[j].prefix) {
+				matchedGroups[i], matchedGroups[j] = matchedGroups[j], matchedGroups[i]
+			}
+		}
+	}
+
+	// 收集中间件，避免重复
+	middlewareMap := make(map[*HandlerFunc]bool)
+	
+	// 只取最具体的匹配 group
+	if len(matchedGroups) > 0 {
+		group := matchedGroups[0]
+		allMiddlewares := group.getAllMiddlewares()
+		
+		for _, middleware := range allMiddlewares {
+			// 使用函数地址作为键来避免重复
+			middlewarePtr := &middleware
+			if !middlewareMap[middlewarePtr] {
+				middlewareMap[middlewarePtr] = true
+				middlewares = append(middlewares, middleware)
+			}
 		}
 	}
 
