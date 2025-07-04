@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"reflect"
 	"strings"
 	"sync"
 	"text/template"
@@ -62,6 +63,10 @@ type Application struct {
 	*RouterGroup
 	router *router
 	groups []*RouterGroup
+	// Pre-sorted groups by prefix length (longest first) for performance
+	sortedGroups []*RouterGroup
+	// Cached middleware chains for each group to avoid collection and deduplication on every request
+	groupMiddlewareCache map[*RouterGroup][]HandlerFunc
 	// templates
 	templates     *template.Template
 	templateFuncs template.FuncMap
@@ -135,6 +140,7 @@ func New() *Application {
 		router:        newRouter(),
 		templateFuncs: template.FuncMap{},
 		notfound:      NotFound(),
+		groupMiddlewareCache: make(map[*RouterGroup][]HandlerFunc),
 	}
 
 	app.RouterGroup = newRouterGroup(app, "")
@@ -152,6 +158,9 @@ func New() *Application {
 		g := app.Group(gprefix)
 		gfn(g)
 	}
+
+	// Initial sort of groups for optimal performance
+	app.sortGroups()
 
 	return app
 }
@@ -370,38 +379,22 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	var middlewares []HandlerFunc
 	var matchedGroups []*RouterGroup
 
-	// Collect all matching groups, sorted by hierarchy depth
-	for _, group := range app.groups {
+	// Use pre-sorted groups instead of sorting on every request
+	for _, group := range app.sortedGroups {
 		if group.matchPath(ctx.Path) {
 			matchedGroups = append(matchedGroups, group)
 		}
 	}
 
-	// Sort by prefix length to ensure more specific paths match first
-	for i := 0; i < len(matchedGroups); i++ {
-		for j := i + 1; j < len(matchedGroups); j++ {
-			if len(matchedGroups[i].prefix) < len(matchedGroups[j].prefix) {
-				matchedGroups[i], matchedGroups[j] = matchedGroups[j], matchedGroups[i]
-			}
-		}
-	}
-
-	// Collect middlewares, avoiding duplicates
-	middlewareMap := make(map[*HandlerFunc]bool)
-	
-	// Only take the most specific matching group
+	// Use precomputed middleware cache for optimal performance
 	if len(matchedGroups) > 0 {
+		// Take the first matching group (most specific due to pre-sorting)
 		group := matchedGroups[0]
-		allMiddlewares := group.getAllMiddlewares()
 		
-		for _, middleware := range allMiddlewares {
-			// Use function address as key to avoid duplicates
-			middlewarePtr := &middleware
-			if !middlewareMap[middlewarePtr] {
-				middlewareMap[middlewarePtr] = true
-				middlewares = append(middlewares, middleware)
-			}
-		}
+		// Get cached middleware chain (already deduplicated)
+		// All groups are guaranteed to be in cache since precomputeMiddlewareChains()
+		// processes all groups in app.groups
+		middlewares = app.groupMiddlewareCache[group]
 	}
 
 	ctx.handlers = middlewares
@@ -842,3 +835,77 @@ func (app *Application) serveHTTPS(ctx context.Context) error {
 
 // H is a shortcut for map[string]interface{}
 type H map[string]interface{}
+
+// sortGroups sorts groups by prefix length (longest first) for optimal matching
+func (app *Application) sortGroups() {
+	// Create a copy of groups slice
+	app.sortedGroups = make([]*RouterGroup, len(app.groups))
+	copy(app.sortedGroups, app.groups)
+	
+	// Sort by prefix length (longest first) for most specific matching
+	for i := 0; i < len(app.sortedGroups); i++ {
+		for j := i + 1; j < len(app.sortedGroups); j++ {
+			if len(app.sortedGroups[i].prefix) < len(app.sortedGroups[j].prefix) {
+				app.sortedGroups[i], app.sortedGroups[j] = app.sortedGroups[j], app.sortedGroups[i]
+			}
+		}
+	}
+	
+	// Precompute middleware chains for all groups
+	app.precomputeMiddlewareChains()
+}
+
+// precomputeMiddlewareChains calculates and caches unique middleware chains for all groups
+func (app *Application) precomputeMiddlewareChains() {
+	// Clear existing cache
+	app.groupMiddlewareCache = make(map[*RouterGroup][]HandlerFunc)
+	
+	// Precompute for each group
+	for _, group := range app.groups {
+		// Collect all middlewares from group hierarchy
+		var allMiddlewares []HandlerFunc
+		allMiddlewares = app.collectGroupMiddlewares(group, allMiddlewares)
+		
+		// Deduplicate middlewares using function pointer comparison
+		uniqueMiddlewares := app.deduplicateMiddlewares(allMiddlewares)
+		
+		// Cache the result
+		app.groupMiddlewareCache[group] = uniqueMiddlewares
+	}
+}
+
+// collectGroupMiddlewares recursively collects middlewares from group hierarchy
+func (app *Application) collectGroupMiddlewares(group *RouterGroup, result []HandlerFunc) []HandlerFunc {
+	// Start with global middlewares (from the Application)
+	result = append(result, app.middlewares...)
+	
+	// Get all group middlewares using the existing getAllMiddlewares method
+	groupMiddlewares := group.getAllMiddlewares()
+	
+	// Add group middlewares to the result
+	result = append(result, groupMiddlewares...)
+	
+	return result
+}
+
+// deduplicateMiddlewares removes duplicate middlewares while preserving order
+func (app *Application) deduplicateMiddlewares(middlewares []HandlerFunc) []HandlerFunc {
+	if len(middlewares) == 0 {
+		return middlewares
+	}
+	
+	// Use reflection to compare function values
+	seen := make(map[reflect.Value]bool)
+	var unique []HandlerFunc
+	
+	for _, middleware := range middlewares {
+		funcValue := reflect.ValueOf(middleware)
+		
+		if !seen[funcValue] {
+			seen[funcValue] = true
+			unique = append(unique, middleware)
+		}
+	}
+	
+	return unique
+}
