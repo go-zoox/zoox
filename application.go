@@ -159,9 +159,6 @@ func New() *Application {
 		gfn(g)
 	}
 
-	// Initial sort of groups for optimal performance
-	app.sortGroups()
-
 	return app
 }
 
