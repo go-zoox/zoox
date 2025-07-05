@@ -137,9 +137,9 @@ type Application struct {
 // New is the constructor of zoox.Application.
 func New() *Application {
 	app := &Application{
-		router:        newRouter(),
-		templateFuncs: template.FuncMap{},
-		notfound:      NotFound(),
+		router:               newRouter(),
+		templateFuncs:        template.FuncMap{},
+		notfound:             NotFound(),
 		groupMiddlewareCache: make(map[*RouterGroup][]HandlerFunc),
 	}
 
@@ -390,7 +390,7 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if len(matchedGroups) > 0 {
 		// Take the first matching group (most specific due to pre-sorting)
 		group := matchedGroups[0]
-		
+
 		// Get cached middleware chain (already deduplicated)
 		// All groups are guaranteed to be in cache since precomputeMiddlewareChains()
 		// processes all groups in app.groups
@@ -841,7 +841,7 @@ func (app *Application) sortGroups() {
 	// Create a copy of groups slice
 	app.sortedGroups = make([]*RouterGroup, len(app.groups))
 	copy(app.sortedGroups, app.groups)
-	
+
 	// Sort by prefix length (longest first) for most specific matching
 	for i := 0; i < len(app.sortedGroups); i++ {
 		for j := i + 1; j < len(app.sortedGroups); j++ {
@@ -850,7 +850,7 @@ func (app *Application) sortGroups() {
 			}
 		}
 	}
-	
+
 	// Precompute middleware chains for all groups
 	app.precomputeMiddlewareChains()
 }
@@ -859,16 +859,16 @@ func (app *Application) sortGroups() {
 func (app *Application) precomputeMiddlewareChains() {
 	// Clear existing cache
 	app.groupMiddlewareCache = make(map[*RouterGroup][]HandlerFunc)
-	
+
 	// Precompute for each group
 	for _, group := range app.groups {
 		// Collect all middlewares from group hierarchy
 		var allMiddlewares []HandlerFunc
 		allMiddlewares = app.collectGroupMiddlewares(group, allMiddlewares)
-		
+
 		// Deduplicate middlewares using function pointer comparison
 		uniqueMiddlewares := app.deduplicateMiddlewares(allMiddlewares)
-		
+
 		// Cache the result
 		app.groupMiddlewareCache[group] = uniqueMiddlewares
 	}
@@ -878,13 +878,13 @@ func (app *Application) precomputeMiddlewareChains() {
 func (app *Application) collectGroupMiddlewares(group *RouterGroup, result []HandlerFunc) []HandlerFunc {
 	// Start with global middlewares (from the Application)
 	result = append(result, app.middlewares...)
-	
+
 	// Get all group middlewares using the existing getAllMiddlewares method
 	groupMiddlewares := group.getAllMiddlewares()
-	
+
 	// Add group middlewares to the result
 	result = append(result, groupMiddlewares...)
-	
+
 	return result
 }
 
@@ -893,19 +893,19 @@ func (app *Application) deduplicateMiddlewares(middlewares []HandlerFunc) []Hand
 	if len(middlewares) == 0 {
 		return middlewares
 	}
-	
+
 	// Use reflection to compare function values
 	seen := make(map[reflect.Value]bool)
 	var unique []HandlerFunc
-	
+
 	for _, middleware := range middlewares {
 		funcValue := reflect.ValueOf(middleware)
-		
+
 		if !seen[funcValue] {
 			seen[funcValue] = true
 			unique = append(unique, middleware)
 		}
 	}
-	
+
 	return unique
 }

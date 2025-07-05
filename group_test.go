@@ -22,7 +22,7 @@ func TestGroupMatchPath(t *testing.T) {
 		{"should not match similar prefix", "/api", "/apiv2", false},
 		{"should not match partial prefix", "/api", "/ap", false},
 		{"should not match different path", "/api", "/users", false},
-		
+
 		// Boundary tests
 		{"match dynamic parameter with colon", "/users/:id", "/users/123", true},
 		{"match dynamic parameter with braces", "/users/{id}", "/users/123", true},
@@ -30,7 +30,7 @@ func TestGroupMatchPath(t *testing.T) {
 		{"match wildcard", "/files/*path", "/files/docs/readme.txt", true},
 		{"dynamic parameter with additional path", "/users/:id", "/users/123/profile", true},
 		{"should not match wrong dynamic path", "/users/:id", "/posts/123", false},
-		
+
 		// Dynamic parameter tests
 		{"match dynamic parameter with colon", "/users/:id", "/users/123", true},
 		{"match dynamic parameter with braces", "/users/{id}", "/users/123", true},
@@ -38,7 +38,7 @@ func TestGroupMatchPath(t *testing.T) {
 		{"match wildcard", "/files/*path", "/files/docs/readme.txt", true},
 		{"dynamic parameter with additional path", "/users/:id", "/users/123/profile", true},
 		{"should not match wrong dynamic path", "/users/:id", "/posts/123", false},
-		
+
 		// Complex scenarios
 		{"match dynamic parameter with colon", "/users/:id", "/users/123", true},
 		{"match dynamic parameter with braces", "/users/{id}", "/users/123", true},
@@ -46,7 +46,7 @@ func TestGroupMatchPath(t *testing.T) {
 		{"match wildcard", "/files/*path", "/files/docs/readme.txt", true},
 		{"dynamic parameter with additional path", "/users/:id", "/users/123/profile", true},
 		{"should not match wrong dynamic path", "/users/:id", "/posts/123", false},
-		
+
 		// Original test cases
 		{"original test case 1", "/v1", "/v1/users", true},
 		{"original test case 2", "/v1", "/v1", true},
@@ -67,57 +67,57 @@ func TestGroupMatchPath(t *testing.T) {
 
 func TestGroupMiddlewareInheritance(t *testing.T) {
 	app := New()
-	
+
 	// Record middleware execution order
 	var executionOrder []string
-	
+
 	// Root level middleware
 	app.Use(func(ctx *Context) {
 		executionOrder = append(executionOrder, "root")
 		ctx.Next()
 	})
-	
+
 	// First level group
 	v1 := app.Group("/v1")
 	v1.Use(func(ctx *Context) {
 		executionOrder = append(executionOrder, "v1")
 		ctx.Next()
 	})
-	
+
 	// Second level group
 	users := v1.Group("/users")
 	users.Use(func(ctx *Context) {
 		executionOrder = append(executionOrder, "users")
 		ctx.Next()
 	})
-	
+
 	users.Get("/:id", func(ctx *Context) {
 		executionOrder = append(executionOrder, "handler")
 		ctx.String(200, "user")
 	})
-	
+
 	// Test request
 	req := httptest.NewRequest("GET", "/v1/users/123", nil)
 	w := httptest.NewRecorder()
 	app.ServeHTTP(w, req)
-	
+
 	// Verify middleware execution order
 	expected := []string{"root", "v1", "users", "handler"}
 	if len(executionOrder) != len(expected) {
 		t.Errorf("Expected %d middleware executions, got %d", len(expected), len(executionOrder))
 	}
-	
+
 	for i, middleware := range expected {
 		if i >= len(executionOrder) || executionOrder[i] != middleware {
 			t.Errorf("Expected middleware %s at position %d, got %s", middleware, i, executionOrder[i])
 		}
 	}
-	
+
 	// Verify response
 	if w.Code != 200 {
 		t.Errorf("Expected status 200, got %d", w.Code)
 	}
-	
+
 	if w.Body.String() != "user" {
 		t.Errorf("Expected body 'user', got '%s'", w.Body.String())
 	}
@@ -192,25 +192,25 @@ func TestGroupPathJoining(t *testing.T) {
 
 func TestGroupNestedRouting(t *testing.T) {
 	app := New()
-	
+
 	// Create nested routing groups
 	api := app.Group("/api")
 	v1 := api.Group("/v1")
 	users := v1.Group("/users")
-	
+
 	users.Get("/:id", func(ctx *Context) {
 		ctx.String(200, "user-"+ctx.Param().Get("id").String())
 	})
-	
+
 	// Test request
 	req := httptest.NewRequest("GET", "/api/v1/users/123", nil)
 	w := httptest.NewRecorder()
 	app.ServeHTTP(w, req)
-	
+
 	if w.Code != 200 {
 		t.Errorf("Expected status 200, got %d", w.Code)
 	}
-	
+
 	// Verify response content
 	expected := "user-123"
 	if w.Body.String() != expected {
@@ -221,43 +221,43 @@ func TestGroupNestedRouting(t *testing.T) {
 func TestGroupMiddlewareOrder(t *testing.T) {
 	app := New()
 	var order []string
-	
+
 	// Root level middleware
 	app.Use(func(ctx *Context) {
 		order = append(order, "global")
 		ctx.Next()
 	})
-	
+
 	// Group middleware
 	api := app.Group("/api")
 	api.Use(func(ctx *Context) {
 		order = append(order, "api")
 		ctx.Next()
 	})
-	
+
 	v1 := api.Group("/v1")
 	v1.Use(func(ctx *Context) {
 		order = append(order, "v1")
 		ctx.Next()
 	})
-	
+
 	// Sub-group middleware
 	v1.Get("/test", func(ctx *Context) {
 		order = append(order, "handler")
 		ctx.String(200, "ok")
 	})
-	
+
 	// Test request
 	req := httptest.NewRequest("GET", "/api/v1/test", nil)
 	w := httptest.NewRecorder()
 	app.ServeHTTP(w, req)
-	
+
 	// Verify middleware execution order
 	expected := []string{"global", "api", "v1", "handler"}
 	if len(order) != len(expected) {
 		t.Errorf("Expected %d middleware executions, got %d", len(expected), len(order))
 	}
-	
+
 	for i, middleware := range expected {
 		if i >= len(order) || order[i] != middleware {
 			t.Errorf("Expected middleware %s at position %d, got %s", middleware, i, order[i])
@@ -267,31 +267,31 @@ func TestGroupMiddlewareOrder(t *testing.T) {
 
 func TestGroupConflictResolution(t *testing.T) {
 	app := New()
-	
+
 	// Create two potentially conflicting groups
 	api := app.Group("/api")
 	v1 := api.Group("/v1")
-	
+
 	// More specific group
 	users := v1.Group("/users")
 	users.Get("/list", func(ctx *Context) {
 		ctx.String(200, "users-list")
 	})
-	
+
 	// Less specific group with different path
 	v1.Get("/info", func(ctx *Context) {
 		ctx.String(200, "v1-info")
 	})
-	
+
 	// Test request - should match more specific path
 	req := httptest.NewRequest("GET", "/api/v1/users/list", nil)
 	w := httptest.NewRecorder()
 	app.ServeHTTP(w, req)
-	
+
 	if w.Code != 200 {
 		t.Errorf("Expected status 200, got %d", w.Code)
 	}
-	
+
 	// Verify only the most specific match is executed
 	expected := "users-list"
 	if w.Body.String() != expected {
@@ -302,7 +302,7 @@ func TestGroupConflictResolution(t *testing.T) {
 func BenchmarkGroupMatchPath(b *testing.B) {
 	group := &RouterGroup{prefix: "/api/v1/users/:id"}
 	path := "/api/v1/users/123/profile"
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		group.matchPath(path)
@@ -311,19 +311,19 @@ func BenchmarkGroupMatchPath(b *testing.B) {
 
 func BenchmarkGroupMiddlewareCollection(b *testing.B) {
 	app := New()
-	
+
 	// Create deeply nested groups
 	api := app.Group("/api")
 	v1 := api.Group("/v1")
 	users := v1.Group("/users")
 	profile := users.Group("/profile")
-	
+
 	// Add middlewares at each level
 	api.Use(func(ctx *Context) { ctx.Next() })
 	v1.Use(func(ctx *Context) { ctx.Next() })
 	users.Use(func(ctx *Context) { ctx.Next() })
 	profile.Use(func(ctx *Context) { ctx.Next() })
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		profile.getAllMiddlewares()

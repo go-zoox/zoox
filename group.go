@@ -41,7 +41,7 @@ func (g *RouterGroup) Group(prefix string, cb ...GroupFunc) *RouterGroup {
 	newGroup := newRouterGroup(g.app, g.prefix+prefix)
 	newGroup.parent = g
 	g.app.groups = append(g.app.groups, newGroup)
-	
+
 	// Sort groups by prefix length for optimal matching performance
 	// This also recalculates middleware cache for all groups
 	g.app.sortGroups()
@@ -79,8 +79,8 @@ func (g *RouterGroup) matchPath(path string) (ok bool) {
 	// Prefix match, but need to check boundaries
 	if strings.HasPrefix(path, prefix) {
 		// Ensure prefix is followed by / or prefix itself ends with /
-		if strings.HasSuffix(prefix, "/") || 
-		   (len(path) > len(prefix) && path[len(prefix)] == '/') {
+		if strings.HasSuffix(prefix, "/") ||
+			(len(path) > len(prefix) && path[len(prefix)] == '/') {
 			return true
 		}
 	}
@@ -97,13 +97,13 @@ func (g *RouterGroup) matchPath(path string) (ok bool) {
 func (g *RouterGroup) matchDynamicPath(path, prefix string) bool {
 	// Convert dynamic parameters to regular expressions
 	pattern := g.buildRegexPattern(prefix)
-	
+
 	// Use regular expression matching
 	matched, err := regexp.MatchString("^"+pattern+"(/.*)?$", path)
 	if err != nil {
 		return false
 	}
-	
+
 	// If no match, try exact matching (for wildcard cases)
 	if !matched {
 		matched, err = regexp.MatchString("^"+pattern+"$", path)
@@ -111,7 +111,7 @@ func (g *RouterGroup) matchDynamicPath(path, prefix string) bool {
 			return false
 		}
 	}
-	
+
 	return matched
 }
 
@@ -119,34 +119,34 @@ func (g *RouterGroup) matchDynamicPath(path, prefix string) bool {
 func (g *RouterGroup) buildRegexPattern(prefix string) string {
 	// Escape special characters
 	pattern := regexp.QuoteMeta(prefix)
-	
+
 	// Handle :param format parameters - colon is not escaped by QuoteMeta
 	re1 := regexp.MustCompile(`:([a-zA-Z_][a-zA-Z0-9_]*)`)
 	pattern = re1.ReplaceAllString(pattern, `([^/]+)`)
-	
+
 	// Handle {param} format parameters - braces are escaped as \{ and \}
 	re2 := regexp.MustCompile(`\\{([^}]+)\\}`)
 	pattern = re2.ReplaceAllString(pattern, `([^/]+)`)
-	
+
 	// Handle wildcard * - asterisk is escaped as \*
 	re3 := regexp.MustCompile(`\\\*([a-zA-Z_][a-zA-Z0-9_]*)?`)
 	pattern = re3.ReplaceAllString(pattern, `(.*)`)
-	
+
 	return pattern
 }
 
 // getAllMiddlewares gets all middlewares (including parent)
 func (g *RouterGroup) getAllMiddlewares() []HandlerFunc {
 	var middlewares []HandlerFunc
-	
+
 	// Recursively collect parent middlewares
 	if g.parent != nil {
 		middlewares = append(middlewares, g.parent.getAllMiddlewares()...)
 	}
-	
+
 	// Add current level middlewares
 	middlewares = append(middlewares, g.middlewares...)
-	
+
 	return middlewares
 }
 
@@ -155,20 +155,20 @@ func (g *RouterGroup) joinPath(path string) string {
 	if g.prefix == "" {
 		return path
 	}
-	
+
 	// Handle root path special case
 	if g.prefix == "/" && path == "/" {
 		return "/"
 	}
-	
+
 	// Ensure prefix and path are properly handled
 	prefix := strings.TrimSuffix(g.prefix, "/")
 	path = strings.TrimPrefix(path, "/")
-	
+
 	if path == "" {
 		return prefix
 	}
-	
+
 	return prefix + "/" + path
 }
 
@@ -320,7 +320,7 @@ func (g *RouterGroup) JSONRPC(path string, handler JSONRPCHandlerFunc) *RouterGr
 // Use adds a middleware to the group
 func (g *RouterGroup) Use(middlewares ...HandlerFunc) {
 	g.middlewares = append(g.middlewares, middlewares...)
-	
+
 	// Recalculate middleware cache when middlewares are added
 	g.app.sortGroups()
 }
