@@ -319,6 +319,9 @@ func (g *RouterGroup) JSONRPC(path string, handler JSONRPCHandlerFunc) *RouterGr
 // Use adds a middleware to the group
 func (g *RouterGroup) Use(middlewares ...HandlerFunc) {
 	g.middlewares = append(g.middlewares, middlewares...)
+	
+	// Update middleware cache since we've added new middlewares
+	g.app.precomputeMiddlewareChains()
 }
 
 func (g *RouterGroup) createStaticHandler(absolutePath string, fs http.FileSystem) HandlerFunc {
