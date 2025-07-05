@@ -322,9 +322,9 @@ func (app *Application) Run(addr ...string) (err error) {
 	// show runtime info
 	app.showRuntimeInfo()
 
-	// Sort groups and precompute middleware chains for optimal request handling performance
-	// This is done once at startup after all groups and middlewares are registered
-	app.sortGroups()
+	// Ensure middleware chains are precomputed for optimal request handling performance
+	// Groups are already maintained in sorted order, so we only need to ensure middleware cache is ready
+	app.ensureMiddlewareChainsReady()
 
 	// before ready
 	if app.lifecycle.beforeReady != nil {
@@ -377,17 +377,16 @@ func (app *Application) SetBeforeDestroy(fn func()) {
 }
 
 func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	// Ensure groups are sorted for test scenarios where Run() is not called
-	// This check is fast and only triggers sorting if groups haven't been sorted yet
-	app.ensureGroupsSorted()
+	// Ensure middleware chains are ready for test scenarios where Run() is not called
+	app.ensureMiddlewareChainsReady()
 
 	ctx := app.createContext(w, req)
 
 	var middlewares []HandlerFunc
 	var matchedGroups []*RouterGroup
 
-	// Use pre-sorted groups instead of sorting on every request
-	for _, group := range app.sortedGroups {
+	// Groups are already maintained in sorted order (longest prefix first)
+	for _, group := range app.groups {
 		if group.matchPath(ctx.Path) {
 			matchedGroups = append(matchedGroups, group)
 		}
@@ -395,7 +394,7 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	// Use precomputed middleware cache for optimal performance
 	if len(matchedGroups) > 0 {
-		// Take the first matching group (most specific due to pre-sorting)
+		// Take the first matching group (most specific due to maintained sorting)
 		group := matchedGroups[0]
 
 		// Get cached middleware chain (already deduplicated)
@@ -843,19 +842,14 @@ func (app *Application) serveHTTPS(ctx context.Context) error {
 // H is a shortcut for map[string]interface{}
 type H map[string]interface{}
 
-// sortGroups sorts groups by prefix length (longest first) for optimal matching
+// sortGroups ensures groups are sorted and middleware chains are precomputed
+// This is now mainly used for initialization and testing scenarios
 func (app *Application) sortGroups() {
-	// Create a copy of groups slice
-	app.sortedGroups = make([]*RouterGroup, len(app.groups))
-	copy(app.sortedGroups, app.groups)
-
-	// Sort by prefix length (longest first) for most specific matching
-	for i := 0; i < len(app.sortedGroups); i++ {
-		for j := i + 1; j < len(app.sortedGroups); j++ {
-			if len(app.sortedGroups[i].prefix) < len(app.sortedGroups[j].prefix) {
-				app.sortedGroups[i], app.sortedGroups[j] = app.sortedGroups[j], app.sortedGroups[i]
-			}
-		}
+	// Groups are already maintained in sorted order during insertion
+	// but we need to ensure sortedGroups is populated for consistency
+	if app.sortedGroups == nil || len(app.sortedGroups) != len(app.groups) {
+		app.sortedGroups = make([]*RouterGroup, len(app.groups))
+		copy(app.sortedGroups, app.groups)
 	}
 
 	// Precompute middleware chains for all groups
@@ -917,9 +911,41 @@ func (app *Application) deduplicateMiddlewares(middlewares []HandlerFunc) []Hand
 	return unique
 }
 
-// ensureGroupsSorted ensures groups are sorted for test scenarios where Run() is not called
-func (app *Application) ensureGroupsSorted() {
+// ensureMiddlewareChainsReady ensures middleware chains are precomputed for optimal request handling performance
+func (app *Application) ensureMiddlewareChainsReady() {
 	app.once.sortGroups.Do(func() {
 		app.sortGroups()
 	})
+}
+
+// insertGroupSorted inserts a new group in the correct sorted position
+// Groups are sorted by prefix length (longest first) for optimal matching
+func (app *Application) insertGroupSorted(newGroup *RouterGroup) {
+	// Find the correct position to insert the new group
+	insertPos := len(app.groups)
+	newGroupPrefixLen := len(newGroup.prefix)
+	
+	for i, group := range app.groups {
+		if newGroupPrefixLen > len(group.prefix) {
+			insertPos = i
+			break
+		}
+	}
+	
+	// Insert the new group at the correct position
+	if insertPos == len(app.groups) {
+		// Append to the end
+		app.groups = append(app.groups, newGroup)
+	} else {
+		// Insert at the specific position
+		app.groups = append(app.groups[:insertPos+1], app.groups[insertPos:]...)
+		app.groups[insertPos] = newGroup
+	}
+	
+	// Update sortedGroups to maintain consistency
+	app.sortedGroups = make([]*RouterGroup, len(app.groups))
+	copy(app.sortedGroups, app.groups)
+	
+	// Precompute middleware chains for the new group
+	app.precomputeMiddlewareChains()
 }

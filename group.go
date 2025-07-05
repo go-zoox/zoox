@@ -40,7 +40,10 @@ func newRouterGroup(app *Application, prefix string) *RouterGroup {
 func (g *RouterGroup) Group(prefix string, cb ...GroupFunc) *RouterGroup {
 	newGroup := newRouterGroup(g.app, g.prefix+prefix)
 	newGroup.parent = g
-	g.app.groups = append(g.app.groups, newGroup)
+	
+	// Insert the new group in the correct sorted position (by prefix length, longest first)
+	// This maintains the sorted order without needing to sort at startup
+	g.app.insertGroupSorted(newGroup)
 
 	for _, fn := range cb {
 		fn(newGroup)
