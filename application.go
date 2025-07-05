@@ -118,7 +118,7 @@ type Application struct {
 		//
 		cmd sync.Once
 		//
-		sortGroups sync.Once
+		precomputeMiddleware sync.Once
 	}
 
 	// tls cert loader
@@ -839,14 +839,6 @@ func (app *Application) serveHTTPS(ctx context.Context) error {
 // H is a shortcut for map[string]interface{}
 type H map[string]interface{}
 
-// sortGroups ensures middleware chains are precomputed
-// This is now mainly used for initialization and testing scenarios
-func (app *Application) sortGroups() {
-	// Groups are already maintained in sorted order during insertion
-	// We only need to precompute middleware chains for all groups
-	app.precomputeMiddlewareChains()
-}
-
 // precomputeMiddlewareChains calculates and caches unique middleware chains for all groups
 func (app *Application) precomputeMiddlewareChains() {
 	// Clear existing cache
@@ -892,8 +884,8 @@ func (app *Application) deduplicateMiddlewares(middlewares []HandlerFunc) []Hand
 
 // ensureMiddlewareChainsReady ensures middleware chains are precomputed for optimal request handling performance
 func (app *Application) ensureMiddlewareChainsReady() {
-	app.once.sortGroups.Do(func() {
-		app.sortGroups()
+	app.once.precomputeMiddleware.Do(func() {
+		app.precomputeMiddlewareChains()
 	})
 }
 
