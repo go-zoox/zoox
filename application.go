@@ -322,6 +322,10 @@ func (app *Application) Run(addr ...string) (err error) {
 	// show runtime info
 	app.showRuntimeInfo()
 
+	// Sort groups and precompute middleware chains for optimal request handling performance
+	// This is done once at startup after all groups and middlewares are registered
+	app.sortGroups()
+
 	// before ready
 	if app.lifecycle.beforeReady != nil {
 		app.lifecycle.beforeReady()
@@ -373,11 +377,9 @@ func (app *Application) SetBeforeDestroy(fn func()) {
 }
 
 func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	// Ensure groups are sorted and middleware chains are precomputed exactly once
-	// This handles both cases: when called via Run() and when called directly in tests
-	app.once.sortGroups.Do(func() {
-		app.sortGroups()
-	})
+	// Ensure groups are sorted for test scenarios where Run() is not called
+	// This check is fast and only triggers sorting if groups haven't been sorted yet
+	app.ensureGroupsSorted()
 
 	ctx := app.createContext(w, req)
 
@@ -913,4 +915,11 @@ func (app *Application) deduplicateMiddlewares(middlewares []HandlerFunc) []Hand
 	}
 
 	return unique
+}
+
+// ensureGroupsSorted ensures groups are sorted for test scenarios where Run() is not called
+func (app *Application) ensureGroupsSorted() {
+	app.once.sortGroups.Do(func() {
+		app.sortGroups()
+	})
 }
