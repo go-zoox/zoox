@@ -120,6 +120,8 @@ type Application struct {
 		mq     sync.Once
 		//
 		cmd sync.Once
+		//
+		sortGroups sync.Once
 	}
 
 	// tls cert loader
@@ -371,6 +373,12 @@ func (app *Application) SetBeforeDestroy(fn func()) {
 }
 
 func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	// Ensure groups are sorted and middleware chains are precomputed exactly once
+	// This handles both cases: when called via Run() and when called directly in tests
+	app.once.sortGroups.Do(func() {
+		app.sortGroups()
+	})
+
 	ctx := app.createContext(w, req)
 
 	var middlewares []HandlerFunc

@@ -42,10 +42,6 @@ func (g *RouterGroup) Group(prefix string, cb ...GroupFunc) *RouterGroup {
 	newGroup.parent = g
 	g.app.groups = append(g.app.groups, newGroup)
 
-	// Sort groups by prefix length for optimal matching performance
-	// This also recalculates middleware cache for all groups
-	g.app.sortGroups()
-
 	for _, fn := range cb {
 		fn(newGroup)
 	}
@@ -320,9 +316,6 @@ func (g *RouterGroup) JSONRPC(path string, handler JSONRPCHandlerFunc) *RouterGr
 // Use adds a middleware to the group
 func (g *RouterGroup) Use(middlewares ...HandlerFunc) {
 	g.middlewares = append(g.middlewares, middlewares...)
-
-	// Recalculate middleware cache when middlewares are added
-	g.app.sortGroups()
 }
 
 func (g *RouterGroup) createStaticHandler(absolutePath string, fs http.FileSystem) HandlerFunc {
