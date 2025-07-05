@@ -117,8 +117,6 @@ type Application struct {
 		mq     sync.Once
 		//
 		cmd sync.Once
-		//
-		precomputeMiddleware sync.Once
 	}
 
 	// tls cert loader
@@ -319,8 +317,9 @@ func (app *Application) Run(addr ...string) (err error) {
 	// show runtime info
 	app.showRuntimeInfo()
 
-	// Groups are already maintained in sorted order with middleware chains precomputed
-	// No additional sorting or preprocessing needed at startup
+	// Ensure all middleware chains are precomputed before serving
+	// This handles any final middleware configurations that may not have been processed yet
+	app.precomputeMiddlewareChains()
 
 	// before ready
 	if app.lifecycle.beforeReady != nil {
@@ -373,12 +372,6 @@ func (app *Application) SetBeforeDestroy(fn func()) {
 }
 
 func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	// Only ensure middleware chains are ready if they haven't been precomputed yet
-	// This is primarily for test scenarios where Run() is not called
-	if len(app.groupMiddlewareCache) == 0 {
-		app.ensureMiddlewareChainsReady()
-	}
-
 	ctx := app.createContext(w, req)
 
 	var middlewares []HandlerFunc
@@ -880,13 +873,6 @@ func (app *Application) deduplicateMiddlewares(middlewares []HandlerFunc) []Hand
 	// Simple approach: don't deduplicate anything for now
 	// The issue might be in our understanding of what constitutes a duplicate
 	return middlewares
-}
-
-// ensureMiddlewareChainsReady ensures middleware chains are precomputed for optimal request handling performance
-func (app *Application) ensureMiddlewareChainsReady() {
-	app.once.precomputeMiddleware.Do(func() {
-		app.precomputeMiddlewareChains()
-	})
 }
 
 // insertGroupSorted inserts a new group in the correct sorted position
