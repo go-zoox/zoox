@@ -62,8 +62,6 @@ type Application struct {
 	*RouterGroup
 	router *router
 	groups []*RouterGroup
-	// Cached middleware chains for each group to avoid collection and deduplication on every request
-	groupMiddlewareCache map[*RouterGroup][]HandlerFunc
 	// templates
 	templates     *template.Template
 	templateFuncs template.FuncMap
@@ -134,10 +132,9 @@ type Application struct {
 // New is the constructor of zoox.Application.
 func New() *Application {
 	app := &Application{
-		router:               newRouter(),
-		templateFuncs:        template.FuncMap{},
-		notfound:             NotFound(),
-		groupMiddlewareCache: make(map[*RouterGroup][]HandlerFunc),
+		router:        newRouter(),
+		templateFuncs: template.FuncMap{},
+		notfound:      NotFound(),
 	}
 
 	app.RouterGroup = newRouterGroup(app, "")
@@ -317,10 +314,6 @@ func (app *Application) Run(addr ...string) (err error) {
 	// show runtime info
 	app.showRuntimeInfo()
 
-	// Ensure all middleware chains are precomputed before serving
-	// This handles any final middleware configurations that may not have been processed yet
-	app.precomputeMiddlewareChains()
-
 	// before ready
 	if app.lifecycle.beforeReady != nil {
 		app.lifecycle.beforeReady()
@@ -372,12 +365,6 @@ func (app *Application) SetBeforeDestroy(fn func()) {
 }
 
 func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	// Ensure middleware chains are precomputed
-	// In production, this is already done in Run(), but for tests that call ServeHTTP directly, we need this check
-	if len(app.groupMiddlewareCache) == 0 {
-		app.precomputeMiddlewareChains()
-	}
-
 	ctx := app.createContext(w, req)
 
 	var middlewares []HandlerFunc
@@ -386,8 +373,8 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// Find the first matching group (most specific due to maintained sorting)
 	for _, group := range app.groups {
 		if group.matchPath(ctx.Path) {
-			// Get cached middleware chain (already deduplicated)
-			middlewares = app.groupMiddlewareCache[group]
+			// Get cached middleware chain from the group itself
+			middlewares = group.getMiddlewareCache()
 			break
 		}
 	}
@@ -830,40 +817,3 @@ func (app *Application) serveHTTPS(ctx context.Context) error {
 
 // H is a shortcut for map[string]interface{}
 type H map[string]interface{}
-
-// precomputeMiddlewareChains calculates and caches unique middleware chains for all groups
-func (app *Application) precomputeMiddlewareChains() {
-	// Clear existing cache
-	app.groupMiddlewareCache = make(map[*RouterGroup][]HandlerFunc)
-
-	// Precompute for each group
-	for _, group := range app.groups {
-		// Cache the result
-		app.groupMiddlewareCache[group] = group.getAllMiddlewares()
-	}
-}
-
-// insertGroupSorted inserts a new group in the correct sorted position
-// Groups are sorted by prefix length (longest first) for optimal matching
-func (app *Application) insertGroupSorted(newGroup *RouterGroup) {
-	// Find the correct position to insert the new group
-	insertPos := len(app.groups)
-	newGroupPrefixLen := len(newGroup.prefix)
-	
-	for i, group := range app.groups {
-		if newGroupPrefixLen > len(group.prefix) {
-			insertPos = i
-			break
-		}
-	}
-	
-	// Insert the new group at the correct position
-	if insertPos == len(app.groups) {
-		// Append to the end
-		app.groups = append(app.groups, newGroup)
-	} else {
-		// Insert at the specific position
-		app.groups = append(app.groups[:insertPos+1], app.groups[insertPos:]...)
-		app.groups[insertPos] = newGroup
-	}
-}

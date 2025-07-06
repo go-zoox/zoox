@@ -27,6 +27,10 @@ type RouterGroup struct {
 	middlewares []HandlerFunc
 	parent      *RouterGroup
 	app         *Application
+	// Cached middleware chain to avoid collection and deduplication on every request
+	middlewareCache []HandlerFunc
+	// Flag to indicate if middleware cache is valid
+	middlewareCacheValid bool
 }
 
 func newRouterGroup(app *Application, prefix string) *RouterGroup {
@@ -40,16 +44,41 @@ func newRouterGroup(app *Application, prefix string) *RouterGroup {
 func (g *RouterGroup) Group(prefix string, cb ...GroupFunc) *RouterGroup {
 	newGroup := newRouterGroup(g.app, g.prefix+prefix)
 	newGroup.parent = g
-	
+
 	// Insert the new group in the correct sorted position (by prefix length, longest first)
 	// This maintains the sorted order without needing to sort at startup
-	g.app.insertGroupSorted(newGroup)
+	g.insertGroupSorted(newGroup)
 
 	for _, fn := range cb {
 		fn(newGroup)
 	}
 
 	return newGroup
+}
+
+// insertGroupSorted inserts a new group in the correct sorted position
+// Groups are sorted by prefix length (longest first) for optimal matching
+func (g *RouterGroup) insertGroupSorted(newGroup *RouterGroup) {
+	// Find the correct position to insert the new group
+	insertPos := len(g.app.groups)
+	newGroupPrefixLen := len(newGroup.prefix)
+
+	for i, group := range g.app.groups {
+		if newGroupPrefixLen > len(group.prefix) {
+			insertPos = i
+			break
+		}
+	}
+
+	// Insert the new group at the correct position
+	if insertPos == len(g.app.groups) {
+		// Append to the end
+		g.app.groups = append(g.app.groups, newGroup)
+	} else {
+		// Insert at the specific position
+		g.app.groups = append(g.app.groups[:insertPos+1], g.app.groups[insertPos:]...)
+		g.app.groups[insertPos] = newGroup
+	}
 }
 
 // matchPath improved path matching logic
@@ -319,6 +348,30 @@ func (g *RouterGroup) JSONRPC(path string, handler JSONRPCHandlerFunc) *RouterGr
 // Use adds a middleware to the group
 func (g *RouterGroup) Use(middlewares ...HandlerFunc) {
 	g.middlewares = append(g.middlewares, middlewares...)
+	// Invalidate cache when middlewares are added
+	g.invalidateMiddlewareCache()
+}
+
+// getMiddlewareCache returns the cached middleware chain, computing it if necessary
+func (g *RouterGroup) getMiddlewareCache() []HandlerFunc {
+	if !g.middlewareCacheValid {
+		g.middlewareCache = g.getAllMiddlewares()
+		g.middlewareCacheValid = true
+	}
+	return g.middlewareCache
+}
+
+// invalidateMiddlewareCache invalidates the middleware cache for this group and all child groups
+func (g *RouterGroup) invalidateMiddlewareCache() {
+	g.middlewareCacheValid = false
+	g.middlewareCache = nil
+
+	// Invalidate cache for all child groups
+	for _, group := range g.app.groups {
+		if group.parent == g {
+			group.invalidateMiddlewareCache()
+		}
+	}
 }
 
 func (g *RouterGroup) createStaticHandler(absolutePath string, fs http.FileSystem) HandlerFunc {
