@@ -6,7 +6,6 @@ import (
 	"mime"
 	"net/http"
 	"path"
-	"regexp"
 	"strings"
 	"time"
 
@@ -41,9 +40,8 @@ func (g *RouterGroup) Group(prefix string, cb ...GroupFunc) *RouterGroup {
 	newGroup := newRouterGroup(g.app, g.prefix+prefix)
 	newGroup.parent = g
 
-	// Insert the new group in the correct sorted position (by prefix length, longest first)
-	// This maintains the sorted order without needing to sort at startup
-	g.insertGroupSorted(newGroup)
+	// Simply append to groups list - no need for complex sorting
+	g.app.groups = append(g.app.groups, newGroup)
 
 	for _, fn := range cb {
 		fn(newGroup)
@@ -52,111 +50,15 @@ func (g *RouterGroup) Group(prefix string, cb ...GroupFunc) *RouterGroup {
 	return newGroup
 }
 
-// insertGroupSorted inserts a new group in the correct sorted position
-// Groups are sorted by prefix length (longest first) for optimal matching
-func (g *RouterGroup) insertGroupSorted(newGroup *RouterGroup) {
-	// Find the correct position to insert the new group
-	insertPos := len(g.app.groups)
-	newGroupPrefixLen := len(newGroup.prefix)
-
-	for i, group := range g.app.groups {
-		if newGroupPrefixLen > len(group.prefix) {
-			insertPos = i
-			break
-		}
-	}
-
-	// Insert the new group at the correct position
-	if insertPos == len(g.app.groups) {
-		// Append to the end
-		g.app.groups = append(g.app.groups, newGroup)
-	} else {
-		// Insert at the specific position
-		g.app.groups = append(g.app.groups[:insertPos+1], g.app.groups[insertPos:]...)
-		g.app.groups[insertPos] = newGroup
-	}
-}
-
-// matchPath improved path matching logic
-func (g *RouterGroup) matchPath(path string) (ok bool) {
+// matchPath simple prefix matching
+func (g *RouterGroup) matchPath(path string) bool {
 	// Empty prefix matches all paths
 	if g.prefix == "" || g.prefix == "/" {
 		return true
 	}
 
-	// Ensure prefix starts with /
-	prefix := g.prefix
-	if !strings.HasPrefix(prefix, "/") {
-		prefix = "/" + prefix
-	}
-
-	// Ensure path starts with /
-	if !strings.HasPrefix(path, "/") {
-		path = "/" + path
-	}
-
-	// Exact match
-	if path == prefix {
-		return true
-	}
-
-	// Prefix match, but need to check boundaries
-	if strings.HasPrefix(path, prefix) {
-		// Ensure prefix is followed by / or prefix itself ends with /
-		if strings.HasSuffix(prefix, "/") ||
-			(len(path) > len(prefix) && path[len(prefix)] == '/') {
-			return true
-		}
-	}
-
-	// Handle dynamic path parameters
-	if strings.Contains(prefix, ":") || strings.Contains(prefix, "{") || strings.Contains(prefix, "*") {
-		return g.matchDynamicPath(path, prefix)
-	}
-
-	return false
-}
-
-// matchDynamicPath handles dynamic path matching
-func (g *RouterGroup) matchDynamicPath(path, prefix string) bool {
-	// Convert dynamic parameters to regular expressions
-	pattern := g.buildRegexPattern(prefix)
-
-	// Use regular expression matching
-	matched, err := regexp.MatchString("^"+pattern+"(/.*)?$", path)
-	if err != nil {
-		return false
-	}
-
-	// If no match, try exact matching (for wildcard cases)
-	if !matched {
-		matched, err = regexp.MatchString("^"+pattern+"$", path)
-		if err != nil {
-			return false
-		}
-	}
-
-	return matched
-}
-
-// buildRegexPattern builds regular expression pattern
-func (g *RouterGroup) buildRegexPattern(prefix string) string {
-	// Escape special characters
-	pattern := regexp.QuoteMeta(prefix)
-
-	// Handle :param format parameters - colon is not escaped by QuoteMeta
-	re1 := regexp.MustCompile(`:([a-zA-Z_][a-zA-Z0-9_]*)`)
-	pattern = re1.ReplaceAllString(pattern, `([^/]+)`)
-
-	// Handle {param} format parameters - braces are escaped as \{ and \}
-	re2 := regexp.MustCompile(`\\{([^}]+)\\}`)
-	pattern = re2.ReplaceAllString(pattern, `([^/]+)`)
-
-	// Handle wildcard * - asterisk is escaped as \*
-	re3 := regexp.MustCompile(`\\\*([a-zA-Z_][a-zA-Z0-9_]*)?`)
-	pattern = re3.ReplaceAllString(pattern, `(.*)`)
-
-	return pattern
+	// Simple prefix matching
+	return strings.HasPrefix(path, g.prefix)
 }
 
 // getAllMiddlewares gets all middlewares (including parent)
@@ -185,7 +87,7 @@ func (g *RouterGroup) joinPath(path string) string {
 		return "/"
 	}
 
-	// Ensure prefix and path are properly handled
+	// Simple path joining
 	prefix := strings.TrimSuffix(g.prefix, "/")
 	path = strings.TrimPrefix(path, "/")
 

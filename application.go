@@ -368,15 +368,20 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	ctx := app.createContext(w, req)
 
 	var middlewares []HandlerFunc
+	var bestMatch *RouterGroup
 
-	// Groups are already maintained in sorted order (longest prefix first)
-	// Find the first matching group (most specific due to maintained sorting)
+	// Find the longest matching group prefix
 	for _, group := range app.groups {
 		if group.matchPath(ctx.Path) {
-			// Get middleware chain directly without caching
-			middlewares = group.getAllMiddlewares()
-			break
+			if bestMatch == nil || len(group.prefix) > len(bestMatch.prefix) {
+				bestMatch = group
+			}
 		}
+	}
+
+	// Use the best matching group's middlewares
+	if bestMatch != nil {
+		middlewares = bestMatch.getAllMiddlewares()
 	}
 
 	ctx.handlers = middlewares
