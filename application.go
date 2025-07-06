@@ -373,8 +373,8 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// Find the first matching group (most specific due to maintained sorting)
 	for _, group := range app.groups {
 		if group.matchPath(ctx.Path) {
-			// Get cached middleware chain from the group itself
-			middlewares = group.getMiddlewareCache()
+			// Get middleware chain directly without caching
+			middlewares = group.getAllMiddlewares()
 			break
 		}
 	}

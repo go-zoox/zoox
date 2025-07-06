@@ -27,10 +27,6 @@ type RouterGroup struct {
 	middlewares []HandlerFunc
 	parent      *RouterGroup
 	app         *Application
-	// Cached middleware chain to avoid collection and deduplication on every request
-	middlewareCache []HandlerFunc
-	// Flag to indicate if middleware cache is valid
-	middlewareCacheValid bool
 }
 
 func newRouterGroup(app *Application, prefix string) *RouterGroup {
@@ -348,30 +344,6 @@ func (g *RouterGroup) JSONRPC(path string, handler JSONRPCHandlerFunc) *RouterGr
 // Use adds a middleware to the group
 func (g *RouterGroup) Use(middlewares ...HandlerFunc) {
 	g.middlewares = append(g.middlewares, middlewares...)
-	// Invalidate cache when middlewares are added
-	g.invalidateMiddlewareCache()
-}
-
-// getMiddlewareCache returns the cached middleware chain, computing it if necessary
-func (g *RouterGroup) getMiddlewareCache() []HandlerFunc {
-	if !g.middlewareCacheValid {
-		g.middlewareCache = g.getAllMiddlewares()
-		g.middlewareCacheValid = true
-	}
-	return g.middlewareCache
-}
-
-// invalidateMiddlewareCache invalidates the middleware cache for this group and all child groups
-func (g *RouterGroup) invalidateMiddlewareCache() {
-	g.middlewareCacheValid = false
-	g.middlewareCache = nil
-
-	// Invalidate cache for all child groups
-	for _, group := range g.app.groups {
-		if group.parent == g {
-			group.invalidateMiddlewareCache()
-		}
-	}
 }
 
 func (g *RouterGroup) createStaticHandler(absolutePath string, fs http.FileSystem) HandlerFunc {
