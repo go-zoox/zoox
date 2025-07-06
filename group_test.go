@@ -317,3 +317,280 @@ func TestRegexpQuoteMeta(t *testing.T) {
 		t.Logf("Input: %s, QuoteMeta: %s", tc, quoted)
 	}
 }
+
+func TestGroupDynamicRouting(t *testing.T) {
+	app := New()
+
+	// 测试动态路由组
+	userGroup := app.Group("/:id/profile")
+	userGroup.Get("/settings", func(ctx *Context) {
+		ctx.String(200, "user-settings-"+ctx.Param().Get("id").String())
+	})
+
+	categoryGroup := app.Group("/:id/xxx/:cat")
+	categoryGroup.Get("/details", func(ctx *Context) {
+		id := ctx.Param().Get("id").String()
+		cat := ctx.Param().Get("cat").String()
+		ctx.String(200, "category-"+id+"-"+cat)
+	})
+
+	// 测试请求
+	tests := []struct {
+		path     string
+		expected string
+		status   int
+	}{
+		{"/123/profile/settings", "user-settings-123", 200},
+		{"/456/xxx/books/details", "category-456-books", 200},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.path, func(t *testing.T) {
+			req := httptest.NewRequest("GET", tt.path, nil)
+			w := httptest.NewRecorder()
+			app.ServeHTTP(w, req)
+
+			if w.Code != tt.status {
+				t.Errorf("Expected status %d, got %d", tt.status, w.Code)
+			}
+
+			if w.Body.String() != tt.expected {
+				t.Errorf("Expected body '%s', got '%s'", tt.expected, w.Body.String())
+			}
+		})
+	}
+}
+
+func TestGroupDynamicRoutingDebug(t *testing.T) {
+	app := New()
+
+	// 测试动态路由组
+	userGroup := app.Group("/:id/profile")
+	userGroup.Get("/settings", func(ctx *Context) {
+		ctx.String(200, "user-settings-"+ctx.Param().Get("id").String())
+	})
+
+	categoryGroup := app.Group("/:id/xxx/:cat")
+	categoryGroup.Get("/details", func(ctx *Context) {
+		id := ctx.Param().Get("id").String()
+		cat := ctx.Param().Get("cat").String()
+		ctx.String(200, "category-"+id+"-"+cat)
+	})
+
+	// 打印所有路由组
+	t.Logf("Total groups: %d", len(app.groups))
+	for i, group := range app.groups {
+		t.Logf("Group %d: prefix='%s'", i, group.prefix)
+	}
+
+	// 测试路径匹配
+	testPaths := []string{"/123/profile/settings", "/456/xxx/books/details"}
+	for _, path := range testPaths {
+		t.Logf("\nTesting path: %s", path)
+		for i, group := range app.groups {
+			matches := group.matchPath(path)
+			t.Logf("  Group %d ('%s') matches: %v", i, group.prefix, matches)
+		}
+	}
+}
+
+func TestGroupDynamicPathMatching(t *testing.T) {
+	tests := []struct {
+		name     string
+		prefix   string
+		path     string
+		expected bool
+	}{
+		// 静态路径匹配
+		{"static exact match", "/api/v1", "/api/v1", true},
+		{"static prefix match", "/api/v1", "/api/v1/users", true},
+		{"static no match", "/api/v1", "/api/v2", false},
+
+		// 动态路径匹配
+		{"single param", "/:id", "/123", true},
+		{"single param with static", "/:id/profile", "/123/profile", true},
+		{"single param with static and more", "/:id/profile", "/123/profile/settings", true},
+		{"single param no match", "/:id/profile", "/123/settings", false},
+
+		// 多个参数
+		{"multiple params", "/:id/xxx/:cat", "/123/xxx/books", true},
+		{"multiple params with more", "/:id/xxx/:cat", "/123/xxx/books/details", true},
+		{"multiple params no match", "/:id/xxx/:cat", "/123/yyy/books", false},
+
+		// 混合格式
+		{"bracket format", "/{id}/profile", "/123/profile", true},
+		{"bracket format no match", "/{id}/profile", "/123/settings", false},
+
+		// 通配符
+		{"wildcard", "/files/*path", "/files/docs/readme.txt", true},
+		{"wildcard root", "/*path", "/anything/goes/here", true},
+
+		// 边界情况
+		{"empty parts", "/:id//profile", "/123//profile", true},
+		{"trailing slash in prefix", "/:id/profile/", "/123/profile/settings", true},
+		{"insufficient path parts", "/:id/profile/settings", "/123/profile", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			group := &RouterGroup{prefix: tt.prefix}
+			result := group.matchPath(tt.path)
+			if result != tt.expected {
+				t.Errorf("matchPath(%q, %q) = %v, want %v", tt.prefix, tt.path, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestGroupDynamicRoutingWithMiddleware(t *testing.T) {
+	app := New()
+
+	var middlewareOrder []string
+
+	// 全局中间件
+	app.Use(func(ctx *Context) {
+		middlewareOrder = append(middlewareOrder, "global")
+		ctx.Next()
+	})
+
+	// 动态路由组 - 用户相关
+	userGroup := app.Group("/:id/profile")
+	userGroup.Use(func(ctx *Context) {
+		middlewareOrder = append(middlewareOrder, "user-profile")
+		ctx.Next()
+	})
+	userGroup.Get("/settings", func(ctx *Context) {
+		middlewareOrder = append(middlewareOrder, "handler")
+		ctx.String(200, "user-settings-"+ctx.Param().Get("id").String())
+	})
+
+	// 动态路由组 - 分类相关
+	categoryGroup := app.Group("/:id/xxx/:cat")
+	categoryGroup.Use(func(ctx *Context) {
+		middlewareOrder = append(middlewareOrder, "category")
+		ctx.Next()
+	})
+	categoryGroup.Get("/details", func(ctx *Context) {
+		middlewareOrder = append(middlewareOrder, "handler")
+		id := ctx.Param().Get("id").String()
+		cat := ctx.Param().Get("cat").String()
+		ctx.String(200, "category-"+id+"-"+cat)
+	})
+
+	// 测试用户路由组中间件
+	t.Run("user profile middleware", func(t *testing.T) {
+		middlewareOrder = nil // 重置
+		req := httptest.NewRequest("GET", "/123/profile/settings", nil)
+		w := httptest.NewRecorder()
+		app.ServeHTTP(w, req)
+
+		// 验证中间件执行顺序
+		expected := []string{"global", "user-profile", "handler"}
+		if len(middlewareOrder) != len(expected) {
+			t.Errorf("Expected %d middleware executions, got %d", len(expected), len(middlewareOrder))
+		}
+
+		for i, middleware := range expected {
+			if i >= len(middlewareOrder) || middlewareOrder[i] != middleware {
+				t.Errorf("Expected middleware %s at position %d, got %s", middleware, i, middlewareOrder[i])
+			}
+		}
+
+		// 验证响应
+		if w.Code != 200 {
+			t.Errorf("Expected status 200, got %d", w.Code)
+		}
+		if w.Body.String() != "user-settings-123" {
+			t.Errorf("Expected body 'user-settings-123', got '%s'", w.Body.String())
+		}
+	})
+
+	// 测试分类路由组中间件
+	t.Run("category middleware", func(t *testing.T) {
+		middlewareOrder = nil // 重置
+		req := httptest.NewRequest("GET", "/456/xxx/books/details", nil)
+		w := httptest.NewRecorder()
+		app.ServeHTTP(w, req)
+
+		// 验证中间件执行顺序
+		expected := []string{"global", "category", "handler"}
+		if len(middlewareOrder) != len(expected) {
+			t.Errorf("Expected %d middleware executions, got %d", len(expected), len(middlewareOrder))
+		}
+
+		for i, middleware := range expected {
+			if i >= len(middlewareOrder) || middlewareOrder[i] != middleware {
+				t.Errorf("Expected middleware %s at position %d, got %s", middleware, i, middlewareOrder[i])
+			}
+		}
+
+		// 验证响应
+		if w.Code != 200 {
+			t.Errorf("Expected status 200, got %d", w.Code)
+		}
+		if w.Body.String() != "category-456-books" {
+			t.Errorf("Expected body 'category-456-books', got '%s'", w.Body.String())
+		}
+	})
+}
+
+func TestNestedDynamicGroupMiddleware(t *testing.T) {
+	app := New()
+
+	var middlewareOrder []string
+
+	// 全局中间件
+	app.Use(func(ctx *Context) {
+		middlewareOrder = append(middlewareOrder, "global")
+		ctx.Next()
+	})
+
+	// 一级动态路由组
+	userGroup := app.Group("/:userId")
+	userGroup.Use(func(ctx *Context) {
+		middlewareOrder = append(middlewareOrder, "user-"+ctx.Param().Get("userId").String())
+		ctx.Next()
+	})
+
+	// 二级动态路由组
+	profileGroup := userGroup.Group("/profile/:section")
+	profileGroup.Use(func(ctx *Context) {
+		middlewareOrder = append(middlewareOrder, "profile-"+ctx.Param().Get("section").String())
+		ctx.Next()
+	})
+
+	// 三级路由
+	profileGroup.Get("/details", func(ctx *Context) {
+		middlewareOrder = append(middlewareOrder, "handler")
+		userId := ctx.Param().Get("userId").String()
+		section := ctx.Param().Get("section").String()
+		ctx.String(200, "user-"+userId+"-profile-"+section)
+	})
+
+	// 测试嵌套动态路由组中间件
+	middlewareOrder = nil // 重置
+	req := httptest.NewRequest("GET", "/123/profile/settings/details", nil)
+	w := httptest.NewRecorder()
+	app.ServeHTTP(w, req)
+
+	// 验证中间件执行顺序
+	expected := []string{"global", "user-123", "profile-settings", "handler"}
+	if len(middlewareOrder) != len(expected) {
+		t.Errorf("Expected %d middleware executions, got %d", len(expected), len(middlewareOrder))
+		t.Logf("Actual order: %v", middlewareOrder)
+	}
+
+	for i, middleware := range expected {
+		if i >= len(middlewareOrder) || middlewareOrder[i] != middleware {
+			t.Errorf("Expected middleware %s at position %d, got %s", middleware, i, middlewareOrder[i])
+		}
+	}
+
+	// 验证响应
+	if w.Code != 200 {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+	if w.Body.String() != "user-123-profile-settings" {
+		t.Errorf("Expected body 'user-123-profile-settings', got '%s'", w.Body.String())
+	}
+}

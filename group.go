@@ -50,15 +50,50 @@ func (g *RouterGroup) Group(prefix string, cb ...GroupFunc) *RouterGroup {
 	return newGroup
 }
 
-// matchPath simple prefix matching
+// matchPath handles both static and dynamic prefix matching
 func (g *RouterGroup) matchPath(path string) bool {
 	// Empty prefix matches all paths
 	if g.prefix == "" || g.prefix == "/" {
 		return true
 	}
 
-	// Simple prefix matching
-	return strings.HasPrefix(path, g.prefix)
+	// If prefix has no dynamic parts, use simple prefix matching
+	if !strings.Contains(g.prefix, ":") && !strings.Contains(g.prefix, "{") && !strings.Contains(g.prefix, "*") {
+		return strings.HasPrefix(path, g.prefix)
+	}
+
+	// For dynamic prefixes, use simple pattern matching
+	return g.matchDynamicPrefix(path, g.prefix)
+}
+
+// matchDynamicPrefix handles dynamic path matching with a simplified approach
+func (g *RouterGroup) matchDynamicPrefix(path, prefix string) bool {
+	pathParts := strings.Split(strings.Trim(path, "/"), "/")
+	prefixParts := strings.Split(strings.Trim(prefix, "/"), "/")
+
+	// If prefix has more parts than path, it cannot match
+	if len(prefixParts) > len(pathParts) {
+		return false
+	}
+
+	// Check each part
+	for i, prefixPart := range prefixParts {
+		pathPart := pathParts[i]
+
+		// Skip dynamic parameters
+		if strings.HasPrefix(prefixPart, ":") ||
+			(strings.HasPrefix(prefixPart, "{") && strings.HasSuffix(prefixPart, "}")) ||
+			strings.HasPrefix(prefixPart, "*") {
+			continue
+		}
+
+		// Static part must match exactly
+		if prefixPart != pathPart {
+			return false
+		}
+	}
+
+	return true
 }
 
 // getAllMiddlewares gets all middlewares (including parent)
