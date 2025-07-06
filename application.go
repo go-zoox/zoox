@@ -372,25 +372,24 @@ func (app *Application) SetBeforeDestroy(fn func()) {
 }
 
 func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	// Ensure middleware chains are precomputed
+	// In production, this is already done in Run(), but for tests that call ServeHTTP directly, we need this check
+	if len(app.groupMiddlewareCache) == 0 {
+		app.precomputeMiddlewareChains()
+	}
+
 	ctx := app.createContext(w, req)
 
 	var middlewares []HandlerFunc
-	var matchedGroups []*RouterGroup
 
 	// Groups are already maintained in sorted order (longest prefix first)
+	// Find the first matching group (most specific due to maintained sorting)
 	for _, group := range app.groups {
 		if group.matchPath(ctx.Path) {
-			matchedGroups = append(matchedGroups, group)
+			// Get cached middleware chain (already deduplicated)
+			middlewares = app.groupMiddlewareCache[group]
+			break
 		}
-	}
-
-	// Use precomputed middleware cache for optimal performance
-	if len(matchedGroups) > 0 {
-		// Take the first matching group (most specific due to maintained sorting)
-		group := matchedGroups[0]
-
-		// Get cached middleware chain (already deduplicated)
-		middlewares = app.groupMiddlewareCache[group]
 	}
 
 	ctx.handlers = middlewares
@@ -839,40 +838,9 @@ func (app *Application) precomputeMiddlewareChains() {
 
 	// Precompute for each group
 	for _, group := range app.groups {
-		// Collect all middlewares from group hierarchy
-		var allMiddlewares []HandlerFunc
-		allMiddlewares = app.collectGroupMiddlewares(group, allMiddlewares)
-
-		// Deduplicate middlewares using function pointer comparison
-		uniqueMiddlewares := app.deduplicateMiddlewares(allMiddlewares)
-
 		// Cache the result
-		app.groupMiddlewareCache[group] = uniqueMiddlewares
+		app.groupMiddlewareCache[group] = group.getAllMiddlewares()
 	}
-}
-
-// collectGroupMiddlewares recursively collects middlewares from group hierarchy
-func (app *Application) collectGroupMiddlewares(group *RouterGroup, result []HandlerFunc) []HandlerFunc {
-	// Get all group middlewares using the existing getAllMiddlewares method
-	// This already includes parent middlewares in the correct order
-	groupMiddlewares := group.getAllMiddlewares()
-	
-	// Simply append all group middlewares - no need to handle app.middlewares separately
-	// because app.middlewares is the same as app.RouterGroup.middlewares
-	result = append(result, groupMiddlewares...)
-
-	return result
-}
-
-// deduplicateMiddlewares removes duplicate middlewares while preserving order
-func (app *Application) deduplicateMiddlewares(middlewares []HandlerFunc) []HandlerFunc {
-	if len(middlewares) == 0 {
-		return middlewares
-	}
-
-	// Simple approach: don't deduplicate anything for now
-	// The issue might be in our understanding of what constitutes a duplicate
-	return middlewares
 }
 
 // insertGroupSorted inserts a new group in the correct sorted position
@@ -898,7 +866,4 @@ func (app *Application) insertGroupSorted(newGroup *RouterGroup) {
 		app.groups = append(app.groups[:insertPos+1], app.groups[insertPos:]...)
 		app.groups[insertPos] = newGroup
 	}
-	
-	// Precompute middleware chains for all groups (including the new one)
-	app.precomputeMiddlewareChains()
 }
