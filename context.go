@@ -196,16 +196,9 @@ func (ctx *Context) Context() context.Context {
 // Next runs the next handler in the middleware stack
 func (ctx *Context) Next() {
 	ctx.index++
-	s := len(ctx.handlers)
-	// for ; ctx.index < s; ctx.index ++ {
-	// 	ctx.handlers[ctx.index](ctx)
-	// }
-
-	if ctx.index >= s {
-		panic("Handler cannot call ctx.Next")
+	if ctx.index < len(ctx.handlers) {
+		ctx.handlers[ctx.index](ctx)
 	}
-
-	ctx.handlers[ctx.index](ctx)
 }
 
 // Query returns the query string parameter with the given name.
@@ -770,7 +763,7 @@ func (ctx *Context) BindJSON(obj interface{}) (err error) {
 	}
 
 	if ctx.Env().Get("DEBUG_ZOOX_REQUEST_BODY") != "" {
-		// refernece: golang复用http.request.body - https://zhuanlan.zhihu.com/p/47313038
+		// reference: golang reuse http.request.body - https://zhuanlan.zhihu.com/p/47313038
 		_, err = ctx.CloneBody()
 		if err != nil {
 			return fmt.Errorf("failed to read request body: %v", err)
@@ -803,7 +796,7 @@ func (ctx *Context) BindYAML(obj interface{}) (err error) {
 	}
 
 	if ctx.Debug().IsDebugMode() {
-		// refernece: golang复用http.request.body - https://zhuanlan.zhihu.com/p/47313038
+		// reference: golang reuse http.request.body - https://zhuanlan.zhihu.com/p/47313038
 		_, err = ctx.CloneBody()
 		if err != nil {
 			return fmt.Errorf("failed to read request body: %v", err)
@@ -1060,7 +1053,7 @@ func (ctx *Context) Proxy(target string, cfg ...*proxy.SingleHostConfig) {
 // CloneBody clones the body of the request, should be used carefully.
 func (ctx *Context) CloneBody() (body io.ReadCloser, err error) {
 	if ctx.bodyBytes == nil {
-		// refernece: golang复用http.request.body - https://zhuanlan.zhihu.com/p/47313038
+		// reference: golang reuse http.request.body - https://zhuanlan.zhihu.com/p/47313038
 		ctx.bodyBytes, err = ioutil.ReadAll(ctx.Request.Body)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read request body: %v", err)
