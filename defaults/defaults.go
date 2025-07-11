@@ -30,9 +30,9 @@ func Defaults() *zoox.Application {
 		app.Use(middleware.RealIP())
 	})
 
-	zoox.DefaultMiddleware("logger", func(app *zoox.Application) {
-		app.Use(middleware.Logger())
-	})
+	// zoox.DefaultMiddleware("logger", func(app *zoox.Application) {
+	// 	app.Use(middleware.Logger())
+	// })
 
 	zoox.DefaultMiddleware("healthcheck", func(app *zoox.Application) {
 		app.Use(middleware.HealthCheck())
@@ -55,6 +55,10 @@ func Defaults() *zoox.Application {
 	app := zoox.New()
 
 	app.SetBeforeReady(func() {
+		if !app.Config.Logger.Middleware.Disabled {
+			app.Use(middleware.Logger())
+		}
+
 		if app.Config.BodySizeLimit > 0 {
 			app.Logger().Infof("[middleware] register: body limit (app.Config) ...")
 

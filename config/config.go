@@ -44,4 +44,7 @@ type Config struct {
 	Banner string
 	//
 	Monitor Monitor `config:"monitor"`
+
+	// Logger
+	Logger Logger `config:"logger"`
 }
