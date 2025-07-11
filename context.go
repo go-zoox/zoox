@@ -182,7 +182,11 @@ func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Con
 
 	ctx.Logger = logger.New(func(opt *logger.Option) {
 		// fmt.Println("ctx.Logger:", app.Config.LogLevel)
-		opt.Level = app.Config.LogLevel
+		if app.Config.Logger.Level != "" {
+			opt.Level = app.Config.Logger.Level
+		} else if app.Config.LogLevel != "" {
+			opt.Level = app.Config.LogLevel
+		}
 	})
 
 	return ctx
