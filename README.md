@@ -106,7 +106,7 @@ func main() {
 
     // API routes
     api := app.Group("/api/v1")
-    api.Use(middleware.JWT("your-secret-key"))
+    api.Use(middleware.Jwt())
 
     api.Get("/users", func(ctx *zoox.Context) {
         ctx.JSON(zoox.H{
@@ -170,18 +170,26 @@ Zoox provides a rich set of middleware for common web application needs:
 
 ```go
 // Authentication
-app.Use(middleware.JWT("secret"))
-app.Use(middleware.BasicAuth("user", "pass"))
+app.Use(middleware.Jwt())
+app.Use(middleware.BasicAuth("Protected Area", map[string]string{
+    "admin": "password",
+}))
 app.Use(middleware.BearerToken("token"))
 
 // Security
-app.Use(middleware.Helmet())
+app.Use(middleware.Helmet(nil))
 app.Use(middleware.CORS())
-app.Use(middleware.RateLimit(100, time.Minute))
+app.Use(middleware.RateLimit(&middleware.RateLimitConfig{
+    Period: time.Minute,
+    Limit:  100,
+}))
 
 // Performance
 app.Use(middleware.Gzip())
-app.Use(middleware.CacheControl("public, max-age=3600"))
+app.Use(middleware.CacheControl(&middleware.CacheControlConfig{
+    Paths:  []string{".*"},
+    MaxAge: time.Hour,
+}))
 
 // Monitoring
 app.Use(middleware.Prometheus())
@@ -190,7 +198,6 @@ app.Use(middleware.RequestID())
 
 // Development
 app.Use(middleware.PProf())
-app.Use(middleware.Debug())
 ```
 
 ### Context Utilities
@@ -199,23 +206,22 @@ app.Use(middleware.Debug())
 func handler(ctx *zoox.Context) {
     // Request data
     body := ctx.Body()
-    query := ctx.Query("page")
-    param := ctx.Param("id")
-    header := ctx.Header("Authorization")
+    query := ctx.Query().Get("page")
+    param := ctx.Param().Get("id")
+    header := ctx.Header().Get("Authorization")
     
     // Form data
-    form := ctx.Form("name")
-    file := ctx.File("upload")
+    form := ctx.Form().Get("name")
+    file, fileHeader, err := ctx.File("upload")
     
     // JSON handling
     var data map[string]interface{}
     ctx.BindJSON(&data)
     
     // Response
-    ctx.JSON(zoox.H{"status": "success"})
-    ctx.XML(data)
-    ctx.HTML("template.html", data)
-    ctx.File("static/file.pdf")
+    ctx.JSON(200, zoox.H{"status": "success"})
+    ctx.HTML(200, "template.html", data)
+    ctx.RenderStatic("/static/", "static/")
     
     // Status codes
     ctx.Status(201)
@@ -240,11 +246,13 @@ userID := session.Get("user_id")
 ### WebSocket Support
 
 ```go
-app.WebSocket("/ws", func(ctx *zoox.Context, conn zoox.WebSocket) {
-    for {
-        message := conn.Read()
-        conn.Write("Echo: " + message)
-    }
+server, err := app.WebSocket("/ws")
+if err != nil {
+    log.Fatal(err)
+}
+
+server.OnMessage(func(message []byte) {
+    server.WriteText("Echo: " + string(message))
 })
 ```
 
@@ -252,9 +260,10 @@ app.WebSocket("/ws", func(ctx *zoox.Context, conn zoox.WebSocket) {
 
 ```go
 cron := app.Cron()
-cron.AddFunc("0 0 * * *", func() {
+cron.AddJob("daily-cleanup", "0 0 * * *", func() error {
     // Daily task at midnight
     log.Println("Running daily cleanup")
+    return nil
 })
 ```
 
@@ -277,8 +286,7 @@ app.Config.Redis.Port = 6379
 app.Config.Redis.Password = "password"
 
 // Session configuration
-app.Config.Session.MaxAge = 3600
-app.Config.Session.Name = "zoox_session"
+app.Config.Session.MaxAge = time.Hour
 ```
 
 ## 🧪 Testing
@@ -288,8 +296,8 @@ func TestUserAPI(t *testing.T) {
     app := zoox.New()
     
     app.Get("/users/:id", func(ctx *zoox.Context) {
-        id := ctx.Param("id")
-        ctx.JSON(zoox.H{"id": id})
+        id := ctx.Param().Get("id")
+        ctx.JSON(200, zoox.H{"id": id.String()})
     })
 
     req := httptest.NewRequest("GET", "/users/123", nil)
