@@ -394,9 +394,9 @@ func (ctx *Context) Write(b []byte) {
 }
 
 // String writes the given string to the response.
-func (ctx *Context) String(status int, format string, values ...interface{}) {
+func (ctx *Context) String(status int, text string) {
 	ctx.Status(status)
-	ctx.Write([]byte(fmt.Sprintf(format, values...)))
+	ctx.Write([]byte(text))
 }
 
 // JSON serializes the given struct as JSON into the response body.
