@@ -164,6 +164,18 @@ zoox docs
 
 ## 📚 Documentation
 
+📖 **Full documentation is available at:** [https://go-zoox.github.io/zoox/](https://go-zoox.github.io/zoox/)
+
+The documentation includes:
+- 🚀 [Getting Started](https://go-zoox.github.io/zoox/getting-started/installation) - Installation and quick start guide
+- 📖 [Guides](https://go-zoox.github.io/zoox/guides/routing) - Routing, middleware, context, templates, and configuration
+- 🔧 [Components](https://go-zoox.github.io/zoox/components/cache) - Cache, session, JWT, and more
+- 🛡️ [Middleware](https://go-zoox.github.io/zoox/middleware/overview) - Authentication, security, performance, and monitoring
+- 🚀 [Advanced](https://go-zoox.github.io/zoox/advanced/websocket) - WebSocket, JSON-RPC, proxy, cron jobs
+- 📚 [API Reference](https://go-zoox.github.io/zoox/api-reference/application) - Complete API documentation
+- 💡 [Examples](https://go-zoox.github.io/zoox/examples/rest-api) - RESTful API, WebSocket, Static Files, JSON-RPC, API Gateway, and microservice examples
+- 🎯 [Best Practices](https://go-zoox.github.io/zoox/best-practices) - Development guidelines and recommendations
+
 ### Middleware
 
 Zoox provides a rich set of middleware for common web application needs:
@@ -344,10 +356,10 @@ Zoox is released under the [MIT License](./LICENSE).
 
 ## 📞 Support
 
-- 📧 Email: [support@zoox.dev](mailto:support@zoox.dev)
-- 💬 Discord: [Join our community](https://discord.gg/zoox)
-- 📖 Documentation: [docs.zoox.dev](https://docs.zoox.dev)
-- 🐛 Issues: [GitHub Issues](https://github.com/go-zoox/zoox/issues)
+- 📖 **Documentation**: [https://go-zoox.github.io/zoox/](https://go-zoox.github.io/zoox/)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/go-zoox/zoox/issues)
+- 💬 **Discord**: [Join our community](https://discord.gg/zoox)
+- 📧 **Email**: [support@zoox.dev](mailto:support@zoox.dev)
 
 ---
 

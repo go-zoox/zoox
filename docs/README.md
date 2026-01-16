@@ -69,7 +69,10 @@
 实际项目示例，包含完整可运行的代码：
 
 - **[RESTful API](examples/rest-api.md)** - 完整的用户管理 REST API，包含认证、CRUD操作
-- **[实时应用](examples/real-time-app.md)** - WebSocket 实时聊天应用，支持多用户
+- **[WebSocket 应用](examples/real-time-app.md)** - WebSocket 实时聊天应用，支持多用户
+- **[静态文件服务](examples/static-files.md)** - 静态文件服务示例，包含缓存、压缩等配置
+- **[JSON-RPC 服务器](examples/jsonrpc-server.md)** - JSON-RPC 2.0 服务器示例，包含批量请求和错误处理
+- **[API Gateway](examples/api-gateway.md)** - API 网关示例，包含路由、认证、限流、聚合等功能
 - **[微服务架构](examples/microservice.md)** - 微服务架构示例，包含 Gateway 和多个服务
 
 ### 🎯 最佳实践

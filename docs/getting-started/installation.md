@@ -14,9 +14,117 @@ Zoox 需要 **Go 1.22.1 或更高版本**。
 go version
 ```
 
-如果版本低于 1.22.1，请先升级 Go：
-- 访问 [Go 官网](https://golang.org/dl/) 下载最新版本
-- 或使用包管理器升级（如 `brew upgrade go` on macOS）
+如果版本低于 1.22.1，请先安装或升级 Go。
+
+### 安装 Go
+
+有多种方式可以安装和管理 Go 版本，推荐使用 **GVM (Go Version Manager)** 进行版本管理。
+
+#### 方法 1: 使用 GVM（推荐）
+
+GVM 是一个强大的 Go 版本管理工具，可以轻松安装、切换和管理多个 Go 版本。
+
+##### 安装 GVM
+
+```bash
+# 使用 curl 安装
+curl -o- https://raw.githubusercontent.com/zcorky/gvm/master/install | bash
+
+# 或使用 wget 安装
+wget -qO- https://raw.githubusercontent.com/zcorky/gvm/master/install | bash
+```
+
+安装完成后，重新加载 shell 配置：
+
+```bash
+# 重新加载环境变量
+source ~/.bashrc  # Linux 或 macOS (bash)
+# 或
+source ~/.zshrc   # macOS (zsh)
+```
+
+##### 使用 GVM 安装 Go
+
+```bash
+# 查看可用的 Go 版本
+gvm ls-remote
+
+# 安装指定版本（推荐安装 1.22.1 或更高版本）
+gvm install 1.22.1
+
+# 使用指定的 Go 版本
+gvm use 1.22.1
+
+# 查看当前使用的 Go 版本
+gvm current
+
+# 查看已安装的所有版本
+gvm ls
+```
+
+##### 项目级版本管理
+
+在项目目录中创建 `.gvmrc` 文件，指定该项目使用的 Go 版本：
+
+```bash
+# 在项目根目录创建 .gvmrc 文件
+echo "1.22.1" > .gvmrc
+
+# 进入项目时，GVM 会自动切换到指定版本
+cd my-zoox-app
+gvm use  # 自动使用 .gvmrc 中指定的版本
+```
+
+##### 其他 GVM 常用命令
+
+```bash
+# 移除指定版本
+gvm remove 1.21.0
+
+# 使用指定版本执行命令
+gvm exec 1.22.1 go version
+
+# 在指定版本的新 shell 中执行
+gvm shell 1.22.1
+```
+
+##### GVM 故障排除
+
+如果遇到 `gvm: command not found` 错误：
+
+1. **重新加载环境变量**：
+   ```bash
+   source ~/.bashrc  # 或 source ~/.zshrc
+   ```
+
+2. **重启终端**
+
+3. **重新注册 GVM**：
+   ```bash
+   # 如果使用 zmicro 工具集
+   zmicro register
+   # 然后重新加载环境变量
+   ```
+
+更多信息请参考 [GVM 官方仓库](https://github.com/zcorky/gvm)。
+
+#### 方法 2: 官方安装包
+
+访问 [Go 官网](https://golang.org/dl/) 下载对应平台的安装包，按照官方指南进行安装。
+
+#### 方法 3: 包管理器
+
+```bash
+# macOS (Homebrew)
+brew install go
+
+# Linux (apt)
+sudo apt update
+sudo apt install golang-go
+
+# Linux (yum)
+sudo yum install golang
+```
 
 ### 环境变量
 
@@ -26,6 +134,8 @@ go version
 go env GOPATH
 go env GOROOT
 ```
+
+使用 GVM 时，这些环境变量会自动设置，无需手动配置。
 
 ## 安装步骤
 
@@ -125,7 +235,21 @@ curl http://localhost:8080
 
 **原因**: Go 版本过低。
 
-**解决方案**: 升级 Go 到 1.22.1 或更高版本。
+**解决方案**: 
+1. 如果使用 GVM，安装并使用新版本：
+   ```bash
+   gvm install 1.22.1
+   gvm use 1.22.1
+   ```
+2. 如果使用官方安装包，从 [Go 官网](https://golang.org/dl/) 下载并安装新版本
+3. 如果使用包管理器，升级到最新版本：
+   ```bash
+   # macOS
+   brew upgrade go
+   
+   # Linux (apt)
+   sudo apt upgrade golang-go
+   ```
 
 ### 问题 3: 依赖下载失败
 

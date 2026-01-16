@@ -334,7 +334,7 @@ curl http://localhost:8083/
 
 ## 下一步
 
-- 📡 查看 [实时应用示例](real-time-app.md) - WebSocket 应用
+- 📡 查看 [WebSocket 应用示例](real-time-app.md) - WebSocket 应用
 - 🏗️ 学习 [RESTful API 示例](rest-api.md) - REST API
 - 📚 阅读 [最佳实践](../best-practices.md) - 开发建议
 

@@ -30,6 +30,8 @@ go.work
 node_modules/
 .umi/
 dist/
+.vitepress/dist/
+.vitepress/cache/
 
 tmp/
 

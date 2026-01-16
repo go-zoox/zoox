@@ -1,6 +1,6 @@
 # WebSocket 支持
 
-Zoox 提供了完整的 WebSocket 支持，可以轻松构建实时应用。
+Zoox 提供了完整的 WebSocket 支持，可以轻松构建 WebSocket 应用。
 
 ## 基本用法
 
