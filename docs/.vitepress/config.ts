@@ -8,7 +8,7 @@ export default defineConfig({
   ignoreDeadLinks: true, // 忽略死链接（某些文档可能尚未创建）
   
   head: [
-    ['link', { rel: 'icon', href: '/zoox/favicon.ico' }],
+    ['link', { rel: 'icon', href: '/zoox/logo.png' }],
     ['meta', { name: 'keywords', content: 'go, golang, web framework, zoox, http, router, middleware' }],
   ],
 
@@ -21,7 +21,7 @@ export default defineConfig({
       description: '一个轻量级、高性能的 Go Web 框架',
       themeConfig: {
         // https://vitepress.dev/reference/default-theme-config
-        logo: '/logo.svg',
+        logo: '/logo.png',
 
         nav: [
           { text: '首页', link: '/' },
@@ -193,7 +193,7 @@ export default defineConfig({
       title: 'Zoox',
       description: 'A Lightweight, High Performance Go Web Framework',
       themeConfig: {
-        logo: '/logo.svg',
+        logo: '/logo.png',
 
         nav: [
           { text: 'Home', link: '/en/' },
