@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="docs/public/logo.png" alt="Zoox Logo" width="200">
+</div>
+
 # Zoox - A Lightweight, High Performance Go Web Framework
 
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/go-zoox/zoox)](https://pkg.go.dev/github.com/go-zoox/zoox)
