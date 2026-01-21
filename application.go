@@ -368,11 +368,20 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	ctx := app.createContext(w, req)
 
 	var middlewares []HandlerFunc
+	var bestMatch *RouterGroup
 
+	// Find the longest matching group prefix
 	for _, group := range app.groups {
-		if ok := group.matchPath(ctx.Path); ok {
-			middlewares = append(middlewares, group.middlewares...)
+		if group.matchPath(ctx.Path) {
+			if bestMatch == nil || len(group.prefix) > len(bestMatch.prefix) {
+				bestMatch = group
+			}
 		}
+	}
+
+	// Use the best matching group's middlewares
+	if bestMatch != nil {
+		middlewares = bestMatch.getAllMiddlewares()
 	}
 
 	ctx.handlers = middlewares
@@ -665,7 +674,7 @@ func (app *Application) serveHTTP(ctx context.Context) error {
 	}
 
 	go func() {
-		<-ctx.Done() // 当上下文被取消时，停止服务器
+		<-ctx.Done() // When context is canceled, stop the server
 		server.Close()
 	}()
 
@@ -675,7 +684,7 @@ func (app *Application) serveHTTP(ctx context.Context) error {
 		logger.Info("Server started at http://%s", app.AddressForLog())
 	}
 
-	// 等待所有 goroutine 完成
+	// Wait for all goroutines to complete
 	return server.Serve(listener)
 }
 
@@ -702,7 +711,7 @@ func (app *Application) serveHTTPS(ctx context.Context) error {
 	}
 
 	go func() {
-		<-ctx.Done() // 当上下文被取消时，停止服务器
+		<-ctx.Done() // When context is canceled, stop the server
 		server.Close()
 	}()
 

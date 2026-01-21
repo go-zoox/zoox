@@ -6,10 +6,9 @@ import (
 	"mime"
 	"net/http"
 	"path"
+	"strings"
 	"time"
 
-	"github.com/go-zoox/core-utils/regexp"
-	"github.com/go-zoox/core-utils/strings"
 	"github.com/go-zoox/fs"
 	"github.com/go-zoox/headers"
 	"github.com/go-zoox/proxy"
@@ -40,6 +39,8 @@ func newRouterGroup(app *Application, prefix string) *RouterGroup {
 func (g *RouterGroup) Group(prefix string, cb ...GroupFunc) *RouterGroup {
 	newGroup := newRouterGroup(g.app, g.prefix+prefix)
 	newGroup.parent = g
+
+	// Simply append to groups list - no need for complex sorting
 	g.app.groups = append(g.app.groups, newGroup)
 
 	for _, fn := range cb {
@@ -49,30 +50,91 @@ func (g *RouterGroup) Group(prefix string, cb ...GroupFunc) *RouterGroup {
 	return newGroup
 }
 
-func (g *RouterGroup) matchPath(path string) (ok bool) {
-	// /v1 	=> /v1
-	// /v1/ => /v1
-	if ok := strings.HasPrefix(path, g.prefix); ok {
-		return ok
+// matchPath handles both static and dynamic prefix matching
+func (g *RouterGroup) matchPath(path string) bool {
+	// Empty prefix matches all paths
+	if g.prefix == "" || g.prefix == "/" {
+		return true
 	}
 
-	// @TODO /v1/containers/123456/terminal => /v1/containers/:id
-	re := g.prefix
-	if strings.Contains(re, ":") {
-		re = strings.ReplaceAllFunc(re, ":\\w+", func(b []byte) []byte {
-			return []byte("\\w+")
-		})
-	} else if strings.Contains(re, "{") {
-		re = strings.ReplaceAllFunc(re, "{.*}", func(b []byte) []byte {
-			return []byte("\\w+")
-		})
+	// If prefix has no dynamic parts, use simple prefix matching
+	if !strings.Contains(g.prefix, ":") && !strings.Contains(g.prefix, "{") && !strings.Contains(g.prefix, "*") {
+		return strings.HasPrefix(path, g.prefix)
 	}
 
-	return regexp.Match(re, path)
+	// For dynamic prefixes, use simple pattern matching
+	return g.matchDynamicPrefix(path, g.prefix)
+}
+
+// matchDynamicPrefix handles dynamic path matching with a simplified approach
+func (g *RouterGroup) matchDynamicPrefix(path, prefix string) bool {
+	pathParts := strings.Split(strings.Trim(path, "/"), "/")
+	prefixParts := strings.Split(strings.Trim(prefix, "/"), "/")
+
+	// If prefix has more parts than path, it cannot match
+	if len(prefixParts) > len(pathParts) {
+		return false
+	}
+
+	// Check each part
+	for i, prefixPart := range prefixParts {
+		pathPart := pathParts[i]
+
+		// Skip dynamic parameters
+		if strings.HasPrefix(prefixPart, ":") ||
+			(strings.HasPrefix(prefixPart, "{") && strings.HasSuffix(prefixPart, "}")) ||
+			strings.HasPrefix(prefixPart, "*") {
+			continue
+		}
+
+		// Static part must match exactly
+		if prefixPart != pathPart {
+			return false
+		}
+	}
+
+	return true
+}
+
+// getAllMiddlewares gets all middlewares (including parent)
+func (g *RouterGroup) getAllMiddlewares() []HandlerFunc {
+	var middlewares []HandlerFunc
+
+	// Recursively collect parent middlewares
+	if g.parent != nil {
+		middlewares = append(middlewares, g.parent.getAllMiddlewares()...)
+	}
+
+	// Add current level middlewares
+	middlewares = append(middlewares, g.middlewares...)
+
+	return middlewares
+}
+
+// joinPath correctly joins URL paths
+func (g *RouterGroup) joinPath(path string) string {
+	if g.prefix == "" {
+		return path
+	}
+
+	// Handle root path special case
+	if g.prefix == "/" && path == "/" {
+		return "/"
+	}
+
+	// Simple path joining
+	prefix := strings.TrimSuffix(g.prefix, "/")
+	path = strings.TrimPrefix(path, "/")
+
+	if path == "" {
+		return prefix
+	}
+
+	return prefix + "/" + path
 }
 
 func (g *RouterGroup) addRoute(method string, path string, handler ...HandlerFunc) {
-	pathX := fs.JoinPath(g.prefix, path)
+	pathX := g.joinPath(path)
 	g.app.router.addRoute(method, pathX, handler...)
 }
 
@@ -164,7 +226,7 @@ func (g *RouterGroup) Proxy(path, target string, options ...func(cfg *ProxyConfi
 	handler := WrapH(proxy.NewSingleHost(target, &cfg.SingleHostConfig))
 
 	g.Use(func(ctx *Context) {
-		if strings.StartsWith(ctx.Path, path) {
+		if strings.HasPrefix(ctx.Path, path) {
 			if cfg.OnRequestWithContext != nil {
 				if err := cfg.OnRequestWithContext(ctx); err != nil {
 					ctx.Logger.Errorf("proxy error: %s", err)
@@ -349,7 +411,7 @@ func (g *RouterGroup) Static(basePath string, rootDir string, options ...*Static
 		opts = options[0]
 	}
 
-	if !strings.StartsWith(basePath, "/") {
+	if !strings.HasPrefix(basePath, "/") {
 		rootDir = fs.JoinCurrentDir(basePath)
 	}
 
@@ -363,7 +425,7 @@ func (g *RouterGroup) Static(basePath string, rootDir string, options ...*Static
 			return
 		}
 
-		if !strings.StartsWith(ctx.Path, absolutePath) {
+		if !strings.HasPrefix(ctx.Path, absolutePath) {
 			ctx.Next()
 			return
 		}
