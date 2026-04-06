@@ -16,6 +16,9 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/quic-go/quic-go/http3"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/go-errors/errors"
@@ -221,6 +224,22 @@ func (app *Application) applyDefaultConfigFromEnv() error {
 
 	if app.Config.HTTPSPort == 0 && os.Getenv(BuiltInEnvHTTPSPort) != "" {
 		app.Config.HTTPSPort = cast.ToInt(os.Getenv(BuiltInEnvHTTPSPort))
+	}
+
+	if !app.Config.EnableH2C && os.Getenv(BuiltInEnvEnableH2C) != "" {
+		app.Config.EnableH2C = cast.ToBool(os.Getenv(BuiltInEnvEnableH2C))
+	}
+
+	if !app.Config.EnableHTTP3 && os.Getenv(BuiltInEnvEnableHTTP3) != "" {
+		app.Config.EnableHTTP3 = cast.ToBool(os.Getenv(BuiltInEnvEnableHTTP3))
+	}
+
+	if app.Config.HTTP3Port == 0 && os.Getenv(BuiltInEnvHTTP3Port) != "" {
+		app.Config.HTTP3Port = cast.ToInt(os.Getenv(BuiltInEnvHTTP3Port))
+	}
+
+	if app.Config.HTTP3AltSvcMaxAge == 0 && os.Getenv(BuiltInEnvHTTP3AltSvcMaxAge) != "" {
+		app.Config.HTTP3AltSvcMaxAge = cast.ToInt(os.Getenv(BuiltInEnvHTTP3AltSvcMaxAge))
 	}
 
 	if app.Config.LogLevel == "" && os.Getenv(BuiltInEnvLogLevel) != "" {
@@ -564,6 +583,30 @@ func (app *Application) AddressHTTPSForLog() string {
 	return fmt.Sprintf("%s:%d", app.Config.Host, app.Config.HTTPSPort)
 }
 
+// AddressHTTP3 returns the UDP listen address for HTTP/3 (host:port).
+func (app *Application) AddressHTTP3() string {
+	port := app.Config.HTTP3Port
+	if port == 0 {
+		port = app.Config.HTTPSPort
+	}
+
+	return fmt.Sprintf("%s:%d", app.Config.Host, port)
+}
+
+// AddressHTTP3ForLog returns a log-friendly UDP address for HTTP/3.
+func (app *Application) AddressHTTP3ForLog() string {
+	port := app.Config.HTTP3Port
+	if port == 0 {
+		port = app.Config.HTTPSPort
+	}
+
+	if app.Config.Host == "0.0.0.0" {
+		return fmt.Sprintf("127.0.0.1:%d", port)
+	}
+
+	return fmt.Sprintf("%s:%d", app.Config.Host, port)
+}
+
 // showBanner ...
 func (app *Application) showBanner() {
 	// allow custom banner
@@ -636,12 +679,26 @@ func (app *Application) showRuntimeInfo() {
 func (app *Application) serve() error {
 	g, ctx := errgroup.WithContext(context.Background())
 
+	var tlsOnce sync.Once
+	var tlsCfg *tls.Config
+	var tlsErr error
+	loadTLS := func() (*tls.Config, error) {
+		tlsOnce.Do(func() {
+			tlsCfg, tlsErr = app.buildTLSConfig()
+		})
+		return tlsCfg, tlsErr
+	}
+
 	g.Go(func() error {
 		return app.serveHTTP(ctx)
 	})
 
 	g.Go(func() error {
-		return app.serveHTTPS(ctx)
+		return app.serveHTTPS(ctx, loadTLS)
+	})
+
+	g.Go(func() error {
+		return app.serveHTTP3(ctx, loadTLS)
 	})
 
 	return g.Wait()
@@ -655,13 +712,19 @@ func (app *Application) serveHTTP(ctx context.Context) error {
 	}
 	defer listener.Close()
 
+	handler := http.Handler(app)
+	if app.Config.EnableH2C && app.Config.NetworkType == "tcp" {
+		h2s := &http2.Server{}
+		handler = h2c.NewHandler(handler, h2s)
+	}
+
 	server := &http.Server{
 		ReadTimeout:  300 * time.Second,
 		WriteTimeout: 300 * time.Second,
 		IdleTimeout:  300 * time.Second,
 		//
 		Addr:    app.Address(),
-		Handler: app,
+		Handler: handler,
 	}
 
 	go func() {
@@ -679,33 +742,7 @@ func (app *Application) serveHTTP(ctx context.Context) error {
 	return server.Serve(listener)
 }
 
-// serveHTTPS ...
-func (app *Application) serveHTTPS(ctx context.Context) error {
-	// if HTTPSPort is not set, ignore set https
-	if app.Config.HTTPSPort == 0 {
-		return nil
-	}
-
-	listener, err := net.Listen(app.Config.NetworkType, app.AddressHTTPS())
-	if err != nil {
-		return err
-	}
-	defer listener.Close()
-
-	server := &http.Server{
-		ReadTimeout:  300 * time.Second,
-		WriteTimeout: 300 * time.Second,
-		IdleTimeout:  300 * time.Second,
-		//
-		Addr:    app.AddressHTTPS(),
-		Handler: app,
-	}
-
-	go func() {
-		<-ctx.Done() // 当上下文被取消时，停止服务器
-		server.Close()
-	}()
-
+func (app *Application) buildTLSConfig() (*tls.Config, error) {
 	var config *tls.Config
 
 	// TLS Ca Certificate
@@ -713,7 +750,7 @@ func (app *Application) serveHTTPS(ctx context.Context) error {
 		pool := x509.NewCertPool()
 		caCrt, err := ioutil.ReadFile(app.Config.TLSCaCertFile)
 		if err != nil {
-			return fmt.Errorf("failed to read tls ca certificate")
+			return nil, fmt.Errorf("failed to read tls ca certificate")
 		}
 		pool.AppendCertsFromPEM(caCrt)
 
@@ -729,42 +766,22 @@ func (app *Application) serveHTTPS(ctx context.Context) error {
 	if app.Config.TLSCertFile != "" && app.Config.TLSKeyFile != "" {
 		certPEMBlock, err := os.ReadFile(app.Config.TLSCertFile)
 		if err != nil {
-			return fmt.Errorf("failed to read tls certificate: %v", err)
+			return nil, fmt.Errorf("failed to read tls certificate: %v", err)
 		}
 		app.Config.TLSCert = string(certPEMBlock)
 
 		keyPEMBlock, err := os.ReadFile(app.Config.TLSKeyFile)
 		if err != nil {
-			return fmt.Errorf("failed to read tls private key: %v", err)
+			return nil, fmt.Errorf("failed to read tls private key: %v", err)
 		}
 		app.Config.TLSKey = string(keyPEMBlock)
-
-		// // if app.Config.TLSCertFile != "" && app.TLSCert == nil {
-		// // 	tlsCaCert, err := ioutil.ReadFile(app.Config.TLSCertFile)
-		// // 	if err != nil {
-		// // 		return err
-		// // 	}
-		// // 	app.TLSCert = tlsCaCert
-		// // }
-
-		// if app.Config.NetworkType == "unix" {
-		// 	logger.Info("Server started at unixs://%s", app.AddressForLog())
-		// } else {
-		// 	logger.Info("Server started at https://%s", app.AddressForLog())
-		// }
-
-		// // if err := http.ServeTLS(listener, app, app.Config.TLSCertFile, app.Config.TLSKeyFile); err != nil {
-		// // 	return err
-		// // }
-
-		// return server.ServeTLS(listener, app.Config.TLSCertFile, app.Config.TLSKeyFile)
 	}
 
 	// @2 load tls from memory: TLS Certificate and Private Key
 	if app.Config.TLSCert != "" && app.Config.TLSKey != "" {
 		cert, err := tls.X509KeyPair([]byte(app.Config.TLSCert), []byte(app.Config.TLSKey))
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		if config == nil {
@@ -799,8 +816,86 @@ func (app *Application) serveHTTPS(ctx context.Context) error {
 	}
 
 	if config == nil {
-		return errors.New("failed to start https server, tls config is required; you can set tls cert and key by app.Config.TLSCertFile and app.Config.TLSKeyFile, or app.Config.TLSCert and app.Config.TLSKey, or app.SetTLSCertLoader method")
+		return nil, errors.New("failed to start https server, tls config is required; you can set tls cert and key by app.Config.TLSCertFile and app.Config.TLSKeyFile, or app.Config.TLSCert and app.Config.TLSKey, or app.SetTLSCertLoader method")
 	}
+
+	if len(config.NextProtos) == 0 {
+		config.NextProtos = []string{"h2", "http/1.1"}
+	}
+
+	return config, nil
+}
+
+func (app *Application) altSvcHeader() string {
+	if !app.Config.EnableHTTP3 {
+		return ""
+	}
+
+	ma := app.Config.HTTP3AltSvcMaxAge
+	if ma < 0 {
+		return ""
+	}
+	if ma == 0 {
+		ma = 86400
+	}
+
+	port := app.Config.HTTP3Port
+	if port == 0 {
+		port = app.Config.HTTPSPort
+	}
+
+	return fmt.Sprintf(`h3=":%d"; ma=%d`, port, ma)
+}
+
+func wrapWithAltSvc(h http.Handler, altSvc string) http.Handler {
+	if altSvc == "" {
+		return h
+	}
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Alt-Svc", altSvc)
+		h.ServeHTTP(w, r)
+	})
+}
+
+// serveHTTPS ...
+func (app *Application) serveHTTPS(ctx context.Context, loadTLS func() (*tls.Config, error)) error {
+	// if HTTPSPort is not set, ignore set https
+	if app.Config.HTTPSPort == 0 {
+		return nil
+	}
+
+	listener, err := net.Listen(app.Config.NetworkType, app.AddressHTTPS())
+	if err != nil {
+		return err
+	}
+	defer listener.Close()
+
+	config, err := loadTLS()
+	if err != nil {
+		return err
+	}
+
+	handler := http.Handler(app)
+	handler = wrapWithAltSvc(handler, app.altSvcHeader())
+
+	server := &http.Server{
+		ReadTimeout:  300 * time.Second,
+		WriteTimeout: 300 * time.Second,
+		IdleTimeout:  300 * time.Second,
+		//
+		Addr:    app.AddressHTTPS(),
+		Handler: handler,
+	}
+
+	if err := http2.ConfigureServer(server, &http2.Server{}); err != nil {
+		return err
+	}
+
+	go func() {
+		<-ctx.Done() // 当上下文被取消时，停止服务器
+		server.Close()
+	}()
 
 	if app.Config.NetworkType == "unix" {
 		logger.Info("Server started at unix://%s", app.AddressHTTPSForLog())
@@ -809,6 +904,34 @@ func (app *Application) serveHTTPS(ctx context.Context) error {
 	}
 
 	return server.Serve(tls.NewListener(listener, config))
+}
+
+func (app *Application) serveHTTP3(ctx context.Context, loadTLS func() (*tls.Config, error)) error {
+	if !app.Config.EnableHTTP3 || app.Config.NetworkType != "tcp" || app.Config.HTTPSPort == 0 {
+		return nil
+	}
+
+	config, err := loadTLS()
+	if err != nil {
+		return err
+	}
+
+	h3TLS := http3.ConfigureTLSConfig(config)
+
+	server := &http3.Server{
+		Addr:      app.AddressHTTP3(),
+		TLSConfig: h3TLS,
+		Handler:   app,
+	}
+
+	go func() {
+		<-ctx.Done()
+		_ = server.Close()
+	}()
+
+	logger.Info("HTTP/3 server started at udp://%s", app.AddressHTTP3ForLog())
+
+	return server.ListenAndServe()
 }
 
 // H is a shortcut for map[string]interface{}
