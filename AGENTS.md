@@ -6,6 +6,13 @@
 
 - 用户可见的配置与协议说明：[docs/guides/configuration.md](docs/guides/configuration.md)（含 HTTP/2、h2c、HTTP/3、环境变量）。
 
+### 文档站点（VitePress / Node）
+
+- **不要**在仓库根目录找 `package.json`：VitePress 与 pnpm 相关文件在 **`docs/`** 下，包括 `docs/package.json`、`docs/pnpm-lock.yaml`、`docs/tsconfig.json`。
+- 本地开发：先 `cd docs`，再 `pnpm install`、`pnpm run docs:dev` / `docs:build` / `docs:preview`（脚本里 VitePress 根目录为当前目录 `.`）。
+- CI： [.github/workflows/docs.yml](.github/workflows/docs.yml) 在 **`working-directory: docs`** 下执行 `pnpm install` 与 `pnpm run docs:build`；`actions/setup-node` 的 `cache-dependency-path` 为 **`docs/pnpm-lock.yaml`**。
+- 人类可读说明：[README_DOCS.md](README_DOCS.md)。
+
 ## 服务入口与协议（实现位置）
 
 - 启动与并发：`application.go` 中 `serve()` 使用 `errgroup` 并行跑 `serveHTTP`、`serveHTTPS`、`serveHTTP3`。
