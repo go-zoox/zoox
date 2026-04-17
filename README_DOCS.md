@@ -1,10 +1,12 @@
 # Documentation Setup
 
-This project uses [VitePress](https://vitepress.dev/) for documentation with TypeScript and pnpm.
+This project uses [VitePress](https://vitepress.dev/) for documentation with TypeScript and pnpm. Node tooling lives under **`docs/`** (see `docs/package.json`).
 
 ## Development
 
 ```bash
+cd docs
+
 # Install dependencies
 pnpm install
 
@@ -26,10 +28,10 @@ The workflow is configured in `.github/workflows/docs.yml`.
 
 ## Documentation Structure
 
-- `docs/` - Documentation source files
+- `docs/` - Documentation source files and Node manifest (`package.json`, `pnpm-lock.yaml`, `tsconfig.json`)
 - `docs/.vitepress/` - VitePress configuration
 - `docs/.vitepress/config.ts` - VitePress config file (TypeScript)
-- `tsconfig.json` - TypeScript configuration
+- `docs/tsconfig.json` - TypeScript configuration for VitePress
 
 ## Local Development
 
@@ -38,7 +40,7 @@ The workflow is configured in `.github/workflows/docs.yml`.
    # Install pnpm globally if not already installed
    npm install -g pnpm
    ```
-2. Run `pnpm install` to install dependencies
+2. `cd docs` and run `pnpm install`
 3. Run `pnpm run docs:dev` to start the dev server
 4. Open http://localhost:5173 in your browser
 

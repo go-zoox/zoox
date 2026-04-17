@@ -12,6 +12,11 @@ type Config struct {
 	Host      string
 	Port      int
 	HTTPSPort int
+
+	EnableH2C         bool // 明文 HTTP/2（h2c），仅建议在可信网络使用
+	EnableHTTP3       bool // 与 HTTPS 同时启用时在 UDP 上提供 HTTP/3
+	HTTP3Port         int  // HTTP/3 UDP 端口，0 表示与 HTTPSPort 相同
+	HTTP3AltSvcMaxAge int  // HTTPS 响应 Alt-Svc 的 ma= 秒数；0 为默认 86400；负数关闭 Alt-Svc
 	
 	BodySizeLimit int64
 	
@@ -91,6 +96,10 @@ Zoox 支持通过环境变量配置，会自动从环境变量读取配置：
 # 服务器配置
 export PORT=8080
 export HTTPS_PORT=8443
+export ENABLE_H2C=true
+export ENABLE_HTTP3=true
+export HTTP3_PORT=8443
+export HTTP3_ALTSVC_MAX_AGE=86400
 export MODE=production
 
 # 日志配置
@@ -199,7 +208,27 @@ app.Config.HTTPSPort = 8443
 app.Run()
 ```
 
-**说明**: TLS 配置参考 `application.go:682-812`。
+**说明**: TLS 与 HTTPS 服务实现参考 `application.go` 中的 `buildTLSConfig`、`serveHTTPS`。
+
+### HTTP/2（HTTPS）
+
+在已配置 `HTTPSPort` 与 TLS 证书时，HTTPS 监听器会通过 ALPN 同时提供 **HTTP/2**（`h2`）与 HTTP/1.1。框架会调用 `golang.org/x/net/http2` 的 `ConfigureServer` 注册 HTTP/2，并在 TLS 配置中声明 `h2`、`http/1.1` 的 ALPN。
+
+可用 `curl -I --http2 https://<host>:<HTTPS端口>` 或浏览器开发者工具中的 Protocol 列验证。
+
+### 明文 HTTP/2（h2c）
+
+将 `app.Config.EnableH2C = true`（或环境变量 `ENABLE_H2C=true`）时，在 **TCP** 明文 HTTP 端口上启用 h2c。仅建议在受信任网络或反向代理之后使用；公网暴露风险较高。
+
+### HTTP/3（QUIC）
+
+1. 配置 `HTTPSPort` 与 TLS（HTTP/3 与 HTTPS 共用证书逻辑）。
+2. 设置 `app.Config.EnableHTTP3 = true`（或 `ENABLE_HTTP3=true`）。
+3. 可选：`app.Config.HTTP3Port`（或 `HTTP3_PORT`）指定 UDP 端口；为 `0` 时使用与 `HTTPSPort` 相同的端口号（生产环境常见：TCP 与 UDP 同端口，如 443）。
+4. 防火墙与安全组需 **放行对应 UDP 端口**。
+5. 启用 HTTP/3 时，HTTPS 响应会默认携带 `Alt-Svc`（引导浏览器使用 HTTP/3）。可通过 `HTTP3AltSvcMaxAge` / `HTTP3_ALTSVC_MAX_AGE` 调整 `ma=`；设为 **负数** 可关闭 `Alt-Svc` 头。
+
+若由 Nginx、Caddy 等在边缘终止 TLS 并处理 HTTP/2/HTTP/3，可不在应用内开启 HTTP/3。
 
 ## Session 配置
 

@@ -6,8 +6,6 @@ on:
       - master
     paths:
       - 'docs/**'
-      - '.vitepress/**'
-      - 'package.json'
       - '.github/workflows/docs.yml'
   workflow_dispatch:
 
@@ -39,11 +37,14 @@ jobs:
         with:
           node-version: 18
           cache: pnpm
+          cache-dependency-path: docs/pnpm-lock.yaml
 
       - name: Install dependencies
+        working-directory: docs
         run: pnpm install --frozen-lockfile
 
       - name: Build
+        working-directory: docs
         run: pnpm run docs:build
 
       - name: Setup Pages
