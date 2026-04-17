@@ -29,6 +29,7 @@ import (
 	"github.com/go-zoox/logger"
 	"github.com/go-zoox/websocket"
 	"github.com/go-zoox/zoox/components/application/cmd"
+	appcache "github.com/go-zoox/zoox/components/application/cache"
 	"github.com/go-zoox/zoox/components/application/cron"
 	"github.com/go-zoox/zoox/components/application/debug"
 	"github.com/go-zoox/zoox/components/application/env"
@@ -440,6 +441,7 @@ func (app *Application) MQ() mq.MQ {
 func (app *Application) Cache() cache.Cache {
 	app.once.cache.Do(func() {
 		app.cache = cache.New(&app.Config.Cache)
+		appcache.Set(app.cache)
 	})
 
 	return app.cache

@@ -19,7 +19,26 @@ app.Get("/data", func(ctx *zoox.Context) {
 })
 ```
 
-**说明**: Cache 实现参考 `application.go:439-446` 和 `context.go:928-935`。
+### 全局访问 Cache（任意代码位置）
+
+从 vNext 开始，`app.Cache()` 首次初始化后会自动注册到 `components/application/cache`，你可以在没有 `app` 或 `ctx` 的位置直接获取同一个实例：
+
+```go
+import (
+	"time"
+
+	appcache "github.com/go-zoox/zoox/components/application/cache"
+)
+
+func DoSomething() error {
+	cache := appcache.Get()
+	return cache.Set("task:latest", "done", time.Minute)
+}
+```
+
+> 注意：`appcache.Get()` 在应用尚未初始化 Cache 时会 panic。建议在应用启动阶段先调用过一次 `app.Cache()`。
+
+**说明**: Cache 实现参考 `application.go`、`context.go` 和 `components/application/cache/cache.go`。
 
 ## 内存缓存
 

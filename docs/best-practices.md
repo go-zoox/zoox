@@ -190,6 +190,31 @@ app.Get("/user/:id", func(ctx *zoox.Context) {
 })
 ```
 
+#### ctx.Cache() vs 全局 appcache.Get()
+
+推荐按调用场景选择：
+
+- 在 HTTP 请求处理链路（handler / middleware）中，优先使用 `ctx.Cache()`
+- 在已持有 `*zoox.Application` 的初始化代码中，使用 `app.Cache()`
+- 在没有 `ctx` / `app` 的通用模块（工具函数、异步任务、后台逻辑）中，使用 `appcache.Get()`
+
+```go
+import (
+	appcache "github.com/go-zoox/zoox/components/application/cache"
+)
+
+func runBackgroundTask() error {
+	cache := appcache.Get()
+	return cache.Set("task:sync", "done", time.Minute)
+}
+```
+
+注意事项：
+
+- `appcache.Get()` 依赖应用已完成 Cache 初始化；建议在启动阶段显式调用一次 `app.Cache()`
+- 不要在同一个请求里混用多个来源的 cache 变量，尽量统一使用 `ctx.Cache()`，减少可读性负担
+- 新增可测试模块时，优先让函数接收 `cache.Cache` 接口参数，`appcache.Get()` 作为无上下文场景的兜底方案
+
 ### 2. 启用 Gzip 压缩
 
 ```go

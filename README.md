@@ -249,9 +249,16 @@ func handler(ctx *zoox.Context) {
 
 ```go
 // Cache example
+// import appcache "github.com/go-zoox/zoox/components/application/cache"
 cache := app.Cache()
 cache.Set("key", "value", time.Hour)
-value := cache.Get("key")
+
+var value string
+cache.Get("key", &value)
+
+// Global cache access (outside app / ctx scope)
+globalCache := appcache.Get()
+globalCache.Set("key:2", "value:2", time.Hour)
 
 // Session example
 session := ctx.Session()

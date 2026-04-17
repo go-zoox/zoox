@@ -199,7 +199,15 @@ cache := app.Cache()
 cache.Set("key", "value", time.Hour)
 ```
 
-**说明**: 实现参考 `application.go:439-446`。
+`app.Cache()` 首次初始化后，会自动注册到全局入口 `components/application/cache`，便于在非请求链路代码中复用同一个实例：
+
+```go
+import appcache "github.com/go-zoox/zoox/components/application/cache"
+
+cache := appcache.Get()
+```
+
+**说明**: 实现参考 `application.go` 和 `components/application/cache/cache.go`。
 
 ### Cron() cron.Cron
 
