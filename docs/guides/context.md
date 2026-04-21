@@ -147,6 +147,46 @@ app.Get("/search", func(ctx *zoox.Context) {
 
 **说明**: BindQuery 方法参考 `context.go:865-876`。
 
+### 与 gormx 查询参数适配
+
+当你在 Zoox 中使用 `github.com/go-zoox/gormx` 时，推荐使用 Zoox 侧适配包：
+
+```go
+import (
+	"github.com/go-zoox/zoox"
+	contextgormx "github.com/go-zoox/zoox/components/context/gormx"
+)
+
+app.Get("/users/:id", func(ctx *zoox.Context) {
+	params := contextgormx.NewParams(ctx)
+
+	list, err := params.GetList()
+	if err != nil {
+		ctx.Error(400, err.Error())
+		return
+	}
+
+	whereQuery, whereArgs, _ := list.Where.Build()
+	orderBy := list.OrderBy.Build()
+
+	ctx.JSON(200, zoox.H{
+		"page":       list.Page,
+		"page_size":  list.PageSize,
+		"whereQuery": whereQuery,
+		"whereArgs":  whereArgs,
+		"orderBy":    orderBy,
+	})
+})
+```
+
+常见查询参数示例：
+
+- `?page=2&pageSize=20`
+- `?orderBy=created_at:desc,id:asc`
+- `?age=18,65:range[)`（区间语法）
+
+这样可以保持 `gormx` 和 `zoox` 的解耦：`gormx` 只依赖通用接口，`zoox` 提供上下文适配实现。
+
 ### 绑定表单数据
 
 ```go

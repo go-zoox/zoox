@@ -74,6 +74,19 @@ var params QueryParams
 ctx.BindQuery(&params)
 ```
 
+### gormx 查询参数适配
+
+如果你使用 `gormx`，可以通过 Zoox 适配层直接复用 `gormx.Params`：
+
+```go
+import contextgormx "github.com/go-zoox/zoox/components/context/gormx"
+
+params := contextgormx.NewParams(ctx)
+list, err := params.GetList()
+```
+
+更多示例见 [gormx 组件文档](../components/gormx.md)。
+
 ### BindForm(obj interface{}) error
 
 绑定表单数据到结构体。

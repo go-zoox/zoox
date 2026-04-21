@@ -30,6 +30,7 @@
 - **[缓存系统](components/cache.md)** - Redis和内存缓存
 - **[会话管理](components/session.md)** - Session和Cookie处理
 - **[JWT认证](components/jwt.md)** - JWT生成和验证
+- **[gormx 适配](components/gormx.md)** - 将 Zoox Context 适配为 gormx Params
 - **[国际化](components/i18n.md)** - 多语言支持
 - **[日志系统](components/logger.md)** - 结构化日志
 

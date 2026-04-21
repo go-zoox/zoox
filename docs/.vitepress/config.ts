@@ -63,6 +63,7 @@ export default defineConfig({
                 { text: '缓存系统', link: '/components/cache' },
                 { text: '会话管理', link: '/components/session' },
                 { text: 'JWT认证', link: '/components/jwt' },
+                { text: 'gormx 适配', link: '/components/gormx' },
               ],
             },
           ],
