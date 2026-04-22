@@ -15,6 +15,7 @@ func NewProject(projectDir, module, goVersion string) error {
 	if err != nil {
 		return err
 	}
+	stepf("resolved target directory: %s", abs)
 
 	if _, statErr := os.Stat(abs); statErr == nil {
 		entries, readErr := os.ReadDir(abs)
@@ -24,13 +25,17 @@ func NewProject(projectDir, module, goVersion string) error {
 		if len(entries) > 0 {
 			return fmt.Errorf("directory %s is not empty", abs)
 		}
+		stepf("directory exists and is empty — ok")
 	} else if !os.IsNotExist(statErr) {
 		return statErr
+	} else {
+		stepf("directory does not exist — will create")
 	}
 
 	if err := os.MkdirAll(abs, 0o755); err != nil {
 		return err
 	}
+	stepf("ensure project root: %s", abs)
 
 	vars := NewProjectVars{
 		Module:    module,
@@ -52,10 +57,11 @@ func NewProject(projectDir, module, goVersion string) error {
 		{"templates/new/utils/utils.go.tmpl", "utils/utils.go"},
 	}
 
+	stepf("go module in go.mod: %s (go %s)", module, goVersion)
 	for _, f := range files {
 		data, err := renderTemplate(f.tmpl, vars)
 		if err != nil {
-			return err
+			return fmt.Errorf("template %s: %w", f.tmpl, err)
 		}
 		outPath := filepath.Join(abs, filepath.FromSlash(f.out))
 		if err := os.MkdirAll(filepath.Dir(outPath), 0o755); err != nil {
@@ -64,7 +70,9 @@ func NewProject(projectDir, module, goVersion string) error {
 		if err := os.WriteFile(outPath, data, 0o644); err != nil {
 			return err
 		}
+		stepf("write %s", f.out)
 	}
 
+	stepf("project scaffold finished (%d files)", len(files))
 	return nil
 }

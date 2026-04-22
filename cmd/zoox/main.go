@@ -28,6 +28,12 @@ func main() {
 	app.Run()
 }
 
+func attachScaffoldLogger() {
+	scaffold.SetLogger(func(format string, args ...any) {
+		fmt.Printf("[zoox] "+format+"\n", args...)
+	})
+}
+
 func newCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "new",
@@ -51,6 +57,10 @@ func newCommand() *cli.Command {
 			}
 			dir := ctx.Args().First()
 			mod := ctx.String("module")
+			absTarget, err := filepath.Abs(dir)
+			if err != nil {
+				return err
+			}
 			if mod == "" {
 				base := filepath.Base(filepath.Clean(dir))
 				if base == "." || base == string(filepath.Separator) || base == "" {
@@ -58,7 +68,23 @@ func newCommand() *cli.Command {
 				}
 				mod = base
 			}
-			return scaffold.NewProject(dir, mod, ctx.String("go"))
+
+			treeRoot := filepath.Base(absTarget)
+			if treeRoot == "." || treeRoot == string(filepath.Separator) {
+				treeRoot = absTarget
+			}
+
+			fmt.Println()
+			scaffold.PrintPlannedLayout(os.Stdout, treeRoot)
+			fmt.Println("Operations:")
+			attachScaffoldLogger()
+			defer scaffold.SetLogger(nil)
+
+			if err := scaffold.NewProject(dir, mod, ctx.String("go")); err != nil {
+				return err
+			}
+			scaffold.PrintNewProjectNextSteps(os.Stdout, absTarget)
+			return nil
 		},
 	}
 }
@@ -96,7 +122,17 @@ func genCommand() *cli.Command {
 					if err != nil {
 						return err
 					}
-					return scaffold.GenModule(proj, name)
+
+					fmt.Println()
+					fmt.Println("Operations:")
+					attachScaffoldLogger()
+					defer scaffold.SetLogger(nil)
+
+					if err := scaffold.GenModule(proj, name); err != nil {
+						return err
+					}
+					scaffold.PrintGenModuleNextSteps(os.Stdout, proj, name)
+					return nil
 				},
 			},
 		},

@@ -12,14 +12,17 @@ const DefaultAPIVersion = "v1"
 
 // GenModule adds api/, services/, and models/ packages for name, and patches router/rest.go and models/register.go.
 func GenModule(projectRoot, name string) error {
+	stepf("gen module: name=%q project=%s", name, projectRoot)
 	if err := ValidateModuleSegment(name); err != nil {
 		return err
 	}
+	stepf("module name validation ok")
 
 	modPath, err := ModulePath(projectRoot)
 	if err != nil {
 		return err
 	}
+	stepf("go.mod module path: %s", modPath)
 
 	apiVer := DefaultAPIVersion
 	vars := ModuleVars{
@@ -52,11 +55,12 @@ func GenModule(projectRoot, name string) error {
 			return err
 		}
 	}
+	stepf("precheck: %d new files (no existing paths)", len(paths))
 
 	for _, p := range paths {
 		data, err := renderTemplate(p.tmpl, vars)
 		if err != nil {
-			return err
+			return fmt.Errorf("template %s: %w", p.tmpl, err)
 		}
 		outPath := filepath.Join(projectRoot, filepath.FromSlash(p.out))
 		if err := os.MkdirAll(filepath.Dir(outPath), 0o755); err != nil {
@@ -65,18 +69,22 @@ func GenModule(projectRoot, name string) error {
 		if err := os.WriteFile(outPath, data, 0o644); err != nil {
 			return err
 		}
+		stepf("write %s", p.out)
 	}
 
 	routerFile := filepath.Join(projectRoot, "router", "rest.go")
+	stepf("patch %s", filepath.ToSlash(filepath.Join("router", "rest.go")))
 	if err := patchRouter(routerFile, modPath, apiVer, name); err != nil {
 		return err
 	}
 
 	modelRegFile := filepath.Join(projectRoot, "models", "register.go")
+	stepf("patch %s", filepath.ToSlash(filepath.Join("models", "register.go")))
 	if err := patchModelRegister(modelRegFile, modPath, apiVer, name); err != nil {
 		return err
 	}
 
+	stepf("gen module finished: api/%s/%s, services/%s/%s, models/%s/%s", apiVer, name, apiVer, name, apiVer, name)
 	return nil
 }
 
