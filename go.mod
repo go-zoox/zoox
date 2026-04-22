@@ -35,7 +35,7 @@ require (
 	github.com/go-zoox/ratelimit v1.2.1
 	github.com/go-zoox/session v1.2.0
 	github.com/go-zoox/tag v1.3.4
-	github.com/go-zoox/watch v1.2.4
+	github.com/go-zoox/watch v1.3.2
 	github.com/go-zoox/websocket v1.3.5
 	github.com/prometheus/client_golang v1.18.0
 	github.com/quic-go/quic-go v0.59.0
