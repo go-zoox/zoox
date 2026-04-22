@@ -9,18 +9,19 @@ import (
 	"github.com/go-zoox/cli"
 	"github.com/go-zoox/fs"
 	"github.com/go-zoox/logger"
+	"github.com/go-zoox/zoox/cmd/zoox/scaffold"
 )
 
 // Install is the install command
 func Install(app *cli.MultipleProgram) {
 	app.Register("install", &cli.Command{
 		Name:  "install",
-		Usage: "Run go mod tidy in a Zoox project (directory containing go.mod).",
+		Usage: "Run go mod tidy in a Zoox project (requires .zoox/config.yaml from `zoox new`).",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "context",
 				Aliases: []string{"C"},
-				Usage:   "project root (containing go.mod); default: current directory",
+				Usage:   "Zoox project root (containing go.mod and .zoox/config.yaml); default: current directory",
 				Value:   fs.CurrentDir(),
 			},
 		},
@@ -31,6 +32,9 @@ func Install(app *cli.MultipleProgram) {
 }
 
 func install(context string) error {
+	if err := scaffold.RequireZooxProjectRoot(context); err != nil {
+		return err
+	}
 	abs, err := filepath.Abs(context)
 	if err != nil {
 		return err

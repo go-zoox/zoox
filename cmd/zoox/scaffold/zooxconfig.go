@@ -1,6 +1,7 @@
 package scaffold
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -8,6 +9,36 @@ import (
 
 	"gopkg.in/yaml.v3"
 )
+
+// ErrNotZooxProject means the directory is not a Zoox project (missing or invalid .zoox/config.yaml).
+var ErrNotZooxProject = errors.New("not a zoox project")
+
+// RequireZooxProjectRoot returns nil if abs path contains a valid .zoox/config.yaml (schema version >= 1).
+// Non–zoox-new layouts or plain Go modules without this file cannot use `zoox install`, `dev`, `build`, or `database` commands.
+func RequireZooxProjectRoot(dir string) error {
+	abs, err := filepath.Abs(dir)
+	if err != nil {
+		return err
+	}
+	p := filepath.Join(abs, ".zoox", "config.yaml")
+	b, err := os.ReadFile(p)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("%w: %s is missing; create the project with `zoox new` or add .zoox/config.yaml from a generated project", ErrNotZooxProject, p)
+		}
+		return fmt.Errorf("read %s: %w", p, err)
+	}
+	var head struct {
+		Version int `yaml:"version"`
+	}
+	if err := yaml.Unmarshal(b, &head); err != nil {
+		return fmt.Errorf("invalid .zoox/config.yaml: %w", err)
+	}
+	if head.Version < 1 {
+		return fmt.Errorf("unsupported .zoox/config.yaml version: %d (expected >= 1)", head.Version)
+	}
+	return nil
+}
 
 // zooxConfigRoot is the on-disk file written by `zoox new` and read by other zoox commands.
 // Module path stays in go.mod.

@@ -21,6 +21,8 @@ go install github.com/go-zoox/zoox/cmd/zoox@latest
 | `zoox build` | 先 `go mod tidy`，再对主包执行 `go build`（默认可执行文件为 `./bin/server`）。 |
 | `zoox database migrate` | 先 `go mod tidy`，再 `go run ./cmd/migrate`（只执行 `migrate.Run()`，不启动 HTTP）。 |
 
+**说明**：`zoox install`、`zoox dev`、`zoox build`、`zoox database migrate` 仅在**项目根存在**由 `zoox new` 生成的 **`.zoox/config.yaml`**（且 `version >= 1`）时可用；普通 Go 仓库或手抄结构但无该文件时，上述命令会报错「不是 Zoox 项目」类提示。`zoox gen module` 仍只需能定位到 `go.mod` 且保留路由/模型中的标记行。
+
 当前 `gen module` 固定使用 **`v1`** 作为 URL 与目录版本段（与 `scaffold.DefaultAPIVersion` 一致）。
 
 ## `.zoox/config.yaml`

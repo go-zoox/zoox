@@ -15,7 +15,7 @@ import (
 func Dev(app *cli.MultipleProgram) {
 	app.Register("dev", &cli.Command{
 		Name:  "dev",
-		Usage: "Run go mod tidy, then watch and rebuild the main package on file changes (default: " + scaffold.DefaultAppPackage + ").",
+		Usage: "Run go mod tidy, then watch/rebuild/run in a Zoox project (default main package: " + scaffold.DefaultAppPackage + ").",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "entry",
@@ -27,7 +27,7 @@ func Dev(app *cli.MultipleProgram) {
 			&cli.StringFlag{
 				Name:    "context",
 				Aliases: []string{"C"},
-				Usage:   "project root (containing go.mod); default: current directory",
+				Usage:   "Zoox project root (go.mod + .zoox/config.yaml); default: current directory",
 				Value:   fs.CurrentDir(),
 			},
 			&cli.StringSliceFlag{

@@ -21,6 +21,8 @@ Ensure `$(go env GOPATH)/bin` is on your `PATH`, then run `zoox --help`.
 | `zoox build` | Run `go mod tidy`, then `go build` the main package (default output `./bin/server`). |
 | `zoox database migrate` | Run `go mod tidy`, then `go run ./cmd/migrate` (calls `migrate.Run()` only; no HTTP). |
 
+**Note:** `zoox install`, `zoox dev`, `zoox build`, and `zoox database migrate` require a **`.zoox/config.yaml`** at the project root (from `zoox new`, with `version >= 1`). Plain Go modules without that file are rejected. **`zoox gen module`** only needs `go.mod` and the marker lines in `router` / `models`.
+
 `gen module` currently fixes the API segment to **`v1`** (`scaffold.DefaultAPIVersion`).
 
 ## `.zoox/config.yaml`

@@ -9,6 +9,7 @@ import (
 	"github.com/go-zoox/cli"
 	"github.com/go-zoox/fs"
 	"github.com/go-zoox/logger"
+	"github.com/go-zoox/zoox/cmd/zoox/scaffold"
 )
 
 // Database registers database subcommands (e.g. migrate).
@@ -28,11 +29,14 @@ func migrateSubcommand() *cli.Command {
 			&cli.StringFlag{
 				Name:    "context",
 				Aliases: []string{"C"},
-				Usage:   "project root (containing go.mod); default: current directory",
+				Usage:   "Zoox project root (go.mod + .zoox/config.yaml); default: current directory",
 				Value:   fs.CurrentDir(),
 			},
 		},
 		Action: func(ctx *cli.Context) error {
+			if err := scaffold.RequireZooxProjectRoot(ctx.String("context")); err != nil {
+				return err
+			}
 			dir, err := filepath.Abs(ctx.String("context"))
 			if err != nil {
 				return err
