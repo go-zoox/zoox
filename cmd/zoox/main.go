@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -29,6 +30,37 @@ func main() {
 	commands.RegisterDatabase(app)
 
 	app.Run()
+}
+
+// runZooxGen locates the Go module, runs a generator, then optional success output.
+func runZooxGen(ctx *cli.Context, usage string, gen func(string, string) error, onSuccess func(projectRoot, name string)) error {
+	if ctx.NArg() < 1 {
+		return errors.New(usage)
+	}
+	name := ctx.Args().First()
+	root := ctx.String("dir")
+	if root == "" {
+		wd, err := os.Getwd()
+		if err != nil {
+			return err
+		}
+		root = wd
+	}
+	proj, err := scaffold.FindGoModDir(root)
+	if err != nil {
+		return err
+	}
+	fmt.Println()
+	fmt.Println("Operations:")
+	attachScaffoldLogger()
+	defer scaffold.SetLogger(nil)
+	if err := gen(proj, name); err != nil {
+		return err
+	}
+	if onSuccess != nil {
+		onSuccess(proj, name)
+	}
+	return nil
 }
 
 func attachScaffoldLogger() {
@@ -113,6 +145,13 @@ func newCommand() *cli.Command {
 }
 
 func genCommand() *cli.Command {
+	genFlags := []cli.Flag{
+		&cli.StringFlag{
+			Name:    "dir",
+			Aliases: []string{"C"},
+			Usage:   "Working directory to search upward for go.mod (default: current directory)",
+		},
+	}
 	return &cli.Command{
 		Name:  "gen",
 		Usage: "Generate code from embedded templates.",
@@ -121,41 +160,44 @@ func genCommand() *cli.Command {
 				Name:      "module",
 				Usage:     "Add api/v1/<name>, services/v1/<name>, models/v1/<name> and patch router + models/register.",
 				ArgsUsage: "<name>",
-				Flags: []cli.Flag{
-					&cli.StringFlag{
-						Name:    "dir",
-						Aliases: []string{"C"},
-						Usage:   "Working directory to search upward for go.mod (default: current directory)",
-					},
-				},
+				Flags:     genFlags,
 				Action: func(ctx *cli.Context) error {
-					if ctx.NArg() < 1 {
-						return fmt.Errorf("usage: zoox gen module [--dir path] <name>")
-					}
-					name := ctx.Args().First()
-					root := ctx.String("dir")
-					if root == "" {
-						wd, err := os.Getwd()
-						if err != nil {
-							return err
-						}
-						root = wd
-					}
-					proj, err := scaffold.FindGoModDir(root)
-					if err != nil {
-						return err
-					}
-
-					fmt.Println()
-					fmt.Println("Operations:")
-					attachScaffoldLogger()
-					defer scaffold.SetLogger(nil)
-
-					if err := scaffold.GenModule(proj, name); err != nil {
-						return err
-					}
-					scaffold.PrintGenModuleNextSteps(os.Stdout, proj, name)
-					return nil
+					return runZooxGen(ctx, "usage: zoox gen module [--dir path] <name>", scaffold.GenModule, func(projectRoot, name string) {
+						scaffold.PrintGenModuleNextSteps(os.Stdout, projectRoot, name)
+					})
+				},
+			},
+			{
+				Name:      "api",
+				Usage:     "Add api/v1/<name> and patch router/rest.go.",
+				ArgsUsage: "<name>",
+				Flags:     genFlags,
+				Action: func(ctx *cli.Context) error {
+					return runZooxGen(ctx, "usage: zoox gen api [--dir path] <name>", scaffold.GenModuleAPI, func(projectRoot, name string) {
+						scaffold.PrintGenModuleNextSteps(os.Stdout, projectRoot, name)
+					})
+				},
+			},
+			{
+				Name:      "service",
+				Usage:     "Add services/v1/<name> (no router or models/register changes).",
+				ArgsUsage: "<name>",
+				Flags:     genFlags,
+				Action: func(ctx *cli.Context) error {
+					return runZooxGen(ctx, "usage: zoox gen service [--dir path] <name>", scaffold.GenModuleService, func(projectRoot, _ string) {
+						scaffold.PrintGenBuildHint(os.Stdout, projectRoot)
+					})
+				},
+			},
+			{
+				Name:      "model",
+				Usage:     "Add models/v1/<name> and patch models/register.go.",
+				ArgsUsage: "<name>",
+				Flags:     genFlags,
+				Action: func(ctx *cli.Context) error {
+					return runZooxGen(ctx, "usage: zoox gen model [--dir path] <name>", scaffold.GenModuleModel, func(projectRoot, _ string) {
+						scaffold.PrintGenBuildHint(os.Stdout, projectRoot)
+					})
 				},
 			},
 		},

@@ -94,3 +94,11 @@ func PrintGenModuleNextSteps(w io.Writer, projectAbsDir, name string) {
 	fmt.Fprintln(w, "  zoox gen module <name>")
 	fmt.Fprint(w, "\n")
 }
+
+// PrintGenBuildHint writes a short run hint after gen model or gen service.
+func PrintGenBuildHint(w io.Writer, projectAbsDir string) {
+	fmt.Fprint(w, "\nDone. Next:\n\n")
+	fmt.Fprintf(w, "  cd %q\n", projectAbsDir)
+	fmt.Fprintln(w, "  zoox dev")
+	fmt.Fprint(w, "\n")
+}

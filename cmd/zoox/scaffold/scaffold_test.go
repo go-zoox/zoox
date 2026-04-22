@@ -234,6 +234,52 @@ func TestGenModule_RejectDuplicate(t *testing.T) {
 	}
 }
 
+func TestGenModel_Service_API_IncrementalEqualsGenModule(t *testing.T) {
+	dir := t.TempDir()
+	mod := "example.com/gentestincr"
+	if err := NewProject(dir, NewProjectOptions{Module: mod, GoVersion: "1.22"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := GenModuleModel(dir, "item"); err != nil {
+		t.Fatal(err)
+	}
+	if err := GenModuleService(dir, "item"); err != nil {
+		t.Fatal(err)
+	}
+	if err := GenModuleAPI(dir, "item"); err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range []string{
+		"api/v1/item/api.go",
+		"api/v1/item/router.go",
+		"api/v1/item/impl.go",
+		"services/v1/item/service.go",
+		"services/v1/item/impl.go",
+		"models/v1/item/model.go",
+		"models/v1/item/dto.go",
+		"models/v1/item/impl.go",
+	} {
+		full := filepath.Join(dir, filepath.FromSlash(p))
+		if _, err := os.Stat(full); err != nil {
+			t.Errorf("missing %s: %v", p, err)
+		}
+	}
+	rest, err := os.ReadFile(filepath.Join(dir, "router", "rest.go"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(rest), "v1Item.Router()") {
+		t.Fatalf("router should register v1Item")
+	}
+	reg, err := os.ReadFile(filepath.Join(dir, "models", "register.go"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(reg), mod+"/models/v1/item") {
+		t.Fatal("register should import model")
+	}
+}
+
 func TestGenModule_PatchRouterMissingMarker(t *testing.T) {
 	dir := t.TempDir()
 	if err := NewProject(dir, NewProjectOptions{Module: "example.com/bad", GoVersion: "1.22"}); err != nil {

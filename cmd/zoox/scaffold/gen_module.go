@@ -10,21 +10,16 @@ import (
 // DefaultAPIVersion is the API segment used in paths (api/<version>/..., services/<version>/..., models/<version>/...).
 const DefaultAPIVersion = "v1"
 
-// GenModule adds api/, services/, and models/ packages for name, and patches router/rest.go and models/register.go.
-func GenModule(projectRoot, name string) error {
-	stepf("gen module: name=%q project=%s", name, projectRoot)
-	if err := ValidateModuleSegment(name); err != nil {
-		return err
-	}
-	stepf("module name validation ok")
+type moduleTmplOut struct {
+	tmpl string
+	out  string
+}
 
+func moduleVars(projectRoot, name, apiVer string) (ModuleVars, string, error) {
 	modPath, err := ModulePath(projectRoot)
 	if err != nil {
-		return err
+		return ModuleVars{}, "", err
 	}
-	stepf("go.mod module path: %s", modPath)
-
-	apiVer := DefaultAPIVersion
 	vars := ModuleVars{
 		Module:       modPath,
 		APIVersion:   apiVer,
@@ -32,21 +27,33 @@ func GenModule(projectRoot, name string) error {
 		Exported:     Exported(name),
 		ResourcePath: ResourcePath(name),
 	}
+	return vars, modPath, nil
+}
 
-	paths := []struct {
-		tmpl string
-		out  string
-	}{
-		{"templates/module/api.go.tmpl", filepath.Join("api", apiVer, name, "api.go")},
-		{"templates/module/router.go.tmpl", filepath.Join("api", apiVer, name, "router.go")},
-		{"templates/module/api_impl.go.tmpl", filepath.Join("api", apiVer, name, "impl.go")},
-		{"templates/module/service.go.tmpl", filepath.Join("services", apiVer, name, "service.go")},
-		{"templates/module/service_impl.go.tmpl", filepath.Join("services", apiVer, name, "impl.go")},
+func moduleModelPaths(apiVer, name string) []moduleTmplOut {
+	return []moduleTmplOut{
 		{"templates/module/model.go.tmpl", filepath.Join("models", apiVer, name, "model.go")},
 		{"templates/module/dto.go.tmpl", filepath.Join("models", apiVer, name, "dto.go")},
 		{"templates/module/model_impl.go.tmpl", filepath.Join("models", apiVer, name, "impl.go")},
 	}
+}
 
+func moduleServicePaths(apiVer, name string) []moduleTmplOut {
+	return []moduleTmplOut{
+		{"templates/module/service.go.tmpl", filepath.Join("services", apiVer, name, "service.go")},
+		{"templates/module/service_impl.go.tmpl", filepath.Join("services", apiVer, name, "impl.go")},
+	}
+}
+
+func moduleAPIPaths(apiVer, name string) []moduleTmplOut {
+	return []moduleTmplOut{
+		{"templates/module/api.go.tmpl", filepath.Join("api", apiVer, name, "api.go")},
+		{"templates/module/router.go.tmpl", filepath.Join("api", apiVer, name, "router.go")},
+		{"templates/module/api_impl.go.tmpl", filepath.Join("api", apiVer, name, "impl.go")},
+	}
+}
+
+func precheckModuleOutpaths(projectRoot string, paths []moduleTmplOut) error {
 	for _, p := range paths {
 		outPath := filepath.Join(projectRoot, filepath.FromSlash(p.out))
 		if _, err := os.Stat(outPath); err == nil {
@@ -55,8 +62,10 @@ func GenModule(projectRoot, name string) error {
 			return err
 		}
 	}
-	stepf("precheck: %d new files (no existing paths)", len(paths))
+	return nil
+}
 
+func writeModuleTemplates(projectRoot string, vars ModuleVars, paths []moduleTmplOut) error {
 	for _, p := range paths {
 		data, err := renderTemplate(p.tmpl, vars)
 		if err != nil {
@@ -71,19 +80,129 @@ func GenModule(projectRoot, name string) error {
 		}
 		stepf("write %s", p.out)
 	}
+	return nil
+}
 
-	routerFile := filepath.Join(projectRoot, "router", "rest.go")
-	stepf("patch %s", filepath.ToSlash(filepath.Join("router", "rest.go")))
-	if err := patchRouter(routerFile, modPath, apiVer, name); err != nil {
+// GenModuleModel adds models/<version>/<name> and patches models/register.go.
+func GenModuleModel(projectRoot, name string) error {
+	stepf("gen model: name=%q project=%s", name, projectRoot)
+	if err := ValidateModuleSegment(name); err != nil {
 		return err
 	}
-
+	stepf("module name validation ok")
+	apiVer := DefaultAPIVersion
+	vars, modPath, err := moduleVars(projectRoot, name, apiVer)
+	if err != nil {
+		return err
+	}
+	stepf("go.mod module path: %s", modPath)
+	paths := moduleModelPaths(apiVer, name)
+	if err := precheckModuleOutpaths(projectRoot, paths); err != nil {
+		return err
+	}
+	stepf("precheck: %d new files (no existing paths)", len(paths))
+	if err := writeModuleTemplates(projectRoot, vars, paths); err != nil {
+		return err
+	}
 	modelRegFile := filepath.Join(projectRoot, "models", "register.go")
 	stepf("patch %s", filepath.ToSlash(filepath.Join("models", "register.go")))
 	if err := patchModelRegister(modelRegFile, modPath, apiVer, name); err != nil {
 		return err
 	}
+	stepf("gen model finished: models/%s/%s", apiVer, name)
+	return nil
+}
 
+// GenModuleService adds services/<version>/<name> (no router or models/register patch).
+func GenModuleService(projectRoot, name string) error {
+	stepf("gen service: name=%q project=%s", name, projectRoot)
+	if err := ValidateModuleSegment(name); err != nil {
+		return err
+	}
+	stepf("module name validation ok")
+	apiVer := DefaultAPIVersion
+	vars, modPath, err := moduleVars(projectRoot, name, apiVer)
+	if err != nil {
+		return err
+	}
+	stepf("go.mod module path: %s", modPath)
+	paths := moduleServicePaths(apiVer, name)
+	if err := precheckModuleOutpaths(projectRoot, paths); err != nil {
+		return err
+	}
+	stepf("precheck: %d new files (no existing paths)", len(paths))
+	if err := writeModuleTemplates(projectRoot, vars, paths); err != nil {
+		return err
+	}
+	stepf("gen service finished: services/%s/%s", apiVer, name)
+	return nil
+}
+
+// GenModuleAPI adds api/<version>/<name> and patches router/rest.go.
+func GenModuleAPI(projectRoot, name string) error {
+	stepf("gen api: name=%q project=%s", name, projectRoot)
+	if err := ValidateModuleSegment(name); err != nil {
+		return err
+	}
+	stepf("module name validation ok")
+	apiVer := DefaultAPIVersion
+	vars, modPath, err := moduleVars(projectRoot, name, apiVer)
+	if err != nil {
+		return err
+	}
+	stepf("go.mod module path: %s", modPath)
+	paths := moduleAPIPaths(apiVer, name)
+	if err := precheckModuleOutpaths(projectRoot, paths); err != nil {
+		return err
+	}
+	stepf("precheck: %d new files (no existing paths)", len(paths))
+	if err := writeModuleTemplates(projectRoot, vars, paths); err != nil {
+		return err
+	}
+	routerFile := filepath.Join(projectRoot, "router", "rest.go")
+	stepf("patch %s", filepath.ToSlash(filepath.Join("router", "rest.go")))
+	if err := patchRouter(routerFile, modPath, apiVer, name); err != nil {
+		return err
+	}
+	stepf("gen api finished: api/%s/%s", apiVer, name)
+	return nil
+}
+
+// GenModule adds api/, services/, and models/ packages for name, and patches router/rest.go and models/register.go.
+func GenModule(projectRoot, name string) error {
+	stepf("gen module: name=%q project=%s", name, projectRoot)
+	if err := ValidateModuleSegment(name); err != nil {
+		return err
+	}
+	stepf("module name validation ok")
+	apiVer := DefaultAPIVersion
+	vars, modPath, err := moduleVars(projectRoot, name, apiVer)
+	if err != nil {
+		return err
+	}
+	stepf("go.mod module path: %s", modPath)
+	paths := append(append(append(
+		[]moduleTmplOut{}, moduleModelPaths(apiVer, name)...),
+		moduleServicePaths(apiVer, name)...),
+		moduleAPIPaths(apiVer, name)...,
+	)
+	if err := precheckModuleOutpaths(projectRoot, paths); err != nil {
+		return err
+	}
+	stepf("precheck: %d new files (no existing paths)", len(paths))
+	if err := writeModuleTemplates(projectRoot, vars, paths); err != nil {
+		return err
+	}
+	routerFile := filepath.Join(projectRoot, "router", "rest.go")
+	stepf("patch %s", filepath.ToSlash(filepath.Join("router", "rest.go")))
+	if err := patchRouter(routerFile, modPath, apiVer, name); err != nil {
+		return err
+	}
+	modelRegFile := filepath.Join(projectRoot, "models", "register.go")
+	stepf("patch %s", filepath.ToSlash(filepath.Join("models", "register.go")))
+	if err := patchModelRegister(modelRegFile, modPath, apiVer, name); err != nil {
+		return err
+	}
 	stepf("gen module finished: api/%s/%s, services/%s/%s, models/%s/%s", apiVer, name, apiVer, name, apiVer, name)
 	return nil
 }
