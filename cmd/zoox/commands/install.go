@@ -2,7 +2,9 @@ package commands
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/go-zoox/cli"
 	"github.com/go-zoox/fs"
@@ -13,12 +15,13 @@ import (
 func Install(app *cli.MultipleProgram) {
 	app.Register("install", &cli.Command{
 		Name:  "install",
-		Usage: "Install zoox application dependencies",
+		Usage: "Run go mod tidy in a Zoox project (directory containing go.mod).",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  "context",
-				Usage: "the command context",
-				Value: fs.CurrentDir(),
+				Name:    "context",
+				Aliases: []string{"C"},
+				Usage:   "project root (containing go.mod); default: current directory",
+				Value:   fs.CurrentDir(),
 			},
 		},
 		Action: func(ctx *cli.Context) error {
@@ -28,14 +31,19 @@ func Install(app *cli.MultipleProgram) {
 }
 
 func install(context string) error {
-	logger.Infof("start to install dependencies ...")
-
-	cmd := exec.Command("go", "mod", "tidy")
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to install dependencies: %s", err.Error())
+	abs, err := filepath.Abs(context)
+	if err != nil {
+		return err
 	}
 
-	logger.Infof("succeed to install dependencies")
-
+	logger.Infof("go mod tidy in %s", abs)
+	cmd := exec.Command("go", "mod", "tidy")
+	cmd.Dir = abs
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("go mod tidy: %w", err)
+	}
+	logger.Infof("done")
 	return nil
 }

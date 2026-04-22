@@ -6,10 +6,25 @@ import (
 	"path/filepath"
 )
 
+// NewProjectOptions configures [NewProject].
+type NewProjectOptions struct {
+	Module      string
+	GoVersion   string
+	ProjectName string // display name; if empty, derived from project directory base name
+	Author      string
+	Description string
+	ZooxVersion string // zoox CLI version (e.g. main.Version)
+}
+
 // NewProject creates a Zoox app skeleton at projectDir with the given Go module path.
-func NewProject(projectDir, module, goVersion string) error {
+func NewProject(projectDir string, opt NewProjectOptions) error {
+	module := opt.Module
+	goVersion := opt.GoVersion
 	if module == "" {
 		return fmt.Errorf("module path is required (use --module)")
+	}
+	if goVersion == "" {
+		return fmt.Errorf("go version is required")
 	}
 	abs, err := filepath.Abs(projectDir)
 	if err != nil {
@@ -36,6 +51,11 @@ func NewProject(projectDir, module, goVersion string) error {
 		return err
 	}
 	stepf("ensure project root: %s", abs)
+
+	projectName := opt.ProjectName
+	if projectName == "" {
+		projectName = filepath.Base(abs)
+	}
 
 	vars := NewProjectVars{
 		Module:    module,
@@ -73,6 +93,11 @@ func NewProject(projectDir, module, goVersion string) error {
 		stepf("write %s", f.out)
 	}
 
-	stepf("project scaffold finished (%d files)", len(files))
+	if err := WriteNewProjectZooxConfig(abs, projectName, opt.Author, opt.Description, opt.ZooxVersion); err != nil {
+		return err
+	}
+	stepf("write .zoox/config.yaml")
+
+	stepf("project scaffold finished (%d template files + .zoox/config.yaml)", len(files))
 	return nil
 }

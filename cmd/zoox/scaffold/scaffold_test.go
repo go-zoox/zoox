@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"gopkg.in/yaml.v3"
 )
 
 func TestValidateModuleSegment(t *testing.T) {
@@ -89,7 +91,7 @@ func TestNewProject_ErrorsWhenNotEmpty(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(dir, "x"), []byte("x"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := NewProject(dir, "m", "1.22"); err == nil {
+	if err := NewProject(dir, NewProjectOptions{Module: "m", GoVersion: "1.22"}); err == nil {
 		t.Fatal("NewProject: want error for non-empty dir")
 	}
 }
@@ -97,11 +99,12 @@ func TestNewProject_ErrorsWhenNotEmpty(t *testing.T) {
 func TestNewProject_CreatesExpectedFiles(t *testing.T) {
 	dir := t.TempDir()
 	mod := "example.com/zooxscaffold"
-	if err := NewProject(dir, mod, "1.22"); err != nil {
+	if err := NewProject(dir, NewProjectOptions{Module: mod, GoVersion: "1.22"}); err != nil {
 		t.Fatal(err)
 	}
 
 	paths := []string{
+		".zoox/config.yaml",
 		"go.mod",
 		"cmd/server/main.go",
 		"config/config.go",
@@ -130,6 +133,24 @@ func TestNewProject_CreatesExpectedFiles(t *testing.T) {
 		t.Fatalf("go.mod missing zoox require")
 	}
 
+	cfgData, err := os.ReadFile(filepath.Join(dir, ".zoox", "config.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var root map[string]any
+	if err := yaml.Unmarshal(cfgData, &root); err != nil {
+		t.Fatalf("config yaml: %v", err)
+	}
+	if _, ok := root["name"]; !ok {
+		t.Fatal("expected name in .zoox/config.yaml")
+	}
+	if _, ok := root["cli"]; !ok {
+		t.Fatal("expected cli in .zoox/config.yaml")
+	}
+	if v, _ := root["app"].(map[string]any); v == nil || v["entry"] != DefaultAppPackage {
+		t.Fatalf("app.entry: %v", v)
+	}
+
 	rest, err := os.ReadFile(filepath.Join(dir, "router", "rest.go"))
 	if err != nil {
 		t.Fatal(err)
@@ -146,7 +167,7 @@ func TestNewProject_CreatesExpectedFiles(t *testing.T) {
 func TestGenModule_CreatesPackagesAndPatchesRouter(t *testing.T) {
 	dir := t.TempDir()
 	mod := "example.com/gentest"
-	if err := NewProject(dir, mod, "1.22"); err != nil {
+	if err := NewProject(dir, NewProjectOptions{Module: mod, GoVersion: "1.22"}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -201,7 +222,7 @@ func TestGenModule_CreatesPackagesAndPatchesRouter(t *testing.T) {
 
 func TestGenModule_RejectDuplicate(t *testing.T) {
 	dir := t.TempDir()
-	if err := NewProject(dir, "example.com/dup", "1.22"); err != nil {
+	if err := NewProject(dir, NewProjectOptions{Module: "example.com/dup", GoVersion: "1.22"}); err != nil {
 		t.Fatal(err)
 	}
 	if err := GenModule(dir, "x"); err != nil {
@@ -214,7 +235,7 @@ func TestGenModule_RejectDuplicate(t *testing.T) {
 
 func TestGenModule_PatchRouterMissingMarker(t *testing.T) {
 	dir := t.TempDir()
-	if err := NewProject(dir, "example.com/bad", "1.22"); err != nil {
+	if err := NewProject(dir, NewProjectOptions{Module: "example.com/bad", GoVersion: "1.22"}); err != nil {
 		t.Fatal(err)
 	}
 	routerFile := filepath.Join(dir, "router", "rest.go")

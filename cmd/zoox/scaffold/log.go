@@ -27,6 +27,8 @@ func PlannedLayoutTree(rootLabel string) string {
 	}
 	return fmt.Sprintf(`%s/
 ├── go.mod
+├── .zoox/
+│   └── config.yaml
 ├── cmd/
 │   └── server/
 │       └── main.go
@@ -59,11 +61,11 @@ func PrintNewProjectNextSteps(w io.Writer, projectAbsDir string) {
 	fmt.Fprint(w, "\nDone. Next commands:\n\n")
 	fmt.Fprintln(w, "Development")
 	fmt.Fprintf(w, "  cd %q\n", rel)
-	fmt.Fprintln(w, "  go mod tidy")
-	fmt.Fprintln(w, "  go run ./cmd/server")
-	fmt.Fprintln(w, "\nBuild (binary in ./bin)")
+	fmt.Fprintln(w, "  zoox install")
+	fmt.Fprintln(w, "  zoox dev")
+	fmt.Fprintln(w, "\nBuild (one-off binary)")
 	fmt.Fprintf(w, "  cd %q\n", rel)
-	fmt.Fprintln(w, "  mkdir -p bin && go build -o bin/server ./cmd/server")
+	fmt.Fprintln(w, "  zoox build")
 	fmt.Fprintln(w, "\nProduction build (example, Linux amd64, stripped)")
 	fmt.Fprintf(w, "  cd %q\n", rel)
 	fmt.Fprintln(w, "  GOOS=linux GOARCH=amd64 go build -trimpath -ldflags=\"-s -w\" -o server ./cmd/server")
@@ -81,7 +83,8 @@ func PrintGenModuleNextSteps(w io.Writer, projectAbsDir, name string) {
 	fmt.Fprint(w, "\nDone. Next commands:\n\n")
 	fmt.Fprintln(w, "Rebuild / run")
 	fmt.Fprintf(w, "  cd %q\n", projectAbsDir)
-	fmt.Fprintln(w, "  go build -o bin/server ./cmd/server && ./bin/server")
+	fmt.Fprintln(w, "  zoox dev")
+	fmt.Fprintf(w, "  # or: zoox build && %s\n", DefaultOutputBinary)
 	fmt.Fprintln(w, "\nTry HTTP (default :8080)")
 	fmt.Fprintf(w, "  curl -sS \"http://127.0.0.1:8080/api/%s/%s\"\n", ver, rp)
 	fmt.Fprintf(w, "  curl -sS \"http://127.0.0.1:8080/api/%s/%s/123\"\n", ver, rp)

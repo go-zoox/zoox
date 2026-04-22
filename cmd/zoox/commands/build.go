@@ -2,69 +2,81 @@ package commands
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
-	"strings"
+	"path/filepath"
 
 	"github.com/go-zoox/chalk"
 	"github.com/go-zoox/cli"
 	"github.com/go-zoox/fs"
 	"github.com/go-zoox/logger"
+	"github.com/go-zoox/zoox/cmd/zoox/scaffold"
 )
 
 // Build is the build command
 func Build(app *cli.MultipleProgram) {
 	app.Register("build", &cli.Command{
 		Name:  "build",
-		Usage: "Build zoox application",
+		Usage: "Run go mod tidy, then go build for the main package (default: " + scaffold.DefaultAppPackage + ").",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "entry",
-				Usage:   "The entry file of the application",
+				Usage:   "Main package to build (Zoox `new` layout: " + scaffold.DefaultAppPackage + ")",
 				Aliases: []string{"e"},
 				EnvVars: []string{"ZOOX_ENTRY"},
-				Value:   "main.go",
+				Value:   scaffold.DefaultAppPackage,
 			},
 			&cli.StringFlag{
 				Name:    "output",
-				Usage:   "The output file of the application",
+				Usage:   "Output binary path",
 				Aliases: []string{"o"},
 				EnvVars: []string{"ZOOX_OUTPUT"},
-				Value:   "./bin/app",
+				Value:   scaffold.DefaultOutputBinary,
 			},
 			&cli.StringFlag{
-				Name:  "context",
-				Usage: "the command context",
-				Value: fs.CurrentDir(),
+				Name:    "context",
+				Aliases: []string{"C"},
+				Usage:   "project root (containing go.mod); default: current directory",
+				Value:   fs.CurrentDir(),
 			},
 		},
 		Action: func(ctx *cli.Context) error {
-			context := ctx.String("context")
-			command := []string{
-				"go build",
+			dir, err := filepath.Abs(ctx.String("context"))
+			if err != nil {
+				return err
 			}
-
-			if ctx.String("output") != "" {
-				command = append(command, "-o", ctx.String("output"))
-			}
-
-			if ctx.String("entry") != "" {
-				command = append(command, ctx.String("entry"))
-			}
-
-			cmdText := strings.Join(command, " ")
-			logger.Debugf("Running command: %s", cmdText)
-
-			if err := install(context); err != nil {
+			if err := install(ctx.String("context")); err != nil {
 				return err
 			}
 
-			logger.Infof("start to build ...")
-			cmd := exec.Command("sh", "-c", cmdText)
-			if err := cmd.Run(); err != nil {
-				return fmt.Errorf("failed to build: %s", err.Error())
+			args := []string{"build"}
+			if o := ctx.String("output"); o != "" {
+				var out string
+				if filepath.IsAbs(o) {
+					out = filepath.Clean(o)
+				} else {
+					out = filepath.Clean(filepath.Join(dir, o))
+				}
+				args = append(args, "-o", out)
+			}
+			if e := ctx.String("entry"); e != "" {
+				args = append(args, e)
 			}
 
-			logger.Infof("succeed to build, output: %s", chalk.Green(ctx.String("output")))
+			logger.Debugf("go %v (dir=%s)", args, dir)
+			logger.Infof("go build ...")
+			cmd := exec.Command("go", args...)
+			cmd.Dir = dir
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			if err := cmd.Run(); err != nil {
+				return fmt.Errorf("go build: %w", err)
+			}
+			out := ctx.String("output")
+			if out == "" {
+				out = "current directory"
+			}
+			logger.Infof("built %s", chalk.Green(out))
 			return nil
 		},
 	})

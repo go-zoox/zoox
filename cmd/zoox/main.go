@@ -7,15 +7,16 @@ import (
 	"path/filepath"
 
 	"github.com/go-zoox/cli"
+	"github.com/go-zoox/zoox/cmd/zoox/commands"
 	"github.com/go-zoox/zoox/cmd/zoox/scaffold"
 )
 
 func main() {
 	app := cli.NewMultipleProgram(&cli.MultipleProgramConfig{
 		Name:        "zoox",
-		Usage:       "Zoox scaffolding CLI for projects and domain modules.",
+		Usage:       "Zoox CLI: project scaffolding, code generation, and local development.",
 		Version:     Version,
-		Description: "Create an api + services + models + migrate + config + middlewares + utils layout; generate domain modules under api/<ver>/name.",
+		Description: "Create a Zoox app layout, generate api/services/models modules, and run install / dev / build in one toolchain.",
 	})
 
 	if err := app.Register("new", newCommand()); err != nil {
@@ -24,6 +25,7 @@ func main() {
 	if err := app.Register("gen", genCommand()); err != nil {
 		log.Fatal(err)
 	}
+	commands.RegisterDevTools(app)
 
 	app.Run()
 }
@@ -50,10 +52,22 @@ func newCommand() *cli.Command {
 				Usage: "Go version written to go.mod (e.g. 1.22)",
 				Value: "1.22",
 			},
+			&cli.StringFlag{
+				Name:    "name",
+				Usage:   "Project display name (stored in .zoox/config.yaml). If omitted, defaults to the base name of <dir>.",
+			},
+			&cli.StringFlag{
+				Name:  "author",
+				Usage: "Author (top-level key in .zoox/config.yaml).",
+			},
+			&cli.StringFlag{
+				Name:  "description",
+				Usage: "Project description (top-level key in .zoox/config.yaml).",
+			},
 		},
 		Action: func(ctx *cli.Context) error {
 			if ctx.NArg() < 1 {
-				return fmt.Errorf("usage: zoox new [--module path] [--go version] <dir>")
+				return fmt.Errorf("usage: zoox new [--module path] [--go version] [--name] [--author] [--description] <dir>")
 			}
 			dir := ctx.Args().First()
 			mod := ctx.String("module")
@@ -80,7 +94,15 @@ func newCommand() *cli.Command {
 			attachScaffoldLogger()
 			defer scaffold.SetLogger(nil)
 
-			if err := scaffold.NewProject(dir, mod, ctx.String("go")); err != nil {
+			opt := scaffold.NewProjectOptions{
+				Module:      mod,
+				GoVersion:   ctx.String("go"),
+				ProjectName: ctx.String("name"),
+				Author:      ctx.String("author"),
+				Description: ctx.String("description"),
+				ZooxVersion: Version,
+			}
+			if err := scaffold.NewProject(dir, opt); err != nil {
 				return err
 			}
 			scaffold.PrintNewProjectNextSteps(os.Stdout, absTarget)
