@@ -108,6 +108,16 @@ go run main.go
 
 Visit `http://localhost:8080` in your browser. If you see "Hello, Zoox!", the installation is successful!
 
+## Scaffolding CLI (optional)
+
+Install the `zoox` binary to scaffold a layered project (`zoox new`) and domain stubs (`zoox gen module`):
+
+```bash
+go install github.com/go-zoox/zoox/cmd/zoox@latest
+```
+
+See [Scaffolding CLI](/en/guides/scaffolding) for flags, generated layout, and template paths in the repository.
+
 ## Next Steps
 
 - [Quick Start Guide](/en/getting-started/quick-start) - Get up and running in 5 minutes

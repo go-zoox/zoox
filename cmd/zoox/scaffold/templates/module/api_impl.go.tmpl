@@ -1,0 +1,26 @@
+package api
+
+import (
+	"github.com/go-zoox/zoox"
+
+	service "{{.Module}}/services/{{.APIVersion}}/{{.Name}}"
+)
+
+func (c *{{.Exported}}Impl) List(ctx *zoox.Context) {
+	data, err := service.Get().List()
+	if err != nil {
+		ctx.JSON(500, zoox.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(200, zoox.H{"data": data})
+}
+
+func (c *{{.Exported}}Impl) Retrieve(ctx *zoox.Context) {
+	id := ctx.Param().Get("id")
+	row, err := service.Get().Retrieve(id)
+	if err != nil {
+		ctx.JSON(404, zoox.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(200, row)
+}

@@ -1,0 +1,9 @@
+package migrate
+
+import "{{.Module}}/models"
+
+// Run performs startup data tasks (e.g. ORM AutoMigrate). Safe when no DB is wired yet.
+func Run() error {
+	models.Register()
+	return nil
+}

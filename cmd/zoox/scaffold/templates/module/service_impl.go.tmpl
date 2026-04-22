@@ -1,0 +1,13 @@
+package service
+
+import (
+	model "{{.Module}}/models/{{.APIVersion}}/{{.Name}}"
+)
+
+func (s *{{.Exported}}Impl) List() ([]map[string]any, error) {
+	return model.Get().List()
+}
+
+func (s *{{.Exported}}Impl) Retrieve(id string) (map[string]any, error) {
+	return model.Get().Retrieve(id)
+}

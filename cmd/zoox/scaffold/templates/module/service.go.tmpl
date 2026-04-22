@@ -1,0 +1,32 @@
+package service
+
+import (
+	"sync"
+)
+
+// {{.Exported}} is the service layer for {{.Name}}.
+type {{.Exported}} interface {
+	List() ([]map[string]any, error)
+	Retrieve(id string) (map[string]any, error)
+}
+
+// {{.Exported}}Impl implements {{.Exported}}.
+type {{.Exported}}Impl struct{}
+
+// New{{.Exported}} constructs a new service implementation.
+func New{{.Exported}}() *{{.Exported}}Impl {
+	return &{{.Exported}}Impl{}
+}
+
+var (
+	default{{.Exported}}Svc *{{.Exported}}Impl
+	once{{.Exported}}Svc   sync.Once
+)
+
+// Get returns the package-level service singleton.
+func Get() {{.Exported}} {
+	once{{.Exported}}Svc.Do(func() {
+		default{{.Exported}}Svc = New{{.Exported}}()
+	})
+	return default{{.Exported}}Svc
+}

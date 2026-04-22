@@ -1,0 +1,12 @@
+package api
+
+import "github.com/go-zoox/zoox"
+
+// Router returns a route group callback for mounting under /api/{{.APIVersion}}/{{.ResourcePath}}.
+func Router() func(g *zoox.RouterGroup) {
+	a := Get()
+	return func(g *zoox.RouterGroup) {
+		g.Get("/", a.List)
+		g.Get("/:id", a.Retrieve)
+	}
+}

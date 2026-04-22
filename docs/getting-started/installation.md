@@ -217,6 +217,16 @@ curl http://localhost:8080
 {"message":"Zoox installed successfully!"}
 ```
 
+## 脚手架 CLI（可选）
+
+框架仓库提供独立命令 `zoox`，用于 `zoox new` 创建分层项目、`zoox gen module` 生成 handler / service / repository 桩代码。安装方式：
+
+```bash
+go install github.com/go-zoox/zoox/cmd/zoox@latest
+```
+
+命令参数、生成目录树、仓库内 `*.tmpl` 路径与模板变量说明见 [脚手架 CLI](/guides/scaffolding)。
+
 ## 常见问题
 
 ### 问题 1: `go: cannot find module providing package`

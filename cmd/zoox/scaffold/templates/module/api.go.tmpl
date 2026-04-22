@@ -1,0 +1,39 @@
+package api
+
+import (
+	"sync"
+
+	"github.com/go-zoox/zoox"
+)
+
+const name = "{{.APIVersion}}.{{.Name}}"
+
+// {{.Exported}} is the HTTP API surface for {{.Name}}.
+type {{.Exported}} interface {
+	List(ctx *zoox.Context)
+	Retrieve(ctx *zoox.Context)
+}
+
+// {{.Exported}}Impl implements {{.Exported}}.
+type {{.Exported}}Impl struct{}
+
+// Name returns the logical API name (for logging / diagnostics).
+func (*{{.Exported}}Impl) Name() string { return name }
+
+// New{{.Exported}} constructs a new API implementation.
+func New{{.Exported}}() *{{.Exported}}Impl {
+	return &{{.Exported}}Impl{}
+}
+
+var (
+	default{{.Exported}}API *{{.Exported}}Impl
+	once{{.Exported}}API   sync.Once
+)
+
+// Get returns the package-level API singleton.
+func Get() {{.Exported}} {
+	once{{.Exported}}API.Do(func() {
+		default{{.Exported}}API = New{{.Exported}}()
+	})
+	return default{{.Exported}}API
+}

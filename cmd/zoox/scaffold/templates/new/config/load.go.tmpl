@@ -1,0 +1,17 @@
+package config
+
+import (
+	"os"
+	"strconv"
+)
+
+// Load builds Config from environment variables.
+func Load() *Config {
+	port := 8080
+	if v := os.Getenv("PORT"); v != "" {
+		if p, err := strconv.Atoi(v); err == nil {
+			port = p
+		}
+	}
+	return &Config{Port: port}
+}

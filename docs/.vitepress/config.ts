@@ -53,6 +53,7 @@ export default defineConfig({
                 { text: 'Context API', link: '/guides/context' },
                 { text: '模板引擎', link: '/guides/templates' },
                 { text: '配置管理', link: '/guides/configuration' },
+                { text: '脚手架 CLI', link: '/guides/scaffolding' },
               ],
             },
           ],
@@ -133,6 +134,7 @@ export default defineConfig({
                 { text: '路由系统', link: '/guides/routing' },
                 { text: '中间件', link: '/guides/middleware' },
                 { text: 'Context API', link: '/guides/context' },
+                { text: '脚手架 CLI', link: '/guides/scaffolding' },
               ],
             },
             {
@@ -226,6 +228,7 @@ export default defineConfig({
                 { text: 'Context API', link: '/en/guides/context' },
                 { text: 'Templates', link: '/en/guides/templates' },
                 { text: 'Configuration', link: '/en/guides/configuration' },
+                { text: 'Scaffolding CLI', link: '/en/guides/scaffolding' },
               ],
             },
           ],
@@ -305,6 +308,7 @@ export default defineConfig({
                 { text: 'Routing', link: '/en/guides/routing' },
                 { text: 'Middleware', link: '/en/guides/middleware' },
                 { text: 'Context API', link: '/en/guides/context' },
+                { text: 'Scaffolding CLI', link: '/en/guides/scaffolding' },
               ],
             },
             {

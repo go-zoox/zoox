@@ -1,0 +1,16 @@
+package config
+
+import "fmt"
+
+// Config holds application-level settings.
+type Config struct {
+	Port int
+}
+
+// ListenAddr returns the address for zoox.Application.Run (e.g. ":8080").
+func (c *Config) ListenAddr() string {
+	if c.Port <= 0 {
+		c.Port = 8080
+	}
+	return fmt.Sprintf(":%d", c.Port)
+}

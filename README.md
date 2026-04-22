@@ -58,6 +58,14 @@ Zoox is a modern, lightweight, and high-performance web framework for Go. It pro
 go get github.com/go-zoox/zoox
 ```
 
+Optional **scaffolding CLI** (layered `handler` / `service` / `repository` layout):
+
+```bash
+go install github.com/go-zoox/zoox/cmd/zoox@latest
+```
+
+Details: [docs/guides/scaffolding.md](docs/guides/scaffolding.md) (also on the [documentation site](https://go-zoox.github.io/zoox/guides/scaffolding)).
+
 ## 🚀 Quick Start
 
 ### Basic Example

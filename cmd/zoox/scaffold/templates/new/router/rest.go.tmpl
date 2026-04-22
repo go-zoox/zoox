@@ -1,0 +1,15 @@
+package router
+
+import (
+	"github.com/go-zoox/zoox"
+
+	"{{.Module}}/middlewares"
+	// zoox:register-api-imports
+)
+
+// Register mounts HTTP routes on the application.
+func Register(r *zoox.Application) {
+	r.Get("/health", middlewares.Health)
+
+	// zoox:register-routes
+}

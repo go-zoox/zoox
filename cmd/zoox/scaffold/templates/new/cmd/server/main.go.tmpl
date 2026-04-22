@@ -1,0 +1,28 @@
+package main
+
+import (
+	"log"
+
+	"{{.Module}}/config"
+	"{{.Module}}/migrate"
+	"{{.Module}}/middlewares"
+	"{{.Module}}/router"
+
+	"github.com/go-zoox/zoox"
+)
+
+func main() {
+	cfg := config.Load()
+
+	if err := migrate.Run(); err != nil {
+		log.Fatal(err)
+	}
+
+	app := zoox.New()
+	middlewares.Setup(app)
+	router.Register(app)
+
+	if err := app.Run(cfg.ListenAddr()); err != nil {
+		log.Fatal(err)
+	}
+}

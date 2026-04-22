@@ -1,0 +1,31 @@
+package model
+
+import "sync"
+
+// Store holds {{.Name}} data access. Replace with gormx / GORM as needed.
+type Store struct{}
+
+var (
+	default{{.Exported}}Store *Store
+	once{{.Exported}}Store    sync.Once
+)
+
+// Get returns the model-layer singleton.
+func Get() *Store {
+	once{{.Exported}}Store.Do(func() {
+		default{{.Exported}}Store = &Store{}
+	})
+	return default{{.Exported}}Store
+}
+
+// List returns sample rows; replace with real queries.
+func (*Store) List() ([]map[string]any, error) {
+	return []map[string]any{
+		{"id": uint(1), "name": "{{.Name}}-1"},
+	}, nil
+}
+
+// Retrieve returns one row by id; replace with real queries.
+func (*Store) Retrieve(id string) (map[string]any, error) {
+	return map[string]any{"id": id, "name": "{{.Name}}-" + id}, nil
+}

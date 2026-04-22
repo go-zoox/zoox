@@ -5,6 +5,7 @@
 ## 文档
 
 - 用户可见的配置与协议说明：[docs/guides/configuration.md](docs/guides/configuration.md)（含 HTTP/2、h2c、HTTP/3、环境变量）。
+- 业务脚手架 CLI（`zoox new` / `zoox gen module`、模板目录树、变量表）：[docs/guides/scaffolding.md](docs/guides/scaffolding.md)；实现位于 `cmd/zoox/` 与 `cmd/zoox/scaffold/templates/`。
 
 ### 文档站点（VitePress / Node）
 
