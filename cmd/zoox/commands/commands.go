@@ -8,3 +8,8 @@ func RegisterDevTools(app *cli.MultipleProgram) {
 	Dev(app)
 	Build(app)
 }
+
+// RegisterDatabase registers database subcommands (e.g. database migrate).
+func RegisterDatabase(app *cli.MultipleProgram) {
+	Database(app)
+}

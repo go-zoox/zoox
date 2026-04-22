@@ -30,6 +30,8 @@ func PlannedLayoutTree(rootLabel string) string {
 ├── .zoox/
 │   └── config.yaml
 ├── cmd/
+│   ├── migrate/
+│   │   └── main.go
 │   └── server/
 │       └── main.go
 ├── config/

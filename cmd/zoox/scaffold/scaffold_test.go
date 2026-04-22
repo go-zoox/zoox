@@ -106,6 +106,7 @@ func TestNewProject_CreatesExpectedFiles(t *testing.T) {
 	paths := []string{
 		".zoox/config.yaml",
 		"go.mod",
+		"cmd/migrate/main.go",
 		"cmd/server/main.go",
 		"config/config.go",
 		"config/load.go",

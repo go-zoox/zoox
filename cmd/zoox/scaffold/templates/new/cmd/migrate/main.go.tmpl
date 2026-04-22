@@ -1,0 +1,16 @@
+package main
+
+import (
+	"log"
+
+	"{{.Module}}/config"
+	"{{.Module}}/migrate"
+)
+
+// Standalone entry to run database/migration tasks without starting the HTTP server.
+func main() {
+	_ = config.Load()
+	if err := migrate.Run(); err != nil {
+		log.Fatal(err)
+	}
+}

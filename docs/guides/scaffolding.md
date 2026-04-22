@@ -19,6 +19,7 @@ go install github.com/go-zoox/zoox/cmd/zoox@latest
 | `zoox install` | 在指定项目根目录执行 `go mod tidy`（默认当前目录，可用 `-C` 指定根目录）。 |
 | `zoox dev` | 先 `go mod tidy`，再监听文件变化并重新 **本机构建 + 运行** 主包（默认 `./cmd/server`）。 |
 | `zoox build` | 先 `go mod tidy`，再对主包执行 `go build`（默认可执行文件为 `./bin/server`）。 |
+| `zoox database migrate` | 先 `go mod tidy`，再 `go run ./cmd/migrate`（只执行 `migrate.Run()`，不启动 HTTP）。 |
 
 当前 `gen module` 固定使用 **`v1`** 作为 URL 与目录版本段（与 `scaffold.DefaultAPIVersion` 一致）。
 
@@ -109,6 +110,16 @@ zoox dev -C /path/to/my-api
 zoox build -C /path/to/my-api -o dist/server
 ```
 
+### `zoox database migrate`
+
+在**项目根**执行 `go mod tidy`，再 `go run ./cmd/migrate`（入口会 `config.Load()` 并调用 `migrate/migrate.go` 里的 `Run()`），**不启动 HTTP**。需由 `zoox new` 生成或自行提供 `cmd/migrate/main.go`。
+
+```bash
+cd my-api
+zoox database migrate
+zoox database migrate -C /path/to/my-api
+```
+
 ## `zoox gen module`
 
 ```text
@@ -133,7 +144,9 @@ zoox gen module [--dir 路径] <name>
 ├── .zoox/
 │   └── config.yaml         # 元数据 + app/build/dev 默认
 ├── go.mod
-├── cmd/server/main.go      # config.Load、migrate.Run、middlewares.Setup、router.Register
+├── cmd/
+│   ├── migrate/main.go     # 仅 config + migrate.Run；`zoox database migrate` 使用
+│   └── server/main.go      # config.Load、migrate.Run、middlewares.Setup、router.Register
 ├── config/
 │   ├── config.go
 │   └── load.go            # 读取 PORT 等环境变量

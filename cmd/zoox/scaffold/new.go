@@ -67,6 +67,7 @@ func NewProject(projectDir string, opt NewProjectOptions) error {
 		out  string
 	}{
 		{"templates/new/go.mod.tmpl", "go.mod"},
+		{"templates/new/cmd/migrate/main.go.tmpl", "cmd/migrate/main.go"},
 		{"templates/new/cmd/server/main.go.tmpl", "cmd/server/main.go"},
 		{"templates/new/config/config.go.tmpl", "config/config.go"},
 		{"templates/new/config/load.go.tmpl", "config/load.go"},

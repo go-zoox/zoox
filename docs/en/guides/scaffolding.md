@@ -19,6 +19,7 @@ Ensure `$(go env GOPATH)/bin` is on your `PATH`, then run `zoox --help`.
 | `zoox install` | Run `go mod tidy` in the project root (default: cwd, use `-C` to point at the root). |
 | `zoox dev` | Run `go mod tidy`, then **watch, rebuild, and run** the main package (default `./cmd/server`) on the **host** platform. |
 | `zoox build` | Run `go mod tidy`, then `go build` the main package (default output `./bin/server`). |
+| `zoox database migrate` | Run `go mod tidy`, then `go run ./cmd/migrate` (calls `migrate.Run()` only; no HTTP). |
 
 `gen module` currently fixes the API segment to **`v1`** (`scaffold.DefaultAPIVersion`).
 
@@ -107,6 +108,16 @@ zoox dev -C /path/to/my-api
 zoox build -C /path/to/my-api -o dist/server
 ```
 
+## `zoox database migrate`
+
+Runs `go mod tidy`, then `go run ./cmd/migrate` at the project root. The generated `cmd/migrate/main.go` calls `config.Load()` and `migrate.Run()` from your `migrate` package (same as server startup, without starting HTTP). Requires `cmd/migrate/main.go` (from `zoox new` or added manually).
+
+```bash
+cd my-api
+zoox database migrate
+zoox database migrate -C /path/to/my-api
+```
+
 ## `zoox gen module`
 
 ```text
@@ -125,7 +136,9 @@ zoox gen module [--dir path] <name>
 <project>/
 ├── .zoox/config.yaml
 ├── go.mod
-├── cmd/server/main.go
+├── cmd/
+│   ├── migrate/main.go
+│   └── server/main.go
 ├── config/
 ├── migrate/
 ├── models/register.go

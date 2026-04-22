@@ -16,7 +16,7 @@ func main() {
 		Name:        "zoox",
 		Usage:       "Zoox CLI: project scaffolding, code generation, and local development.",
 		Version:     Version,
-		Description: "Create a Zoox app layout, generate api/services/models modules, and run install / dev / build in one toolchain.",
+		Description: "Create a Zoox app layout, generate api/services/models modules, and run install / dev / build / database migrate in one toolchain.",
 	})
 
 	if err := app.Register("new", newCommand()); err != nil {
@@ -26,6 +26,7 @@ func main() {
 		log.Fatal(err)
 	}
 	commands.RegisterDevTools(app)
+	commands.RegisterDatabase(app)
 
 	app.Run()
 }
