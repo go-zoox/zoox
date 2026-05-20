@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/go-zoox/cli"
+	"github.com/go-zoox/zoox"
 	"github.com/go-zoox/zoox/cmd/zoox/commands"
 	"github.com/go-zoox/zoox/cmd/zoox/scaffold"
 )
@@ -16,7 +17,7 @@ func main() {
 	app := cli.NewMultipleProgram(&cli.MultipleProgramConfig{
 		Name:        "zoox",
 		Usage:       "Zoox CLI: project scaffolding, code generation, and local development.",
-		Version:     Version,
+		Version:     zoox.Version,
 		Description: "Create a Zoox app layout, generate api/services/models modules, and run install / dev / build / database migrate in one toolchain.",
 	})
 
@@ -86,8 +87,8 @@ func newCommand() *cli.Command {
 				Value: "1.22",
 			},
 			&cli.StringFlag{
-				Name:    "name",
-				Usage:   "Project display name (stored in .zoox/config.yaml). If omitted, defaults to the base name of <dir>.",
+				Name:  "name",
+				Usage: "Project display name (stored in .zoox/config.yaml). If omitted, defaults to the base name of <dir>.",
 			},
 			&cli.StringFlag{
 				Name:  "author",
@@ -133,7 +134,7 @@ func newCommand() *cli.Command {
 				ProjectName: ctx.String("name"),
 				Author:      ctx.String("author"),
 				Description: ctx.String("description"),
-				ZooxVersion: Version,
+				ZooxVersion: zoox.Version,
 			}
 			if err := scaffold.NewProject(dir, opt); err != nil {
 				return err

@@ -180,14 +180,7 @@ func newContext(app *Application, w http.ResponseWriter, req *http.Request) *Con
 		ctx.requestID = utils.GenerateRequestID()
 	}
 
-	ctx.Logger = logger.New(func(opt *logger.Option) {
-		// fmt.Println("ctx.Logger:", app.Config.LogLevel)
-		if app.Config.Logger.Level != "" {
-			opt.Level = app.Config.Logger.Level
-		} else if app.Config.LogLevel != "" {
-			opt.Level = app.Config.LogLevel
-		}
-	})
+	ctx.Logger = app.Logger()
 
 	return ctx
 }

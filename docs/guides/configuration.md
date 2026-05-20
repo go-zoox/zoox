@@ -297,7 +297,7 @@ app.Config.Logger.Level = "info"
 app.Config.Logger.Middleware.Disabled = false
 ```
 
-**说明**: Logger 配置参考 `config/logger.go`。
+**说明**: Logger 配置参考 `config/logger.go`（`transports` 列表，未配置则仅 console；有配置则 console 叠加）。构建逻辑见 `components/application/logger`，在 `app.Logger()` 首次调用时生效。
 
 ## 监控配置
 

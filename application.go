@@ -33,6 +33,7 @@ import (
 	"github.com/go-zoox/websocket"
 	appcache "github.com/go-zoox/zoox/components/application/cache"
 	"github.com/go-zoox/zoox/components/application/cmd"
+	applogger "github.com/go-zoox/zoox/components/application/logger"
 	"github.com/go-zoox/zoox/components/application/cron"
 	"github.com/go-zoox/zoox/components/application/debug"
 	"github.com/go-zoox/zoox/components/application/env"
@@ -511,15 +512,30 @@ func (app *Application) Env() env.Env {
 	return app.env
 }
 
-// Logger ...
-func (app *Application) Logger() *logger.Logger {
-	app.once.logger.Do(func() {
-		app.logger = logger.New(func(opt *logger.Option) {
-			// fmt.Println("app.Config.LogLevel:", app.Config.LogLevel)
-			opt.Level = app.Config.LogLevel
-		})
-	})
+// SetLogger sets the application root logger.
+func (app *Application) SetLogger(l *logger.Logger) {
+	app.logger = l
+}
 
+// Logger returns the application root logger (built from Config.Logger on first use).
+func (app *Application) Logger() *logger.Logger {
+	if app.logger != nil {
+		return app.logger
+	}
+	app.once.logger.Do(func() {
+		if app.logger != nil {
+			return
+		}
+		if strings.TrimSpace(app.Config.Logger.Level) == "" && strings.TrimSpace(app.Config.LogLevel) != "" {
+			app.Config.Logger.Level = app.Config.LogLevel
+		}
+		l, err := applogger.Build(&app.Config.Logger)
+		if err != nil {
+			panic(err)
+		}
+		app.logger = l
+		logger.SetDefault(l)
+	})
 	return app.logger
 }
 
