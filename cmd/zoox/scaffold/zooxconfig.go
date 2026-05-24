@@ -43,12 +43,12 @@ func RequireZooxProjectRoot(dir string) error {
 // zooxConfigRoot is the on-disk file written by `zoox new` and read by other zoox commands.
 // Module path stays in go.mod.
 type zooxConfigRoot struct {
-	Version     int    `yaml:"version"`
-	Name        string `yaml:"name"`
-	Author      string `yaml:"author"`
-	Description string `yaml:"description"`
-	CreatedAt   string `yaml:"created_at"`
-	CLI         string `yaml:"cli"` // zoox CLI version used to create/update the file
+	Version     int             `yaml:"version"`
+	Name        string          `yaml:"name"`
+	Author      string          `yaml:"author"`
+	Description string          `yaml:"description"`
+	CreatedAt   string          `yaml:"created_at"`
+	CLI         string          `yaml:"cli"` // zoox CLI version used to create/update the file
 	App         zooxConfigApp   `yaml:"app"`
 	Build       zooxConfigBuild `yaml:"build"`
 	Dev         zooxConfigDev   `yaml:"dev"`

@@ -3,9 +3,9 @@ package gormx
 import (
 	"github.com/go-zoox/core-utils/safe"
 	gormxlib "github.com/go-zoox/gormx"
+	"github.com/go-zoox/zoox"
 	"github.com/go-zoox/zoox/components/context/param"
 	"github.com/go-zoox/zoox/components/context/query"
-	"github.com/go-zoox/zoox"
 )
 
 // NewParams creates gormx params from zoox context.

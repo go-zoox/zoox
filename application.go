@@ -33,11 +33,11 @@ import (
 	"github.com/go-zoox/websocket"
 	appcache "github.com/go-zoox/zoox/components/application/cache"
 	"github.com/go-zoox/zoox/components/application/cmd"
-	applogger "github.com/go-zoox/zoox/components/application/logger"
 	"github.com/go-zoox/zoox/components/application/cron"
 	"github.com/go-zoox/zoox/components/application/debug"
 	"github.com/go-zoox/zoox/components/application/env"
 	"github.com/go-zoox/zoox/components/application/jobqueue"
+	applogger "github.com/go-zoox/zoox/components/application/logger"
 	"github.com/go-zoox/zoox/components/application/runtime"
 	"github.com/go-zoox/zoox/config"
 
