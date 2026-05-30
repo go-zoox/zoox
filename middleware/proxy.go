@@ -3,6 +3,7 @@ package middleware
 import (
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/go-zoox/proxy"
 	"github.com/go-zoox/proxy/utils/rewriter"
@@ -23,6 +24,20 @@ type ProxyErrorPages struct {
 	BadGateway           string
 	ServiceUnavailable   string
 	GatewayTimeout       string
+	// ContentType overrides the default text/html response type (e.g. application/json).
+	ContentType string
+}
+
+func writeProxyErrorResponse(ctx *zoox.Context, status int, body, contentType string) {
+	if strings.HasPrefix(strings.ToLower(strings.TrimSpace(contentType)), "application/json") {
+		if ct := strings.TrimSpace(contentType); ct != "" {
+			ctx.Data(status, ct, []byte(body))
+			return
+		}
+		ctx.Data(status, "application/json; charset=utf-8", []byte(body))
+		return
+	}
+	ctx.HTML(status, body)
 }
 
 // Proxy is a middleware that proxies the request.
@@ -59,14 +74,14 @@ func Proxy(fn func(ctx *zoox.Context, cfg *ProxyConfig) (next, stop bool, err er
 					}
 				}
 
-				ctx.HTML(v.Status(), html)
+				writeProxyErrorResponse(ctx, v.Status(), html, cfg.ErrorPages.ContentType)
 			} else {
 				html := v.Error()
 				if cfg.ErrorPages.InternalServiceError != "" {
 					html = cfg.ErrorPages.InternalServiceError
 				}
 
-				ctx.HTML(http.StatusInternalServerError, html)
+				writeProxyErrorResponse(ctx, http.StatusInternalServerError, html, cfg.ErrorPages.ContentType)
 			}
 			return
 		}
