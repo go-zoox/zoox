@@ -2,6 +2,7 @@ package cron
 
 import (
 	"fmt"
+	"sync"
 
 	gocron "github.com/go-zoox/cron"
 )
@@ -22,8 +23,16 @@ type Cron interface {
 }
 
 type cron struct {
-	isStarted bool
+	startOnce sync.Once
+	started   bool
 	core      *gocron.Cron
+}
+
+func (c *cron) ensureStarted() {
+	c.startOnce.Do(func() {
+		c.core.Start()
+		c.started = true
+	})
 }
 
 // New creates a cron.
@@ -40,16 +49,14 @@ func New() Cron {
 
 // AddJob ...
 func (c *cron) AddJob(id string, spec string, job func() error) (err error) {
-	if !c.isStarted {
-		c.core.Start()
-	}
+	c.ensureStarted()
 
 	return c.core.AddJob(id, spec, job)
 }
 
 // RemoveJob ...
 func (c *cron) RemoveJob(id string) error {
-	if !c.isStarted {
+	if !c.started {
 		return fmt.Errorf("cron job is not started yet")
 	}
 
@@ -58,7 +65,7 @@ func (c *cron) RemoveJob(id string) error {
 
 // HasJob
 func (c *cron) HasJob(id string) bool {
-	if !c.isStarted {
+	if !c.started {
 		return false
 	}
 
@@ -67,7 +74,7 @@ func (c *cron) HasJob(id string) bool {
 
 // ClearJobs clears all jobs.
 func (c *cron) ClearJobs() error {
-	if !c.isStarted {
+	if !c.started {
 		return fmt.Errorf("cron job is not started yet")
 	}
 
@@ -76,63 +83,49 @@ func (c *cron) ClearJobs() error {
 
 // AddSecondlyJob adds a schedule job run in every second.
 func (c *cron) AddSecondlyJob(id string, cmd func() error) (err error) {
-	if !c.isStarted {
-		c.core.Start()
-	}
+	c.ensureStarted()
 
 	return c.core.AddSecondlyJob(id, cmd)
 }
 
 // AddMinutelyJob adds a schedule job run in every minute.
 func (c *cron) AddMinutelyJob(id string, cmd func() error) (err error) {
-	if !c.isStarted {
-		c.core.Start()
-	}
+	c.ensureStarted()
 
 	return c.core.AddMinutelyJob(id, cmd)
 }
 
 // AddHourlyJob adds a schedule job run in every hour.
 func (c *cron) AddHourlyJob(id string, cmd func() error) (err error) {
-	if !c.isStarted {
-		c.core.Start()
-	}
+	c.ensureStarted()
 
 	return c.core.AddHourlyJob(id, cmd)
 }
 
 // AddDailyJob adds a schedule job run in every day.
 func (c *cron) AddDailyJob(id string, cmd func() error) (err error) {
-	if !c.isStarted {
-		c.core.Start()
-	}
+	c.ensureStarted()
 
 	return c.core.AddDailyJob(id, cmd)
 }
 
 // AddWeeklyJob adds a schedule job run in every week.
 func (c *cron) AddWeeklyJob(id string, cmd func() error) (err error) {
-	if !c.isStarted {
-		c.core.Start()
-	}
+	c.ensureStarted()
 
 	return c.core.AddWeeklyJob(id, cmd)
 }
 
 // AddMonthlyJob adds a schedule job run in every month.
 func (c *cron) AddMonthlyJob(id string, cmd func() error) (err error) {
-	if !c.isStarted {
-		c.core.Start()
-	}
+	c.ensureStarted()
 
 	return c.core.AddMonthlyJob(id, cmd)
 }
 
 // AddYearlyJob adds a schedule job run in every year.
 func (c *cron) AddYearlyJob(id string, cmd func() error) (err error) {
-	if !c.isStarted {
-		c.core.Start()
-	}
+	c.ensureStarted()
 
 	return c.core.AddYearlyJob(id, cmd)
 }
