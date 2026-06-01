@@ -29,7 +29,7 @@ require (
 	github.com/go-zoox/kv v1.5.9
 	github.com/go-zoox/logger v1.6.4
 	github.com/go-zoox/mq v1.0.1
-	github.com/go-zoox/proxy v1.6.2
+	github.com/go-zoox/proxy v1.7.1
 	github.com/go-zoox/pubsub v1.2.3
 	github.com/go-zoox/random v1.0.4
 	github.com/go-zoox/ratelimit v1.2.1
@@ -190,4 +190,4 @@ require (
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
 
-replace github.com/go-zoox/proxy => ../proxy
+// replace github.com/go-zoox/proxy => ../proxy
