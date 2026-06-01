@@ -44,6 +44,9 @@ func writeProxyErrorResponse(ctx *zoox.Context, status int, body, contentType st
 func Proxy(fn func(ctx *zoox.Context, cfg *ProxyConfig) (next, stop bool, err error)) zoox.Middleware {
 	return func(ctx *zoox.Context) {
 		cfg := &ProxyConfig{}
+		if ctx.App.Config.TrustProxy {
+			cfg.Config.TrustProxy = true
+		}
 		next, stop, err := fn(ctx, cfg)
 		if err != nil {
 			ctx.Logger.Errorf("[middleware.proxy] proxy error: %#v", err)
@@ -112,6 +115,9 @@ type ProxySingleTargetConfig struct {
 func ProxySingleTarget(fn func(ctx *zoox.Context, cfg *ProxySingleTargetConfig) (next bool, err error)) zoox.Middleware {
 	return func(ctx *zoox.Context) {
 		proxyCfg := &ProxySingleTargetConfig{}
+		if ctx.App.Config.TrustProxy {
+			proxyCfg.SingleHostConfig.TrustProxy = true
+		}
 		next, err := fn(ctx, proxyCfg)
 		if err != nil {
 			if v, ok := err.(*proxy.HTTPError); ok {

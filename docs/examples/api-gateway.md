@@ -49,6 +49,7 @@ import (
 
 func main() {
 	app := zoox.New()
+	app.Config.TrustProxy = true // 网关在上游代理后面时建议开启
 
 	// 全局中间件
 	app.Use(middleware.Logger())

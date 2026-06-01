@@ -1051,6 +1051,20 @@ func (ctx *Context) Fetch() *fetch.Fetch {
 
 // Proxy customize the request to proxy the backend services.
 func (ctx *Context) Proxy(target string, cfg ...*proxy.SingleHostConfig) {
+	if len(cfg) == 0 || cfg[0] == nil {
+		c := &proxy.SingleHostConfig{}
+		if ctx.App.Config.TrustProxy {
+			c.TrustProxy = true
+		}
+
+		WrapH(proxy.NewSingleHost(target, c))(ctx)
+		return
+	}
+
+	if ctx.App.Config.TrustProxy {
+		cfg[0].TrustProxy = true
+	}
+
 	WrapH(proxy.NewSingleHost(target, cfg...))(ctx)
 }
 

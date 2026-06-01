@@ -157,6 +157,9 @@ type ProxyConfig struct {
 //	}))
 func (g *RouterGroup) Proxy(path, target string, options ...func(cfg *ProxyConfig)) *RouterGroup {
 	cfg := &ProxyConfig{}
+	if g.app != nil && g.app.Config.TrustProxy {
+		cfg.SingleHostConfig.TrustProxy = true
+	}
 	for _, option := range options {
 		option(cfg)
 	}

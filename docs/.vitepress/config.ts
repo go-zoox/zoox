@@ -109,6 +109,7 @@ export default defineConfig({
                 { text: '静态文件服务', link: '/examples/static-files' },
                 { text: 'JSON-RPC 服务器', link: '/examples/jsonrpc-server' },
                 { text: 'API Gateway', link: '/examples/api-gateway' },
+                { text: 'Trust Proxy', link: '/examples/trust-proxy' },
                 { text: '微服务架构', link: '/examples/microservice' },
               ],
             },

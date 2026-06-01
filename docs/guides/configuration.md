@@ -12,6 +12,7 @@ type Config struct {
 	Host      string
 	Port      int
 	HTTPSPort int
+	TrustProxy bool // 代理相关 helper 是否信任上游 X-Forwarded-*（优先级高于 TLS/Fallback）
 
 	EnableH2C         bool // 明文 HTTP/2（h2c），仅建议在可信网络使用
 	EnableHTTP3       bool // 与 HTTPS 同时启用时在 UDP 上提供 HTTP/3
@@ -63,6 +64,9 @@ app.Config.Port = 8080       // 默认值
 
 // HTTPS 端口（如果设置了，会同时启动 HTTPS 服务）
 app.Config.HTTPSPort = 8443
+
+// 让 zoox 的 proxy helper 透传并信任上游 X-Forwarded-*（适合中间代理）
+app.Config.TrustProxy = true
 ```
 
 ### 启动服务器

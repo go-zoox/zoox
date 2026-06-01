@@ -74,6 +74,7 @@
 - **[静态文件服务](examples/static-files.md)** - 静态文件服务示例，包含缓存、压缩等配置
 - **[JSON-RPC 服务器](examples/jsonrpc-server.md)** - JSON-RPC 2.0 服务器示例，包含批量请求和错误处理
 - **[API Gateway](examples/api-gateway.md)** - API 网关示例，包含路由、认证、限流、聚合等功能
+- **[Trust Proxy](examples/trust-proxy.md)** - 网关/中间代理场景下保留上游 `X-Forwarded-*` 的配置示例
 - **[微服务架构](examples/microservice.md)** - 微服务架构示例，包含 Gateway 和多个服务
 
 ### 🎯 最佳实践

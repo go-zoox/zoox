@@ -11,6 +11,9 @@ type Config struct {
 	Host      string
 	Port      int
 	HTTPSPort int
+	// TrustProxy controls whether proxy helpers trust upstream X-Forwarded-* headers.
+	// When true, forwarded header priority is: upstream X-Forwarded-* > TLS > fallback.
+	TrustProxy bool
 
 	// EnableH2C enables cleartext HTTP/2 (h2c) on the plaintext TCP HTTP server. Use only on trusted networks.
 	EnableH2C bool

@@ -23,6 +23,26 @@ func main() {
 
 **说明**: 代理实现参考 `group.go:145-192`。
 
+## Trust Proxy（网关/中间代理）
+
+当 Zoox 运行在上游网关（Ingress/Nginx/LB）后面，并且你希望保留上游
+传入的 `X-Forwarded-*`（例如 `X-Forwarded-Proto: https`）时，可开启：
+
+```go
+app := zoox.New()
+app.Config.TrustProxy = true
+```
+
+开启后，底层代理会优先使用上游 `X-Forwarded-*`，再回退到 TLS/默认值。
+
+### 路由级覆盖（可选）
+
+```go
+app.Proxy("/api", "http://backend:8080", func(cfg *zoox.ProxyConfig) {
+	cfg.TrustProxy = true
+})
+```
+
 ## 路径重写
 
 ### 基本重写
