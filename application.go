@@ -256,6 +256,10 @@ func (app *Application) applyDefaultConfigFromEnv() error {
 		app.Config.Session.MaxAge = cast.ToDuration(os.Getenv(BuiltInEnvSessionMaxAge))
 	}
 
+	if app.Config.Session.Key == "" && os.Getenv(BuiltInEnvSessionKey) != "" {
+		app.Config.Session.Key = os.Getenv(BuiltInEnvSessionKey)
+	}
+
 	if app.Config.Redis.Host == "" && os.Getenv(BuiltInEnvRedisHost) != "" {
 		app.Config.Redis.Host = os.Getenv(BuiltInEnvRedisHost)
 	}

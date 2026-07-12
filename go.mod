@@ -33,7 +33,7 @@ require (
 	github.com/go-zoox/pubsub v1.2.3
 	github.com/go-zoox/random v1.0.4
 	github.com/go-zoox/ratelimit v1.2.1
-	github.com/go-zoox/session v1.2.0
+	github.com/go-zoox/session v1.2.1
 	github.com/go-zoox/tag v1.3.5
 	github.com/go-zoox/watch v1.3.2
 	github.com/go-zoox/websocket v1.3.5

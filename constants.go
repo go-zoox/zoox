@@ -49,6 +49,7 @@ var (
 
 	BuiltInEnvSecretKey = "SECRET_KEY"
 
+	BuiltInEnvSessionKey    = "SESSION_KEY"
 	BuiltInEnvSessionMaxAge = "SESSION_MAX_AGE"
 
 	BuiltInEnvRedisHost = "REDIS_HOST"
