@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	github.com/getsentry/sentry-go v0.27.0
 	github.com/go-errors/errors v1.5.1
-	github.com/go-zoox/cache v1.0.7
+	github.com/go-zoox/cache v1.0.8
 	github.com/go-zoox/chalk v1.0.2
 	github.com/go-zoox/cli v1.4.0
 	github.com/go-zoox/command v1.12.2
@@ -26,7 +26,7 @@ require (
 	github.com/go-zoox/jobqueue v1.0.1
 	github.com/go-zoox/jsonrpc v1.2.2
 	github.com/go-zoox/jwt v1.5.0
-	github.com/go-zoox/kv v1.5.9
+	github.com/go-zoox/kv v1.5.11
 	github.com/go-zoox/logger v1.6.4
 	github.com/go-zoox/mq v1.0.1
 	github.com/go-zoox/proxy v1.7.1
