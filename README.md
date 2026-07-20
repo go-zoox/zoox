@@ -367,6 +367,17 @@ go test ./...
 
 Zoox is released under the [MIT License](./LICENSE).
 
+## 💻 Platform Support
+
+| Feature     | Linux | macOS | Windows |
+|-------------|-------|-------|---------|
+| HTTP Server | ✓     | ✓     | ✓       |
+| Runtime Info | ✓    | ✓     | ✓       |
+| Disk Stats  | ✓     | ✓     | ✓(* )   |
+| All Middleware | ✓   | ✓     | ✓       |
+
+> (*) Windows uses `gopsutil/disk` for disk statistics instead of `syscall.Statfs`.
+
 ## 🙏 Acknowledgments
 
 - Inspired by modern web frameworks

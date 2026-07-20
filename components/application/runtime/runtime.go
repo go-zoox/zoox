@@ -2,7 +2,6 @@ package runtime
 
 import (
 	rt "runtime"
-	"syscall"
 
 	"github.com/go-zoox/datetime"
 	"github.com/go-zoox/logger"
@@ -82,18 +81,6 @@ func (r *runtime) Memory() (used, total uint64) {
 	total = v.Total / 1024 / 1024
 	available := v.Available / 1024 / 1024
 	used = total - available
-	return
-}
-
-func (r *runtime) Disk() (free, total float64) {
-	var diskStat syscall.Statfs_t
-	err := syscall.Statfs(".", &diskStat)
-	if err != nil {
-		return 0, 0
-	}
-
-	free = float64(diskStat.Bavail*uint64(diskStat.Bsize)) / (1024 * 1024 * 1024)  // 转换为 GB
-	total = float64(diskStat.Blocks*uint64(diskStat.Bsize)) / (1024 * 1024 * 1024) // 转换为 GB
 	return
 }
 
