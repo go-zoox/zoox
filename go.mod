@@ -8,7 +8,7 @@ require (
 	github.com/go-zoox/cache v1.0.8
 	github.com/go-zoox/chalk v1.0.2
 	github.com/go-zoox/cli v1.4.0
-	github.com/go-zoox/command v1.12.2
+	github.com/go-zoox/command v1.12.3
 	github.com/go-zoox/concurrency v1.2.0
 	github.com/go-zoox/cookie v1.2.0
 	github.com/go-zoox/core-utils v1.4.13
@@ -35,7 +35,7 @@ require (
 	github.com/go-zoox/ratelimit v1.2.1
 	github.com/go-zoox/session v1.2.1
 	github.com/go-zoox/tag v1.3.5
-	github.com/go-zoox/watch v1.3.2
+	github.com/go-zoox/watch v1.3.3
 	github.com/go-zoox/websocket v1.3.5
 	github.com/prometheus/client_golang v1.18.0
 	github.com/quic-go/quic-go v0.59.0
